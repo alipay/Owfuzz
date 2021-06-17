@@ -30,30 +30,30 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 
 ## Usage
 - owfuzz usage:
-	- example: sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [target-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [targe-ip]
-	- -i [interface]
+        example: sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [target-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [targe-ip]
+	-i [interface]
 	     Interface to use.
-	- -m [ap/sta]
+	-m [ap/sta]
 	     Set the mode of fuzzer, default is ap.
-	- -c [channel]
+	-c [channel]
 	     Set the working channel of fuzzer, default is 1.
-	- -t [mac]
+	-t [mac]
 	     Target's MAC address.
-	- -S [SSID]
+	-S [SSID]
 	     AP's SSID.
-	- -A [auth type]
+	-A [auth type]
 	     Target's auth type: OPEN_NONE, OPEN_WEP, SHARE_WEP, WPA_PSK_TKIP, WPA_PSK_AES, WPA_PSK_TKIP_AES, WPA2_PSK_TKIP, WPA2_PSK_AES, WPA2_PSK_TKIP_AES, EAP_8021X, WPA3
-	- -I [IP address]
+	-I [IP address]
 	     Target's IP address
-	- -b [BSSID]
+	-b [BSSID]
 	     AP's Mac address
-	- -s [mac]
+	-s [mac]
 	     Fuzzer's (source) Mac address.
-	- -T [test type]
+	-T [test type]
 	     Test type, default 1, 0: Poc test, 1: interactive test, 2: frames test, 3: interactive & frames test
-	- -f [log file]
+	-f [log file]
 	     Log file path
-	- -h
+	-h
 	     Help.
 
 ## Building
@@ -84,6 +84,11 @@ sudo ./owfuzz -i wlan0 -m sta -c [channel] -t [ap-mac] -b [ap-mac] -s [sta-mac] 
 ```
 sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 1 -A WPA2_PSK_TKIP_AES
 ```
+
+## Discovered vulnerabilities
+   
+
+
 
 ## License
 
