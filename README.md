@@ -30,31 +30,19 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 
 ## Usage
 - owfuzz usage:
-        example: sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [target-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [targe-ip]
-	-i [interface]
-	     Interface to use.
-	-m [ap/sta]
-	     Set the mode of fuzzer, default is ap.
-	-c [channel]
-	     Set the working channel of fuzzer, default is 1.
-	-t [mac]
-	     Target's MAC address.
-	-S [SSID]
-	     AP's SSID.
-	-A [auth type]
-	     Target's auth type: OPEN_NONE, OPEN_WEP, SHARE_WEP, WPA_PSK_TKIP, WPA_PSK_AES, WPA_PSK_TKIP_AES, WPA2_PSK_TKIP, WPA2_PSK_AES, WPA2_PSK_TKIP_AES, EAP_8021X, WPA3
-	-I [IP address]
-	     Target's IP address
-	-b [BSSID]
-	     AP's Mac address
-	-s [mac]
-	     Fuzzer's (source) Mac address.
-	-T [test type]
-	     Test type, default 1, 0: Poc test, 1: interactive test, 2: frames test, 3: interactive & frames test
-	-f [log file]
-	     Log file path
-	-h
-	     Help.
+	- example: sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [target-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [targe-ip]
+	- -i [interface], Interface to use.
+	- -m [ap/sta], Set the mode of fuzzer, default is ap.
+	- -c [channel], Set the working channel of fuzzer, default is 1.
+	- -t [mac], Target's MAC address.
+	- -S [SSID], AP's SSID.
+	- -A [auth type], Target's auth type: OPEN_NONE, OPEN_WEP, SHARE_WEP, WPA_PSK_TKIP, WPA_PSK_AES, WPA_PSK_TKIP_AES, WPA2_PSK_TKIP, WPA2_PSK_AES, WPA2_PSK_TKIP_AES, EAP_8021X, WPA3
+	- -I [IP address], Target's IP address
+	- -b [BSSID], AP's Mac address
+	- -s [mac], Fuzzer's (source) Mac address.
+	- -T [test type], Test type, default 1, 0: Poc test, 1: interactive test, 2: frames test, 3: interactive & frames test
+	- -f [log file], Log file path
+	- -h Help.
 
 ## Building
 
