@@ -5,7 +5,7 @@ Author: Hongjian cao
 # owfuzz
 <img src="./docs/hardware.JPG" width="900">
 
-**owfuzz:** a WiFi protocol testing tool using [openwifi](https://github.com/open-sdr/openwifi). 
+**owfuzz:** a WiFi protocol fuzzing tool using [openwifi](https://github.com/open-sdr/openwifi). 
 
 Openwifi is an open-source WiFi protocol stack based on SDR that is fully compatible with Linux mac80211. It's driver takes advantage of the Linux kernel's supports (mac80211, cfg80211) for WiFi high MAC, so it can provide an interface to the application layer like a common WiFi USB dongle. In The hardware part, CSMA/CA protocol and other functions of WiFi low MAC layer are implemented on FPGA. It supports monitoring and injection of arbitrary WiFi frames，The application layer software can also directly communicate with the openwifi driver/FPGA/RF underlying functions through nl80211, which provides users with great autonomous and controllable ability. Owfuzz is the first to use openwifi platform to implements a WiFi protocol fuzzing test framework, which supports the fuzzing test of all WiFi frames and the interactivity testing of WiFi protocols. 
 
