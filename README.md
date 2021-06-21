@@ -1,5 +1,5 @@
 <!--
-Author: Hongjian cao
+Author: Hongjian cao(E7mer)
 -->
 
 # owfuzz
@@ -20,7 +20,7 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 
 - IEEE Std 802.11 1999/2007/2012/2016
 - 2.4Ghz and 5Ghz
-- Supports all WiFi devices: APs and Cliets
+- Supports all WiFi devices: APs and Clients
 - Fuzzing all frames: management/control/data
 - Any state of WiFi
 - Interactivity testing
@@ -46,7 +46,7 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 
 ## Building
 
-- Build dependencies (Kali/Ubuntu)
+- Install dependencies (Kali/Ubuntu)
 ```
 sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
 ```
@@ -55,6 +55,32 @@ sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
 ```
 make
 ```
+
+## Start in [openwifi](https://github.com/open-sdr/openwifi#quick-start)
+- Copy owfuzz and openwifi_env.sh to openwifi with password **openwifi**.
+  ```
+  scp -r owfuzz openwifi_env.sh root@192.168.10.122:~/
+  ```
+
+- Login to the board from your PC (PC Ethernet should have IP 192.168.10.1) with password **openwifi**.
+  ```
+  ssh root@192.168.10.122
+  ```
+
+- Install dependencies
+```
+sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
+```
+
+- Compiling
+```
+make
+```
+
+- Init openwifi env
+  ```
+  ./openwifi_env.sh
+  ```
 
 ## Example
 
