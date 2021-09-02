@@ -100,7 +100,8 @@ sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -
 ```
 
 ## Discovered vulnerabilities
-   
+
+Please see [here](https://github.com/E7mer/OWFuzz).
 
 
 
