@@ -106,9 +106,85 @@ struct ieee2016_ie_extended_capabilities
     uint16_t ec_80;
 };
 
+typedef struct _fuzzing_option
+{
+  struct osdep_instance ois[11];
+  unsigned char ois_cnt;
+
+  pthread_t fthread;
+  int thread_id;
+	char interface[64];
+  uint8_t channel;
+
+	char mode[5];
+	int fuzz_work_mode;
+
+	struct ether_addr source_addr;
+  char szsource_addr[50];
+	struct ether_addr target_addr;
+  char sztarget_addr[50];
+	struct ether_addr bssid;
+  char szbssid[50];
+
+  // mitm
+  volatile uint8_t mitm_state;
+  uint8_t mitm_ap_channel;
+  struct packet mitm_ap_bcn;
+  struct packet real_ap_bcn;
+
+  // p2p 
+  uint8_t p2p_frame_test;
+  uint8_t p2p_status;
+  struct ether_addr p2p_source_addr;
+	struct ether_addr p2p_target_addr;
+  struct ether_addr p2p_bssid;
+
+  struct ether_addr p2p_intened_source_addr;
+	struct ether_addr p2p_intened_target_addr;
+
+  int source_group_owner_intent;
+  int target_group_owner_intent;
+
+  uint8_t p2p_source_listen_channel;
+  uint8_t p2p_source_operating_channel;
+  uint8_t p2p_target_listen_channel;
+  uint8_t p2p_target_operating_channel;
+  uint8_t p2p_operating_channel;
+
+  int p2p_operating_interface_id;
+
+	char target_ssid[33];
+	char target_ip[20];
+	uint8_t enable_check_alive;
+	int ping_sockfd;
+	struct sockaddr_in ping_dst_addr;
+
+	enum AP_AUTH_TYPE auth_type;
+	enum wpa_states wpa_s;
+	uint16_t seq_ctrl;
+	uint16_t recv_seq_ctrl;
+	uint16_t data_seq_ctrl;
+	uint16_t recv_data_seq_ctrl;
+	time_t  last_recv_pkt_time;
+	uint8_t target_alive;
+
+	uint8_t test_type;
+
+	uint32_t fuzz_pkt_num;
+	uint32_t fuzz_exp_pkt_cnt;
+	struct packet fuzz_pkt;
+
+	uint8_t *owfuzz_frames;
+	uint32_t owfuzz_frames_cnt;
+
+  int log_level;
+  char log_file[256];
+
+}fuzzing_option;
+
 #pragma pack(1)
 
-
+void print_options(fuzzing_option *fo);
 
 //dsflags: 'a' = AdHoc, Beacon   'f' = From DS   't' = To DS   'w' = WDS (intra DS)
 //Set recv to SE_NULLMAC if you don't create WDS packets. (its ignored anyway)
@@ -142,8 +218,12 @@ unsigned long long ntohll(unsigned long long val);
 
 unsigned long long htonll(unsigned long long val);
 
+uint8_t *get_elemet(struct packet *pkt, uint8_t id);
+
 void generate_random_data(uint8_t *data, uint32_t length, FUZZING_VALUE_TYPE value_type);
 void dumphex(uint8_t *data, uint32_t length);
 void print_interaction_status(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char *recv_frame, char *response_frame);
+
+
 
 #endif

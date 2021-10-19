@@ -24,6 +24,7 @@
 #endif
 
 static VARIABLE_IS_NOT_USED struct ether_addr SE_NULLMAC = { .ether_addr_octet = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+static VARIABLE_IS_NOT_USED struct ether_addr SE_BROADCASTMAC = { .ether_addr_octet = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
 
 enum mac_kind {
   MAC_KIND_RANDOM,

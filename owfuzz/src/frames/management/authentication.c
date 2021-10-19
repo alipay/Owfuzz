@@ -28,6 +28,28 @@ uint8_t authentication_ie_ieee1999[10] = {16, 0};
 uint8_t authentication_ie_ieee2007[10] = {16, 221, 0};
 uint8_t authentication_ie_ieee2012[30] = {16, 48, 54, 55, 56, 75, 221, 0};
 uint8_t authentication_ie_ieee2016[50] = {16, 48, 54, 55, 56, 75, 158, 52, 221, 0};
+uint8_t authentication_ie_ieee2020[50] = {16, 48, 54, 55, 56, 75, 57, 158, 52, 
+255,
+255,
+255,
+255,
+255,
+255,
+255,
+221, 
+0};
+
+static int ie_extension_id = 0;
+static uint8_t ie_extension[50] = {
+IE_EXT_13_FILS_NONCE,
+IE_EXT_4_FILS_SESSION,
+IE_EXT_8_FILS_WRAPPED_DATA,
+IE_EXT_1_ASSOCIATION_DELAY_INFO,
+IE_EXT_33_PASSWORD_IDENTIFIER,
+IE_EXT_92_REJECTED_GROUPS,
+IE_EXT_93_ANTI_CLOGGING_TOKEN_CONTAINER,
+0
+};
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -43,6 +65,9 @@ static int ieee2012_id = 0;
 
 static int ieee2016 = 0;
 static int ieee2016_id = 0;
+
+static int ieee2020 = 0;
+static int ieee2020_id = 0;
 
 void save_authentication_state()
 {
@@ -119,7 +144,9 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                 af->status_code = 0x0000;
                 authentication.len += sizeof(struct authentication_fixed);
 
-                create_frame_fuzzing_ies(&authentication, "Authentication", 
+                create_frame_fuzzing_ie(&authentication, "Authentication", authentication_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+
+                /*create_frame_fuzzing_ies(&authentication, "Authentication", 
                     authentication_ie_ieee1999, 
                     authentication_ie_ieee2007, 
                     authentication_ie_ieee2012, 
@@ -133,7 +160,7 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                     &ieee2016, 
                     &ieee2016_id, 
                     &fuzzing_step, 
-                    &fuzzing_value_step);
+                    &fuzzing_value_step);*/
                 
                 //fuzzing_opt.wpa_s = WPA_ASSOCIATING;
             }
@@ -155,7 +182,10 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                 authentication.len += sizeof(struct authentication_fixed);
                 print_interaction_status(bssid, dmac, smac, "WEP-Auth1", "WEP-Auth2");
                 add_ie_data(&authentication, 16, RANDOM_VALUE, NULL, 0);
-                create_frame_fuzzing_ies(&authentication, "Authentication", 
+
+                create_frame_fuzzing_ie(&authentication, "Authentication", authentication_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+
+                /*create_frame_fuzzing_ies(&authentication, "Authentication", 
                     authentication_ie_ieee1999, 
                     authentication_ie_ieee2007, 
                     authentication_ie_ieee2012, 
@@ -169,7 +199,7 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                     &ieee2016, 
                     &ieee2016_id, 
                     &fuzzing_step, 
-                    &fuzzing_value_step);
+                    &fuzzing_value_step);*/
             }
             else if(af->seq == 3)
             {
@@ -196,7 +226,10 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                 af->status_code = 0x0000;
                 authentication.len += sizeof(struct authentication_fixed);
                 print_interaction_status(bssid, dmac, smac, "WEP-Auth3(Data)", "WEP-Auth4");
-                create_frame_fuzzing_ies(&authentication, "Authentication", 
+
+                create_frame_fuzzing_ie(&authentication, "Authentication", authentication_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+
+                /*create_frame_fuzzing_ies(&authentication, "Authentication", 
                     authentication_ie_ieee1999, 
                     authentication_ie_ieee2007, 
                     authentication_ie_ieee2012, 
@@ -210,7 +243,7 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                     &ieee2016, 
                     &ieee2016_id, 
                     &fuzzing_step, 
-                    &fuzzing_value_step);
+                    &fuzzing_value_step);*/
 
                 fuzzing_opt.wpa_s = WPA_ASSOCIATING;
             }
@@ -250,7 +283,9 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
             af->status_code = 0x0000;
             authentication.len += sizeof(struct authentication_fixed);
 
-            create_frame_fuzzing_ies(&authentication, "Authentication", 
+            create_frame_fuzzing_ie(&authentication, "Authentication", authentication_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+
+            /*create_frame_fuzzing_ies(&authentication, "Authentication", 
                 authentication_ie_ieee1999, 
                 authentication_ie_ieee2007, 
                 authentication_ie_ieee2012, 
@@ -264,7 +299,7 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                 &ieee2016, 
                 &ieee2016_id, 
                 &fuzzing_step, 
-                &fuzzing_value_step);
+                &fuzzing_value_step);*/
 
 		}
 		else if(fuzzing_opt.auth_type==OPEN_WEP || fuzzing_opt.auth_type==SHARE_WEP) // 1 shared key

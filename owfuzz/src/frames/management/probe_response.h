@@ -30,5 +30,7 @@ struct packet create_ap_probe_response(struct ether_addr bssid, char adhoc, enum
 struct packet create_probe_response(struct ether_addr bssid, struct ether_addr dmac,char adhoc, char* ssid,
                                     uint8_t *request_elements, int request_elements_len);
 
+void create_probe_response_fuzzing_ies(struct packet *pkt);
+
 
 #endif

@@ -13,12 +13,12 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 
 
 **Architecture**
-<img src="./docs/OWFuzz.png" width="900">
+<img src="./docs/Owfuzz.png" width="900">
 
 
 **Features:**
 
-- IEEE Std 802.11 1999/2007/2012/2016
+- IEEE Std 802.11 1999/2007/2012/2016/2020
 - 2.4Ghz and 5Ghz
 - Supports all WiFi devices: APs and Clients
 - Fuzzing all frames: management/control/data
@@ -26,13 +26,14 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 - Interactivity testing
 - OPEN/WEP/WPA/WPA2/WPA3
 - Automatically generates poc log and locates the vulnerability.
+- Multichannel monitor and transmission
 
 
 ## Usage
 - owfuzz usage:
 	- example: sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [target-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [targe-ip]
 	- -i [interface], Interface to use.
-	- -m [ap/sta], Set the mode of fuzzer, default is ap.
+	- -m [ap/sta/mitm], Set the mode of fuzzer, default is ap.
 	- -c [channel], Set the working channel of fuzzer, default is 1.
 	- -t [mac], Target's MAC address.
 	- -S [SSID], AP's SSID.
@@ -96,12 +97,12 @@ sudo ./owfuzz -i wlan0 -m sta -c [channel] -t [ap-mac] -b [ap-mac] -s [sta-mac] 
 
 - Interactivity fuzzing
 ```
-sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 1 -A WPA2_PSK_TKIP_AES
+sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 1 -A WPA2_PSK_AES
 ```
 
 ## Discovered vulnerabilities
 
-Please see [here](https://github.com/E7mer/OWFuzz).
+Please see [here](https://github.com/E7mer/Owfuzz).
 
 
 

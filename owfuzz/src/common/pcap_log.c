@@ -25,6 +25,18 @@ pcap_dumper_t * pcap_fp = NULL;
 int open_pcap()
 {
     pcap_t *p = NULL;
+    char owfuzz_path[256]={0};
+	char *ptr;
+
+	if(readlink("/proc/self/exe", owfuzz_path,sizeof(owfuzz_path)) <= 0)
+		return;
+    
+	ptr = strrchr(owfuzz_path, '/');
+	if(!ptr)
+		return;
+
+	ptr[1] = '\0';
+	strcat(owfuzz_path, "poc.pcap");
 
     p = pcap_open_dead(DLT_IEEE802_11, 0x0000ffff);
     if(NULL == p)
@@ -33,7 +45,7 @@ int open_pcap()
         return 0;
     }
 
-    pcap_fp = pcap_dump_open(p, "poc.pcap");
+    pcap_fp = pcap_dump_open(p, owfuzz_path);
     if(NULL==pcap_fp)
     {
         fuzz_logger_log(FUZZ_LOG_ERR, "pcap_dump_open failed");

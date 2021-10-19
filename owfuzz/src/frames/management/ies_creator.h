@@ -48,6 +48,7 @@ typedef enum _IEEE_80211_VERSION
 	IEEE_80211_2007,
 	IEEE_80211_2012,
 	IEEE_80211_2016,
+	IEEE_80211_2020,
 	IEEE_80211_UNKNOWN                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 }IEEE_80211_VERSION;
 
@@ -88,7 +89,21 @@ typedef enum _IEEE_80211_VERSION
 void init_ie_creator();
 void add_ie_data(struct packet *pkt, uint8_t id, FUZZING_TYPE fuzzing_type, uint8_t *specific_data, int specific_data_len);
 void add_default_ie_data(struct packet *pkt, uint8_t id);
-struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version, uint8_t id, FUZZING_TYPE fuzzing_type, FUZZING_VALUE_TYPE value_type, uint8_t *specific_data, int specific_data_len);
+struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version, 
+							uint8_t id, 
+							FUZZING_TYPE fuzzing_type, 
+							FUZZING_VALUE_TYPE value_type, 
+							uint8_t *specific_data, 
+							int specific_data_len);
+
+struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version, 
+							uint8_t id, 
+							uint8_t ex_id,
+							FUZZING_TYPE fuzzing_type, 
+							FUZZING_VALUE_TYPE value_type, 
+							uint8_t *specific_data, 
+							int specific_data_len);
+
 void create_frame_ies(struct packet *pkt, 
 					char *frame_name,
 					uint8_t frame_ie_ieee1999[], 
@@ -103,6 +118,17 @@ void create_frame_ies(struct packet *pkt,
 					int *ieee2012_id, 
 					int *ieee2016, 
 					int *ieee2016_id,
+	 				FUZZING_TYPE *fuzzing_step, 
+					FUZZING_VALUE_TYPE *fuzzing_value_step);
+
+
+void create_frame_fuzzing_ie(struct packet *pkt, 
+					char *frame_name,
+					uint8_t frame_ies[],
+					int *ieee_ver, 
+					int *ieee_id, 
+					uint8_t frame_ies_ext[],
+					int *ies_ext_id,
 	 				FUZZING_TYPE *fuzzing_step, 
 					FUZZING_VALUE_TYPE *fuzzing_value_step);
 
@@ -126,4 +152,10 @@ void create_frame_fuzzing_ies(struct packet *pkt,
 					int *ieee2016_id,
 	 				FUZZING_TYPE *fuzzing_step, 
 					FUZZING_VALUE_TYPE *fuzzing_value_step);
+
+int add_attribute_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi, uint8_t id);
+int add_data_element_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi,  uint16_t id);
+
+
+
 #endif

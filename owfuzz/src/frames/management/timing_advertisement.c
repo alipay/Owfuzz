@@ -23,7 +23,8 @@
 uint8_t timing_advertisement_ie_ieee1999[10] = {0xff, 0};
 uint8_t timing_advertisement_ie_ieee2007[10] = {0xff, 0};
 uint8_t timing_advertisement_ie_ieee2012[30] = {7, 32, 69, 127, 221, 0};
-uint8_t timing_advertisement_ie_ieee2016[50] = {7, 32, 69, 127, 221, 0};
+uint8_t timing_advertisement_ie_ieee2016[30] = {7, 32, 69, 127, 221, 0};
+uint8_t timing_advertisement_ie_ieee2020[30] = {7, 32, 69, 127, 221, 0};
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -39,6 +40,9 @@ static int ieee2012_id = 0;
 
 static int ieee2016 = 0;
 static int ieee2016_id = 0;
+
+static int ieee2020 = 0;
+static int ieee2020_id = 0;
 
 void save_timing_advertisement_state()
 {
@@ -67,7 +71,9 @@ struct packet create_timing_advertisement(struct ether_addr bssid, struct ether_
 
     timing_advertisement.len += sizeof(struct timing_advertisement_fixed);
 
-	create_frame_fuzzing_ies(&timing_advertisement, "Timing advertisement", 
+	create_frame_fuzzing_ie(&timing_advertisement, "Timing advertisement", timing_advertisement_ie_ieee2020, &ieee2020, &ieee2020_id, NULL, NULL, &fuzzing_step, &fuzzing_value_step);
+
+	/*create_frame_fuzzing_ies(&timing_advertisement, "Timing advertisement", 
 		timing_advertisement_ie_ieee1999, 
 		timing_advertisement_ie_ieee2007, 
 		timing_advertisement_ie_ieee2012, 
@@ -81,7 +87,7 @@ struct packet create_timing_advertisement(struct ether_addr bssid, struct ether_
 		&ieee2016, 
 		&ieee2016_id, 
 		&fuzzing_step, 
-		&fuzzing_value_step);
+		&fuzzing_value_step);*/
 
     return timing_advertisement;
 }

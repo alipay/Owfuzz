@@ -12,16 +12,10 @@ int osdep_sockfd_out = -1;
 
 static struct wif *_wi_in, *_wi_out;
 
-struct devices
-{
-    int fd_in,  arptype_in;
-    int fd_out, arptype_out;
-    int fd_rtc;
-} dev;
-
 char *osdep_iface_in = NULL;
 char *osdep_iface_out = NULL;
 
+struct devices dev = {0};
 
 int osdep_start(char *interface1, char *interface2)
 {
@@ -112,7 +106,7 @@ void osdep_stop()
 		_wi_in = NULL;
 	}
 
-	if(_wi_out){
+	if(_wi_out && (_wi_in != _wi_out)){
 		wi_close(_wi_out);
 		_wi_out = NULL;
 	}
@@ -128,3 +122,97 @@ void osdep_stop()
 	}
 }
 
+
+int osdep_start_ex(struct osdep_instance *oi)
+{
+	if(oi == NULL) return -1;
+
+	/* open the replay interface */
+	oi->_wi_out = wi_open(oi->osdep_iface_out);
+	if (!oi->_wi_out){
+		printf("open interface %s failed.\n", oi->osdep_iface_out);
+		return -1;
+	}
+
+	oi->dev.fd_out = wi_fd(oi->_wi_out);
+
+	if(!strcmp(oi->osdep_iface_in, oi->osdep_iface_out)){
+
+		/* open the packet source */
+		oi->_wi_in = oi->_wi_out;
+		oi->dev.fd_in = oi->dev.fd_out;
+
+		/* XXX */
+		oi->dev.arptype_in = oi->dev.arptype_out;
+
+		return 0;
+	}
+	else if(strlen(oi->osdep_iface_in)){
+
+		/* open the packet source */
+		oi->_wi_in = wi_open(oi->osdep_iface_in);
+		if (!oi->_wi_in){
+			printf("open interface %s failed.\n", oi->osdep_iface_in);
+			return -1;
+		}
+
+		oi->dev.fd_in = wi_fd(oi->_wi_in);
+		return 0;
+	}		
+
+	return -1;
+}
+
+int osdep_send_packet_ex(struct osdep_instance* oi, struct packet *pkt)
+{
+	struct wif *wi = oi->_wi_out; /* XXX globals suck */
+	if (wi_write(wi, pkt->data, pkt->len, NULL) == -1) {
+		switch (errno) {
+		case EAGAIN:
+		case ENOBUFS:
+			usleep(10000);
+			return 0; /* XXX not sure I like this... -sorbo */
+		}
+
+		perror("wi_write()");
+		return -1;
+	}
+
+	return 0;
+}
+
+struct packet osdep_read_packet_ex(struct osdep_instance* oi)
+{
+	struct wif *wi = oi->_wi_in; /* XXX */
+	int rc;
+	struct packet pkt = {0};
+
+	do {
+	  rc = wi_read(wi, pkt.data, MAX_IEEE_PACKET_SIZE, NULL);
+	  if (rc == -1) {
+	    perror("wi_read()");
+	    pkt.len = 0;
+	    return pkt;
+	  }
+	} while (rc < 1);
+
+	pkt.len = rc;
+	pkt.channel = oi->channel;
+
+	return pkt;
+}
+
+void osdep_stop_ex(struct osdep_instance* oi)
+{
+	if(oi){
+		if(oi->_wi_in){
+			wi_close(oi->_wi_in);
+			oi->_wi_in = NULL;
+		}
+
+		if(oi->_wi_out && (oi->_wi_in != oi->_wi_out)){
+			wi_close(oi->_wi_out);
+			oi->_wi_out = NULL;
+		}
+	}
+}

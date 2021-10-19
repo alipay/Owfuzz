@@ -33,6 +33,12 @@ struct packet create_ack(struct ether_addr dmac)
 
     pkt.len = 1+1+2+6;
 
+    //rlen = random() % (1024 + 1);
+    //generate_random_data(pkt.data + pkt.len, rlen, VALUE_RANDOM);
+    //pkt.len += rlen;
+
+    //dumphex(pkt.data, pkt.len);
+
     fuzz_logger_log(FUZZ_LOG_DEBUG, "Response Ack to  ==> %02X:%02X:%02X:%02X:%02X:%02X", 
                     dmac.ether_addr_octet[0],
                     dmac.ether_addr_octet[1],

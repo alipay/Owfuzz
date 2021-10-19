@@ -21,6 +21,7 @@
 #define FRAME_H
 
 #include "../common/include.h"
+#include "common/ieee802_11_defs.h"
 
 // management
 #include "management/action.h"
@@ -72,15 +73,13 @@
 #include "data/qos_data_cf_poll.h"
 #include "data/qos_data_cf_ack_poll.h"
 
-
-int env_init(char *interface);
-int send_frame(struct packet *pkt);
-
 struct packet get_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt);
 struct packet get_default_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt);
 
 int init_ping_sock();
 int check_alive_by_ping();
+int check_alive_by_deauth(struct packet *pkt);
+int check_alive_by_pkts(struct ether_addr smac);
 
 void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len);
 void hex_to_ascii_hex(unsigned char *phex, unsigned char *pascii, unsigned int len);

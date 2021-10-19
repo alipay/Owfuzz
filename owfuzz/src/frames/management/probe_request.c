@@ -28,6 +28,39 @@ uint8_t probe_request_ie_ieee1999[10] = {0, 1, 0};
 uint8_t probe_request_ie_ieee2007[30] = {0, 1, 10, 50, 221, 0};
 uint8_t probe_request_ie_ieee2012[80] = {0, 1, 50, 3, 59, 45, 72, 127, 84, 97, 107, 114, 221, 0};
 uint8_t probe_request_ie_ieee2016[100] = {0, 1, 10, 50, 3, 59, 45, 72, 127, 84, 97, 107, 114, 158, 148, 170, 191, 255, 255, 221, 0};
+uint8_t probe_request_ie_ieee2020[100] = {0, 1, 10, 50, 3, 59, 45, 72, 127, 84, 97, 107, 114, 158, 148, 170, 191,
+255,
+255,
+255,
+239,
+215,
+226,
+229,
+217,
+230,
+235,
+255,
+255,
+255,
+255,
+255,
+255,
+221, 
+0};
+
+static int ie_extension_id = 0;
+static uint8_t ie_extension[50] = {
+IE_EXT_11_ESTIMATED_SERVICE_PARAMETERS_INBOUND,
+IE_EXT_10_EXTENDED_REQUEST,
+IE_EXT_2_FILS_REQUEST_PARAMETERS,
+IE_EXT_44_VENDOR_SPECIFIC_REQUEST,
+IE_EXT_17_CDMG_CAPABILITIES,
+IE_EXT_21_CLUSTER_PROBE,
+IE_EXT_27_CMMG_CAPABILITIES,
+IE_EXT_53_ESTIMATED_SERVICE_PARAMETERS_OUTBOUND,
+IE_EXT_90_SUPPLEMENTAL_CLASS_2_CAPABILITIES,
+0
+};
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -43,6 +76,9 @@ static int ieee2012_id = 0;
 
 static int ieee2016 = 0;
 static int ieee2016_id = 0;
+
+static int ieee2020 = 0;
+static int ieee2020_id = 0;
 
 void save_probe_request_state()
 {
@@ -96,7 +132,9 @@ struct packet create_probe_request(struct ether_addr bssid, struct ether_addr sm
 
   add_default_ie_data(&probe, 50);
 
-  create_frame_fuzzing_ies(&probe, "Probe Request", 
+  create_frame_fuzzing_ie(&probe, "Probe Request", probe_request_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+
+  /*create_frame_fuzzing_ies(&probe, "Probe Request", 
       probe_request_ie_ieee1999, 
       probe_request_ie_ieee2007, 
       probe_request_ie_ieee2012, 
@@ -110,7 +148,12 @@ struct packet create_probe_request(struct ether_addr bssid, struct ether_addr sm
       &ieee2016, 
       &ieee2016_id, 
       &fuzzing_step, 
-      &fuzzing_value_step);
+      &fuzzing_value_step);*/
 
   return probe;
+}
+
+void create_probe_request_fuzzing_ies(struct packet *pkt)
+{
+  create_frame_fuzzing_ie(pkt, "Probe Request", probe_request_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 }

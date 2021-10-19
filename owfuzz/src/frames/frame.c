@@ -28,71 +28,15 @@
 
 extern fuzzing_option fuzzing_opt;
 
-int env_init(char *interface)
-{
-	int ret = -1;
-
-	ret = osdep_start(interface, interface);
-	if(ret != 0)
-	{
-		fuzz_logger_log(FUZZ_LOG_ERR, "osdep_start error");
-		return -1;
-	}
-
-	init_ie_creator();
-
-	return 0;
-}
-
-int send_frame(struct packet *pkt)
-{
-	int times = 0;
-	int send_time = 0;
-
-	if(pkt->len == 0)
-	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG,"sending frame error, packet length: %d", pkt->len); 
-		return -1;
-	}
-
-	if(pkt->len > MAX_IEEE_PACKET_SIZE)
-	{
-		dumphex(pkt->data, MAX_IEEE_PACKET_SIZE);
-	}
-
-	if(fuzzing_opt.test_type == 1)
-	{
-		times = 3;
-	}
-	else
-	{
-		times =1;
-	}
-
-	fuzz_logger_log(FUZZ_LOG_DEBUG,"sending frame, packet length: %d", pkt->len); 
-
-	while(send_time < times)
-	{
-		if(-1 == osdep_send_packet(pkt))
-		{
-			fuzz_logger_log(FUZZ_LOG_ERR, "sending frame error, packet length: %d", pkt->len); 
-			log_pkt(FUZZ_LOG_ERR, pkt);
-		}
-		send_time++;
-		//usleep(1);
-	}
-
-	//log_pkt(FUZZ_LOG_DEBUG, pkt);
-
-	return 0;
-}
-
 struct packet get_frame(uint8_t frame_type,  struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
 	struct packet pkt = {0};
 	struct ieee_hdr *hdr;
 
-	fuzzing_opt.fuzz_pkt_num++;
+	//fuzzing_opt.fuzz_pkt_num++;
+	if(recv_pkt){
+		pkt.channel = recv_pkt->channel;
+	}
 
 	switch(frame_type)
 	{
@@ -496,6 +440,42 @@ int check_alive_by_ping()
 	return 0;
 }
 
+int check_alive_by_deauth(struct packet *pkt)
+{
+	struct ieee_hdr *hdr;
+
+	hdr = (struct ieee_hdr *) pkt->data;
+	if(hdr->type == IEEE80211_TYPE_DEAUTH || hdr->type == IEEE80211_TYPE_DISASSOC)
+	{
+		fuzz_logger_log(FUZZ_LOG_DEBUG, "Deauth/Disassoc Dos!!!.");
+		return 0;
+	}
+
+	return 1;
+}
+
+int check_alive_by_pkts(struct ether_addr smac)
+{
+	time_t  current_time = 0;
+
+	if(fuzzing_opt.last_recv_pkt_time == 0) return 1;
+
+	//if(MAC_MATCHES(smac, SE_NULLMAC)) return 1;
+
+	if(MAC_MATCHES(smac, fuzzing_opt.source_addr)) return 1;
+
+	current_time = time(NULL);
+	if(current_time - fuzzing_opt.last_recv_pkt_time > CHECK_ALIVE_TIME)
+	{
+		fuzz_logger_log(FUZZ_LOG_DEBUG, "Target is dead!!!.");
+		return 0;
+	}
+
+	//fuzzing_opt.target_alive = 1;
+
+	return 1;
+}
+
 void save_fuzzing_state()
 {
 	save_action_state();
@@ -624,7 +604,7 @@ void log_pkt(int log_level, struct packet *pkt)
 	int log_txt_len = 0, len = 0;
 	char buf[MAX_PRINT_BUF_LEN * 5] = {0};
 
-	if(log_level < fuzzing_opt.log_level)
+	if(log_level > fuzzing_opt.log_level)
 		return;
 
 	if(pkt->data == NULL || pkt->len <= 0)

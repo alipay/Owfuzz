@@ -36,8 +36,8 @@ struct packet create_block_ack_request(struct ether_addr bssid, struct ether_add
 
     // BAR control
     // BAR Information
-
-    rlen = random() % (1024 + 1);
+    
+    rlen = random() % (10 + 1);
     generate_random_data(pkt.data + pkt.len, rlen, VALUE_RANDOM);
     pkt.len += rlen;
 

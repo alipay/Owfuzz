@@ -27,6 +27,51 @@ uint8_t association_response_ie_ieee2007[10] = {1, 50, 12, 221, 0};
 uint8_t association_response_ie_ieee2012[30] = {1, 50, 12, 53, 65, 70, 54, 55, 58, 56, 45, 61, 72, 74, 127, 90, 95, 110, 221, 0};
 uint8_t association_response_ie_ieee2016[50] = {1, 50, 12, 53, 65, 70, 54, 55, 58, 56, 45, 61, 72, 74, 127, 90, 95, 110, 181, 158, 
                                                 148, 151, 170, 52, 191, 192, 199, 255, 221, 0};
+uint8_t association_response_ie_ieee2020[50] = {1, 50, 12, 53, 65, 70, 54, 55, 58, 56, 45, 61, 72, 74, 127, 90, 95, 110, 181, 158, 148, 151, 170, 52, 191, 192, 199,
+255,
+255,
+255,
+255,
+255,
+255,
+255,
+212,
+216,
+223,
+217,
+232,
+211,
+231,
+224,
+233,
+234,
+235,
+236,
+255,
+255,
+255,
+255,
+244,
+255,
+221, 
+0};
+
+static int ie_extension_id = 0;
+static uint8_t ie_extension[50] = {
+IE_EXT_14_FUTURE_CHANNEL_GUIDANCE,
+IE_EXT_4_FILS_SESSION,
+IE_EXT_12_FILS_PUBLIC_KEY,
+IE_EXT_3_FILS_KEY_CONFIRMATION,
+IE_EXT_5_FILS_HLP_CONTAINER,
+IE_EXT_6_FILS_IP_ADDRESS_ASSIGNMENT,
+IE_EXT_7_KEY_DELIVERY,
+IE_EXT_17_CDMG_CAPABILITIES,
+IE_EXT_27_CMMG_CAPABILITIES,
+IE_EXT_28_CMMG_OPERATION,
+IE_EXT_34_GLK_GCR_PARAMETER_SET,
+IE_EXT_88_MSCS_DESCRIPTOR,
+0
+};
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -42,6 +87,9 @@ static int ieee2012_id = 0;
 
 static int ieee2016 = 0;
 static int ieee2016_id = 0;
+
+static int ieee2020 = 0;
+static int ieee2020_id = 0;
 
 static int g_aid = 0x0001;
 
@@ -117,7 +165,10 @@ struct packet create_association_response(struct ether_addr bssid, struct ether_
     association_response.len += sizeof(struct association_response_fixed);
 
 	add_default_ie_data(&association_response, 1);
-	create_frame_fuzzing_ies(&association_response, 
+
+	create_frame_fuzzing_ie(&association_response, "Association response", association_response_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+	
+	/*create_frame_fuzzing_ies(&association_response, 
 					"Association response", 
 					association_response_ie_ieee1999, 
 					association_response_ie_ieee2007,
@@ -133,7 +184,7 @@ struct packet create_association_response(struct ether_addr bssid, struct ether_
 					&ieee2016_id,
 					&fuzzing_step,
 					&fuzzing_value_step
-					);
+					);*/
 	
     return association_response;
 }

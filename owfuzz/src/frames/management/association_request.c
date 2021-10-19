@@ -27,6 +27,48 @@ uint8_t association_request_ie_ieee1999[10] = {0, 1, 0};
 uint8_t association_request_ie_ieee2007[30] = {0, 1, 50, 33, 36, 48, 46, 221, 0};
 uint8_t association_request_ie_ieee2012[80] = {0, 1, 50, 33, 36, 48, 46, 70, 54, 59, 45, 72, 127, 89, 94, 107, 221, 0};
 uint8_t association_request_ie_ieee2016[100] = {0, 1, 50, 33, 36, 48, 46, 70, 54, 59, 45, 72, 127, 89, 94, 107, 158, 148, 170, 191, 199, 221, 0};
+uint8_t association_request_ie_ieee2020[100] = {0, 1, 50, 33, 36, 48, 46, 70, 54, 59, 45, 72, 127, 89, 94, 107, 158, 148, 170, 191, 199,
+255,
+255,
+255,
+255,
+255,
+216,
+210,
+217,
+230,
+224,
+90,
+233,
+235,
+225,
+236,
+255,
+255,
+255,
+55,
+244,
+255,
+255,
+221, 
+0};
+
+
+static int ie_extension_id = 0;
+static uint8_t ie_extension[50] = {
+IE_EXT_4_FILS_SESSION,
+IE_EXT_12_FILS_PUBLIC_KEY,
+IE_EXT_3_FILS_KEY_CONFIRMATION,
+IE_EXT_5_FILS_HLP_CONTAINER,
+IE_EXT_6_FILS_IP_ADDRESS_ASSIGNMENT,
+IE_EXT_17_CDMG_CAPABILITIES,
+IE_EXT_27_CMMG_CAPABILITIES,
+IE_EXT_34_GLK_GCR_PARAMETER_SET,
+IE_EXT_90_SUPPLEMENTAL_CLASS_2_CAPABILITIES,
+IE_EXT_88_MSCS_DESCRIPTOR, 
+0
+};
+
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -42,6 +84,9 @@ static int ieee2012_id = 0;
 
 static int ieee2016 = 0;
 static int ieee2016_id = 0;
+
+static int ieee2020 = 0;
+static int ieee2020_id = 0;
 
 void save_association_request_state()
 {
@@ -78,34 +123,34 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
   add_ie_data(&pkt, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
   //add_default_ie_data(&pkt, 1);
 
-	if(fuzzing_opt.channel <= 14)
-	{
-		ie_data = IE_1_SUPPORTTED_RATES_B;
-		ie_id = ie_data[0];
-		ie_len = ie_data[1];
-		add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+  if(fuzzing_opt.channel <= 14)
+  {
+    ie_data = IE_1_SUPPORTTED_RATES_B;
+    ie_id = ie_data[0];
+    ie_len = ie_data[1];
+    add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 
     add_default_ie_data(&pkt, 45);
-	}
-	else
-	{
-		ie_data = IE_1_SUPPORTTED_RATES_N_AC;
-		ie_id = ie_data[0];
-		ie_len = ie_data[1];
-		add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+  }
+  else
+  {
+    ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+    ie_id = ie_data[0];
+    ie_len = ie_data[1];
+    add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 
     add_default_ie_data(&pkt, 45);
-		ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
-		if(ie_data)
-		{
-			memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
-			ie_data[2] = fuzzing_opt.channel;
-			ie_id = ie_data[0];
-			ie_len = ie_data[1];
-			add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-			free(ie_data);
-		}
-	}
+    ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
+    if(ie_data)
+    {
+      memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
+      ie_data[2] = fuzzing_opt.channel;
+      ie_id = ie_data[0];
+      ie_len = ie_data[1];
+      add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+      free(ie_data);
+    }
+  }
 
   add_default_ie_data(&pkt, 50);
 
@@ -132,7 +177,11 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
     
   }
 
-  create_frame_fuzzing_ies(&pkt, "Association Request", 
+  
+
+  create_frame_fuzzing_ie(&pkt, "Association Request", association_request_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+
+  /*create_frame_fuzzing_ies(&pkt, "Association Request", 
       association_request_ie_ieee1999, 
       association_request_ie_ieee2007, 
       association_request_ie_ieee2012, 
@@ -146,7 +195,7 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
       &ieee2016, 
       &ieee2016_id, 
       &fuzzing_step, 
-      &fuzzing_value_step);
+      &fuzzing_value_step);*/
 
   return pkt;
 

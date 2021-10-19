@@ -40,9 +40,11 @@
 
 #define AP_MODE "ap"
 #define STA_MODE "sta"
+#define MITM_MODE "mitm"
 
 #define FUZZ_WORK_MODE_AP	0
 #define FUZZ_WORK_MODE_STA	1
+#define FUZZ_WORK_MODE_MITM 2
 
 #define PRE_KEY "88888888"
 
@@ -55,7 +57,7 @@
 #define PING_ECHO_DATA "\x49\xde\x05\x00\x00\x00\x00\x00\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37"
 #define PING_ECHO_DATA_LEN 48
 
-#define CHECK_ALIVE_TIME 10
+#define CHECK_ALIVE_TIME 5
 
 
 enum AP_AUTH_TYPE
@@ -194,38 +196,5 @@ enum wpa_states {
 	 */
 	WPA_COMPLETED
 };
-
-typedef struct _fuzzing_option
-{
-	char interface[50];
-	char mode[5];
-	int fuzz_work_mode;
-	uint8_t channel;
-	struct ether_addr source_addr;
-	struct ether_addr target_addr;
-	struct ether_addr bssid;
-
-	char target_ssid[33];
-	char target_ip[20];
-	uint8_t enable_check_alive;
-	int ping_sockfd;
-	struct sockaddr_in ping_dst_addr;
-
-	enum AP_AUTH_TYPE auth_type;
-	enum wpa_states wpa_s;
-	uint16_t seq_ctrl;
-	uint16_t recv_seq_ctrl;
-	uint16_t data_seq_ctrl;
-	uint16_t recv_data_seq_ctrl;
-	time_t  last_recv_pkt_time;
-	uint8_t target_alive;
-	uint8_t test_type;
-	int log_level;
-
-	uint32_t fuzz_pkt_num;
-	uint32_t fuzz_exp_pkt_cnt;
-
-}fuzzing_option;
-
 
 #endif

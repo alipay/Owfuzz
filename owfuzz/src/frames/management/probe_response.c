@@ -29,6 +29,34 @@ uint8_t probe_response_ie_ieee2012[80] = {0, 1, 2, 3, 4, 6, 7, 8, 9, 32, 37, 40,
 uint8_t probe_response_ie_ieee2016[100] = {0, 1, 3, 4, 6, 7, 32, 37, 40, 41, 35, 42, 50, 48, 11, 12, 46, 51, 63, 64, 67, 68, 66, 71, 70, 54, 58, 60, 59, 
 									45, 61, 72, 74, 127, 86, 89, 69, 107, 108, 111, 112, 114, 113, 119, 120, 174, 123, 118, 181, 186, 158, 148, 151, 170,
                                     190, 191, 192, 195, 196, 193, 198, 199, 201, 202, 255, 167, 221, 0};
+uint8_t probe_response_ie_ieee2020[100] = {0, 1, 3, 4, 6, 5, 7, 32, 37, 40, 41, 35, 42, 50, 48, 11, 12, 46, 51, 63, 64, 67, 68, 66, 71, 70, 54, 58, 60, 59, 
+45, 61, 72, 74, 127, 86, 89, 69, 107, 108, 111, 112, 114, 113, 119, 120, 174, 123, 118, 181, 186, 187, 158, 191, 
+192, 195, 196, 193, 198, 199, 201, 202, 
+255,
+255,
+237,
+240,
+239,
+241,
+255,
+255,
+255,
+255,
+244,
+221, 
+0};
+
+static int ie_extension_id = 0;
+static uint8_t ie_extension[50] = {
+IE_EXT_11_ESTIMATED_SERVICE_PARAMETERS_INBOUND,
+IE_EXT_14_FUTURE_CHANNEL_GUIDANCE,
+IE_EXT_52_MAX_CHNNEL_SWITCH_TIME,
+IE_EXT_53_ESTIMATED_SERVICE_PARAMETERS_OUTBOUND,
+IE_EXT_15_SERVICE_HINT,
+IE_EXT_16_SERVICE_HASH,
+0
+};
+
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -44,6 +72,9 @@ static int ieee2012_id = 0;
 
 static int ieee2016 = 0;
 static int ieee2016_id = 0;
+
+static int ieee2020 = 0;
+static int ieee2020_id = 0;
 
 void save_probe_response_state()
 {
@@ -134,7 +165,9 @@ struct packet create_probe_response(struct ether_addr bssid, struct ether_addr d
 		}
 	}
 
-	create_frame_fuzzing_ies(&beacon, "Probe response", 
+	create_frame_fuzzing_ie(&beacon, "Probe Response", probe_response_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
+
+	/*create_frame_fuzzing_ies(&beacon, "Probe response", 
 		probe_response_ie_ieee1999, 
 		probe_response_ie_ieee2007, 
 		probe_response_ie_ieee2012, 
@@ -148,8 +181,14 @@ struct packet create_probe_response(struct ether_addr bssid, struct ether_addr d
 		&ieee2016, 
 		&ieee2016_id, 
 		&fuzzing_step, 
-		&fuzzing_value_step);
+		&fuzzing_value_step);*/
 
 	return beacon;
+}
+
+
+void create_probe_response_fuzzing_ies(struct packet *pkt)
+{
+	create_frame_fuzzing_ie(pkt, "Probe Response", probe_response_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 }
 

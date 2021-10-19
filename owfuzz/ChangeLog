@@ -1,0 +1,11 @@
+This file details the changelog of owfuzz.
+
+-----------------------------------------
+2021-06-17 -- [Version 1.0] -- Release.
+
+
+2021-06-21 -- Supports config file: owfuzz.cfg 
+-----------------------------------------
+
+2021-08-26 -- Add mitm mode, support multichannel monitor and transmission, p2p fuzzing
+---------------------------------------------------------------------------------------

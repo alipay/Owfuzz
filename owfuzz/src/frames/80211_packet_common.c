@@ -26,6 +26,85 @@ extern fuzzing_option fuzzing_opt;
 
 static uint16_t seqno = 0;
 
+
+void print_options(fuzzing_option *fo)
+{
+	int i;
+
+	printf("******************************************\n");
+	for(i=0; i<fo->ois_cnt; i++)
+	{
+		printf("interface[%d] %s, channel: %d\n", i, fo->ois[i].osdep_iface_out, fo->ois[i].channel);
+	}
+
+	printf("interface: %s, channel: %d\n", fo->interface, fo->channel);
+	printf("Fuzz Mode: %s - [%d]\n", fo->mode, fo->fuzz_work_mode);
+	printf("target_ssid: %s\n", fo->target_ssid);
+	printf("target_ip: %s\n", fo->target_ip);
+  printf("test_type: %d\n", fo->test_type);
+
+	printf("target_addr: %02X:%02X:%02X:%02X:%02X:%02X\n", fo->target_addr.ether_addr_octet[0],
+	fo->target_addr.ether_addr_octet[1],
+	fo->target_addr.ether_addr_octet[2],
+	fo->target_addr.ether_addr_octet[3],
+	fo->target_addr.ether_addr_octet[4],
+	fo->target_addr.ether_addr_octet[5]);
+
+	printf("source_addr: %02X:%02X:%02X:%02X:%02X:%02X\n", fo->source_addr.ether_addr_octet[0],
+	fo->source_addr.ether_addr_octet[1],
+	fo->source_addr.ether_addr_octet[2],
+	fo->source_addr.ether_addr_octet[3],
+	fo->source_addr.ether_addr_octet[4],
+	fo->source_addr.ether_addr_octet[5]);
+
+	printf("bssid: %02X:%02X:%02X:%02X:%02X:%02X\n", fo->bssid.ether_addr_octet[0],
+	fo->bssid.ether_addr_octet[1],
+	fo->bssid.ether_addr_octet[2],
+	fo->bssid.ether_addr_octet[3],
+	fo->bssid.ether_addr_octet[4],
+	fo->bssid.ether_addr_octet[5]);
+
+	// p2p
+	printf("p2p_target_addr: %02X:%02X:%02X:%02X:%02X:%02X\n", fo->p2p_target_addr.ether_addr_octet[0],
+	fo->p2p_target_addr.ether_addr_octet[1],
+	fo->p2p_target_addr.ether_addr_octet[2],
+	fo->p2p_target_addr.ether_addr_octet[3],
+	fo->p2p_target_addr.ether_addr_octet[4],
+	fo->p2p_target_addr.ether_addr_octet[5]);
+
+	printf("p2p_source_addr: %02X:%02X:%02X:%02X:%02X:%02X\n", fo->p2p_source_addr.ether_addr_octet[0],
+	fo->p2p_source_addr.ether_addr_octet[1],
+	fo->p2p_source_addr.ether_addr_octet[2],
+	fo->p2p_source_addr.ether_addr_octet[3],
+	fo->p2p_source_addr.ether_addr_octet[4],
+	fo->p2p_source_addr.ether_addr_octet[5]);
+
+	printf("p2p_bssid: %02X:%02X:%02X:%02X:%02X:%02X\n", fo->p2p_bssid.ether_addr_octet[0],
+	fo->p2p_bssid.ether_addr_octet[1],
+	fo->p2p_bssid.ether_addr_octet[2],
+	fo->p2p_bssid.ether_addr_octet[3],
+	fo->p2p_bssid.ether_addr_octet[4],
+	fo->p2p_bssid.ether_addr_octet[5]);
+
+
+	printf("source_group_owner_intent: %d\n", fo->source_group_owner_intent);
+	printf("target_group_owner_intent: %d\n", fo->target_group_owner_intent);
+
+	printf("p2p_source_listen_channel: %d\n", fo->p2p_source_listen_channel);
+	printf("p2p_source_operating_channel: %d\n", fo->p2p_source_operating_channel);
+
+	printf("p2p_target_listen_channel: %d\n", fo->p2p_target_listen_channel);
+	printf("p2p_target_operating_channel: %d\n", fo->p2p_target_operating_channel);
+
+	printf("p2p_operating_channel: %d\n", fo->p2p_operating_channel);
+
+  printf("p2p_operating_interface_id: %d\n", fo->p2p_operating_interface_id);
+
+
+
+}
+
+
 void create_ieee_hdr(struct packet *pkt, uint8_t type, char dsflags, uint16_t duration, struct ether_addr destination, struct ether_addr source, struct ether_addr bssid_or_transm, struct ether_addr recv, uint8_t fragment) {
   struct ieee_hdr *hdr = (struct ieee_hdr *) pkt->data;
 
@@ -243,15 +322,98 @@ struct ether_addr *get_receiver(struct packet *pkt) {
   return get_addr(pkt, 'b');
 }
 
+uint8_t *get_elemet(struct packet *pkt, uint8_t id)
+{
+  struct ieee_hdr *hdr;
+  unsigned char *ie = NULL;
+  int left;
+  
+  if(!pkt) {
+    fuzz_logger_log(FUZZ_LOG_INFO, "get_elemet: pkt is NULL");
+    return NULL;
+  }
+
+  hdr = (struct ieee_hdr *) pkt->data;
+  if((hdr->type & 0x0F) != MANAGMENT_FRAME)
+    return NULL;
+
+  switch(hdr->type)
+	{
+    case IEEE80211_TYPE_ASSOCRES:   
+      ie = pkt->data + sizeof(struct ieee_hdr) + 6;
+      break;
+    case IEEE80211_TYPE_REASSOCRES:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 6;
+      break;
+    case IEEE80211_TYPE_PROBERES:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 12;
+      break;
+    case IEEE80211_TYPE_TIMADVERT:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 10;
+      break;
+    case IEEE80211_TYPE_BEACON:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 12;
+      break;
+    case IEEE80211_TYPE_ATIM:
+      break;
+    case IEEE80211_TYPE_DISASSOC:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 2;
+      break;
+    case IEEE80211_TYPE_DEAUTH:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 2;
+      break;
+    case IEEE80211_TYPE_ACTION:
+      //ie = pkt->data + sizeof(struct ieee_hdr);
+      break;
+    case IEEE80211_TYPE_ACTIONNOACK:
+      //ie = pkt->data + sizeof(struct ieee_hdr);
+      break;
+    case IEEE80211_TYPE_ASSOCREQ:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 4;
+      break;
+    case IEEE80211_TYPE_REASSOCREQ:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 4;
+      break;
+    case IEEE80211_TYPE_PROBEREQ:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 0;
+      break;
+    case IEEE80211_TYPE_AUTH:
+      ie = pkt->data + sizeof(struct ieee_hdr) + 6;
+      break;
+    default:
+      break;
+  }
+
+  if(ie)
+  {
+    left = pkt->len - (ie - pkt->data);
+    while(left>2)
+    {
+      if(ie[0] == id)
+        break;
+      
+      ie = ie + 2  + ie[1];
+      left = left - 2 - ie[1];
+    }
+  }
+
+  return ie;
+}
+
 void generate_random_data(uint8_t *data, uint32_t length, FUZZING_VALUE_TYPE value_type)
 {
   uint32_t i;
   struct timeval t;
+  uint8_t A;
 
   if(!data || length == 0)
   {
     return;
   }
+
+  gettimeofday(&t, NULL);
+  srandom(t.tv_usec);
+  A = random() % 256;
 
   for(i=0; i<length; i++)
   {
@@ -272,7 +434,9 @@ void generate_random_data(uint8_t *data, uint32_t length, FUZZING_VALUE_TYPE val
     }
     else if(value_type == VALUE_A)
     {
-      *(data + i) = 0x41;
+      gettimeofday(&t, NULL);
+      srandom(t.tv_usec);
+      *(data + i) = A;
     }
   }
 }

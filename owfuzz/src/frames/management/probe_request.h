@@ -26,4 +26,6 @@ void load_probe_request_state();
 
 struct packet create_probe_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
 
+void create_probe_request_fuzzing_ies(struct packet *pkt);
+
 #endif

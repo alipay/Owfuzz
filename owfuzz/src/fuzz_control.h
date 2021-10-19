@@ -20,12 +20,20 @@
 #ifndef FUZZ_CONTROL_H
 #define FUZZ_CONTROL_H
 
-int init();
+int init(char *interface, int chan);
+int reinit(char *interface, int chan);
+int send_frame(struct packet *pkt);
+
+int init_ex();
+int oi_init(struct osdep_instance *oi);
+struct packet read_packet_ex();
+int send_packet_ex(struct packet *pkt);
+
 int fuzzing(int argc, char*argv[]);
-int check_alive_by_pkt();
 void load_payloads();
 void save_exp_payload(struct packet *pkt);
-void print_status();
+void save_packet(struct packet *pkt);
+void print_status(struct packet *pkt);
 
 
 #endif

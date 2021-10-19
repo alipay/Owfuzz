@@ -23,8 +23,9 @@
 
 uint8_t action_ie_ieee1999[10] = {0xff, 0};
 uint8_t action_ie_ieee2007[10] = {221, 0};
-uint8_t action_ie_ieee2012[30] = {221, 76, 0};
-uint8_t action_ie_ieee2016[50] = {221, 76, 139, 0};
+uint8_t action_ie_ieee2012[10] = {221, 76, 0};
+uint8_t action_ie_ieee2016[10] = {221, 76, 139, 0};
+uint8_t action_ie_ieee2020[10] = {221, 76, 139, 0};
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -40,6 +41,9 @@ static int ieee2012_id = 0;
 
 static int ieee2016 = 0;
 static int ieee2016_id = 0;
+
+static int ieee2020 = 0;
+static int ieee2020_id = 0;
 
 uint8_t action_category[24] = {WLAN_ACTION_SPECTRUM_MGMT, WLAN_ACTION_QOS, WLAN_ACTION_DLS, WLAN_ACTION_BLOCK_ACK, WLAN_ACTION_PUBLIC, WLAN_ACTION_RADIO_MEASUREMENT, WLAN_ACTION_FT,
                                 WLAN_ACTION_HT,WLAN_ACTION_SA_QUERY,WLAN_ACTION_PROTECTED_DUAL,WLAN_ACTION_WNM,WLAN_ACTION_UNPROTECTED_WNM,WLAN_ACTION_TDLS,WLAN_ACTION_MESH,WLAN_ACTION_MULTIHOP,WLAN_ACTION_SELF_PROTECTED,
@@ -242,8 +246,10 @@ struct packet create_action(struct ether_addr bssid, struct ether_addr smac, str
     rlen = random() % (0xff + 1);
     generate_random_data(action.data + action.len, rlen, VALUE_RANDOM);
     action.len += rlen;
+
+    create_frame_fuzzing_ie(&action, "Action", action_ie_ieee2020, &ieee2020, &ieee2020_id, NULL, NULL, &fuzzing_step, &fuzzing_value_step);
     
-    create_frame_fuzzing_ies(&action, "Action", 
+    /*create_frame_fuzzing_ies(&action, "Action", 
         action_ie_ieee1999, 
         action_ie_ieee2007, 
         action_ie_ieee2012, 
@@ -257,7 +263,7 @@ struct packet create_action(struct ether_addr bssid, struct ether_addr smac, str
         &ieee2016, 
         &ieee2016_id, 
         &fuzzing_step, 
-        &fuzzing_value_step);
+        &fuzzing_value_step);*/
 
     
     //dumphex(action.data, action.len);
@@ -275,7 +281,7 @@ void handle_action_spectrum(struct packet *pkt, struct packet *recv_pkt)
     static enum action_code {Measurement_Request, Measurement_Report, TPC_Request, TPC_Report, Channel_Switch_Announcement} ac;
     struct action_fixed *af;
     struct ieee80211_mgmt *m_action, *mgmt_action; 
-    static uint8_t action_codes[5] = {Measurement_Request, Measurement_Report, TPC_Request,  TPC_Report, Channel_Switch_Announcement};
+    static uint8_t action_codes[5] = {Measurement_Request, Measurement_Report, TPC_Request,  TPC_Report/*, Channel_Switch_Announcement*/};
 
     m_action = (struct ieee80211_mgmt *)pkt->data;
     if(recv_pkt)
