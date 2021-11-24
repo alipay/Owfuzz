@@ -58,7 +58,7 @@ make
 ```
 
 ## Start in [openwifi](https://github.com/open-sdr/openwifi#quick-start)
-- Copy owfuzz and openwifi_env.sh to openwifi with password **openwifi**.
+- Copy owfuzz and openwifi_owfuzz.sh to openwifi with password **openwifi**.
   ```
   scp -r owfuzz openwifi_env.sh root@192.168.10.122:~/
   ```
@@ -80,7 +80,7 @@ make
 
 - Init openwifi env
   ```
-  ./openwifi_env.sh
+  ./openwifi_owfuzz.sh
   ```
 
 ## Example
