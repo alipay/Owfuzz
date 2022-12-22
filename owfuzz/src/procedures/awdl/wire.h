@@ -213,5 +213,6 @@ int read_int_string(const struct buf *buf, int offset, char *str, int length);
  * @return offset to next TLV or a negative value if an error occured
  */
 int read_tlv(const struct buf *buf, int offset, uint8_t *type, uint16_t *len, const uint8_t **val);
+int read_tlv8(const struct buf *buf, int offset, uint8_t *type, uint8_t *len, const uint8_t **val);
 
 #endif /* OWL_WIRE_H */

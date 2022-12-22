@@ -21,6 +21,8 @@
 #include "ies_creator.h"
 #include "../80211_packet_common.h"
 
+extern fuzzing_option fuzzing_opt;
+
 //802.11a/b
 static int ie_ranges1999[10][3]={
 {0, 0, 32},    // SSID
@@ -920,16 +922,17 @@ int add_attribute_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie
 
     atlv.type = id;
     srandom(time(NULL)+pkt->len);
-    atlv.length = random() % 32767;
+    atlv.length = random() %  255;
 
     srandom(time(NULL) + atlv.length);
     value_type = random() % (FUZZING_VALUE_END-1) + 1;
-    rlen = random() % 256;
+    rlen = atlv.length;//random() % 256;
     
     generate_random_data(atlv.value, rlen, value_type);
 
-    memcpy(pkt->data + pkt->len, &atlv, rlen + 3);
-    vsi->length += (rlen + 3);
+    memcpy(pkt->data + pkt->len, &atlv, 3);
+    memcpy(pkt->data + pkt->len + 3, atlv.value, rlen);
+    if(vsi) vsi->length += (rlen + 3);
 	pkt->len += (rlen + 3);
 
     return (rlen + 3);
@@ -943,15 +946,16 @@ int add_data_element_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific
 
     detlv.type = id;
     srandom(time(NULL)+pkt->len);
-    detlv.length = random() % 32767;
+    detlv.length = random() % 255;
 
     srandom(time(NULL) + detlv.length);
     value_type = random() % (FUZZING_VALUE_END-1) + 1;
-    rlen = random() % 256;
+    rlen = detlv.length;//random() % 256;
     generate_random_data(detlv.value, rlen, value_type);
 
-    memcpy(pkt->data + pkt->len, &detlv, rlen + 4);
-    vsi->length += (rlen + 4);
+    memcpy(pkt->data + pkt->len, &detlv, 4);
+    memcpy(pkt->data + pkt->len + 4, &detlv, rlen);
+    if(vsi) vsi->length += (rlen + 4);
 	pkt->len += (rlen + 4);
 
     return (rlen + 4);
@@ -969,11 +973,11 @@ void add_ie_data(struct packet *pkt, uint8_t id, FUZZING_TYPE fuzzing_type, uint
 
 void add_default_ie_data(struct packet *pkt, uint8_t id)
 {
-    int len = 0;
     if(!pkt) return;
 
     memcpy(pkt->data + pkt->len, default_ie_data[id].ie, default_ie_data[id].len);
 	pkt->len += default_ie_data[id].len;
+
 }
 
 struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version, uint8_t id, FUZZING_TYPE fuzzing_type, FUZZING_VALUE_TYPE value_type, uint8_t *specific_data, int specific_data_len)
@@ -1356,24 +1360,41 @@ void create_frame_fuzzing_ie(struct packet *pkt,
 	{
 		*ieee_ver = 0;
 		*ieee_id = 0;
+        *ies_ext_id = 0;
 
 		*fuzzing_step = NOT_PRESENT;
 		*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 	}
 
+    if(frame_ies && ieee_id && 0 == get_ie_status(frame_ies[*ieee_id], 0)) // disable
+    {
+        *ieee_id += 1;
+		*fuzzing_step = NOT_PRESENT;
+        return;
+    }
+    else
+    {
+        if(frame_ies_ext && ies_ext_id && 0 == get_ie_status(frame_ies_ext[*ies_ext_id], 0))
+        {
+            *ies_ext_id += 1;
+            *fuzzing_step = NOT_PRESENT;
+            return;
+        }
+    }
+
 	if(*ieee_ver == 0 && frame_ies[0] != 0xff)
 	{
         if(frame_ies[*ieee_id] == 255)
         {
-            if(frame_ies_ext)
+            if(frame_ies_ext && frame_ies_ext[0] != 0xff)
             {
-                if(frame_ies_ext[*ies_ext_id] == 0){
-                    *ies_ext_id = 0;
-                }
-
                 fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211) ==> ie extension(%d-%d) step: %d-%d", frame_name, frame_ies[*ieee_id], frame_ies_ext[*ies_ext_id], *fuzzing_step, *fuzzing_value_step);
+                fuzzing_opt.current_ie = frame_ies[*ieee_id];
+                fuzzing_opt.current_ie_ext = frame_ies_ext[*ies_ext_id];
+                fuzzing_opt.fuzzing_step = *fuzzing_step;
+                fuzzing_opt.fuzzing_value_step = *fuzzing_value_step;
 
-                iedata = get_ie_ex_data_by_fuzzing_type(IEEE_80211_2020, frame_ies[*ieee_id], frame_ies_ext[(*ies_ext_id)++], *fuzzing_step, *fuzzing_value_step, NULL, 0);
+                iedata = get_ie_ex_data_by_fuzzing_type(IEEE_80211_2020, frame_ies[*ieee_id], frame_ies_ext[*ies_ext_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
                 memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
                 pkt->len += iedata.length;
             }
@@ -1381,6 +1402,10 @@ void create_frame_fuzzing_ie(struct packet *pkt,
         else
         {
             fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211) ==> ie(%d) step: %d-%d", frame_name, frame_ies[*ieee_id], *fuzzing_step, *fuzzing_value_step);
+            fuzzing_opt.current_ie = frame_ies[*ieee_id];
+            fuzzing_opt.current_ie_ext = 0;
+            fuzzing_opt.fuzzing_step = *fuzzing_step;
+            fuzzing_opt.fuzzing_value_step = *fuzzing_value_step;
 
             iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2020, frame_ies[*ieee_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
             memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
@@ -1394,8 +1419,17 @@ void create_frame_fuzzing_ie(struct packet *pkt,
 
 			if(*fuzzing_step + 1 == FUZZING_END)
 			{
-				*ieee_id += 1;
 				*fuzzing_step = NOT_PRESENT;
+
+                if(frame_ies_ext[*ies_ext_id + 1] != 0){
+                    *ies_ext_id += 1;
+                }
+                else
+                {
+                    *ieee_id +=1;
+                    *ies_ext_id = 0;
+                }
+                
 			}
 			else
 			{
@@ -1726,6 +1760,28 @@ void create_frame_fuzzing_ies(struct packet *pkt,
             create_radom_ie(pkt, IEEE_80211_2016, frame_ie_ieee2016[random() % ie_cnt]);
         }
 	}    
+}
+
+uint8_t get_ie_status(uint8_t ie_type, uint8_t is_ext)
+{
+    int i=0;
+
+    if(is_ext == 0)
+    {
+        for(i=0; i<255;i++)
+        {
+            if(fuzzing_opt.ies_status[i].type == ie_type)
+                return fuzzing_opt.ies_status[i].enabled;
+        }
+    }
+    else
+    {
+        for(i=0; i<255;i++)
+        {
+            if(fuzzing_opt.ext_ies_status[i].type == ie_type)
+                return fuzzing_opt.ext_ies_status[i].enabled;
+        }
+    }
 }
 
 void init_ie_creator()

@@ -92,6 +92,7 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
     struct SAE_Commit *sae_commit, *rsae_commit;
     struct SAE_Confirm *sae_confirm, *rsae_confirm;
     int rlen = 0;
+    int i,j;
 
     create_ieee_hdr(&authentication, IEEE80211_TYPE_AUTH, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 

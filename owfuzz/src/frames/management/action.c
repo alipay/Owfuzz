@@ -27,6 +27,11 @@ uint8_t action_ie_ieee2012[10] = {221, 76, 0};
 uint8_t action_ie_ieee2016[10] = {221, 76, 139, 0};
 uint8_t action_ie_ieee2020[10] = {221, 76, 139, 0};
 
+static int ie_extension_id = 0;
+static uint8_t ie_extension[50] = {
+0xff, 0
+};
+
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
@@ -247,7 +252,7 @@ struct packet create_action(struct ether_addr bssid, struct ether_addr smac, str
     generate_random_data(action.data + action.len, rlen, VALUE_RANDOM);
     action.len += rlen;
 
-    create_frame_fuzzing_ie(&action, "Action", action_ie_ieee2020, &ieee2020, &ieee2020_id, NULL, NULL, &fuzzing_step, &fuzzing_value_step);
+    create_frame_fuzzing_ie(&action, "Action", action_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
     
     /*create_frame_fuzzing_ies(&action, "Action", 
         action_ie_ieee1999, 

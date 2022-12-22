@@ -156,6 +156,8 @@ void create_frame_fuzzing_ies(struct packet *pkt,
 int add_attribute_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi, uint8_t id);
 int add_data_element_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi,  uint16_t id);
 
+uint8_t get_ie_status(uint8_t ie_type, uint8_t is_ext);
+
 
 
 #endif

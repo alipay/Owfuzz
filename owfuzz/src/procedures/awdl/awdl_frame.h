@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include "ieee80211.h"
+#include "../../frames/80211_packet_common.h"
 
 #define AWDL_LLC_PROTOCOL_ID  0x0800
 
@@ -32,6 +33,8 @@
 #define IEEE80211_VENDOR_SPECIFIC 127
 #define AWDL_VERSION_COMPAT awdl_version(1, 0)
 #define AWDL_TYPE 8
+
+static VARIABLE_IS_NOT_USED struct ether_addr SE_AWDLMAC = { .ether_addr_octet = { 0x00, 0x25, 0x00, 0xff, 0x94, 0x73 } };
 
 struct awdl_data {
 	uint16_t head; /* AWDL_DATA_HEAD */
@@ -224,5 +227,7 @@ struct awdl_version_tlv {
 } __attribute__((__packed__));
 
 const char *awdl_tlv_as_str(uint8_t type);
+
+struct packet create_action_awdl(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt);
 
 #endif /* AWDL_FRAME_H_ */

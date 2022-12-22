@@ -20,11 +20,18 @@
 #include "timing_advertisement.h"
 #include "ies_creator.h"
 
+extern fuzzing_option fuzzing_opt;
+
 uint8_t timing_advertisement_ie_ieee1999[10] = {0xff, 0};
 uint8_t timing_advertisement_ie_ieee2007[10] = {0xff, 0};
 uint8_t timing_advertisement_ie_ieee2012[30] = {7, 32, 69, 127, 221, 0};
 uint8_t timing_advertisement_ie_ieee2016[30] = {7, 32, 69, 127, 221, 0};
 uint8_t timing_advertisement_ie_ieee2020[30] = {7, 32, 69, 127, 221, 0};
+
+static int ie_extension_id = 0;
+static uint8_t ie_extension[50] = {
+0xff, 0
+};
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
@@ -60,6 +67,7 @@ struct packet create_timing_advertisement(struct ether_addr bssid, struct ether_
     struct timing_advertisement_fixed *taf; 
     static uint64_t internal_timestamp = 0;
   	struct ether_addr bc;
+	int i,j;
 
 	MAC_SET_BCAST(bc);
     create_ieee_hdr(&timing_advertisement, IEEE80211_TYPE_TIMADVERT, 'a', 0, bc, bssid, bssid, SE_NULLMAC, 0);
@@ -71,7 +79,24 @@ struct packet create_timing_advertisement(struct ether_addr bssid, struct ether_
 
     timing_advertisement.len += sizeof(struct timing_advertisement_fixed);
 
-	create_frame_fuzzing_ie(&timing_advertisement, "Timing advertisement", timing_advertisement_ie_ieee2020, &ieee2020, &ieee2020_id, NULL, NULL, &fuzzing_step, &fuzzing_value_step);
+	for(i=0; i<fuzzing_opt.cur_sfs_cnt; i++)
+	{
+		if(fuzzing_opt.sfs[i].frame_type == IEEE80211_TYPE_TIMADVERT && fuzzing_opt.sfs[i].bset == 1)
+		{
+			for(j=0; j<fuzzing_opt.sfs[i].ie_cnt; j++)
+			{
+				add_ie_data(&timing_advertisement, fuzzing_opt.sfs[i].sies[j].id, SPECIFIC_VALUE, fuzzing_opt.sfs[i].sies[j].value, fuzzing_opt.sfs[i].sies[j].len);
+			}
+			break;
+		}
+	}
+
+	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_TIMADVERT)
+	{
+
+	}
+
+	create_frame_fuzzing_ie(&timing_advertisement, "Timing advertisement", timing_advertisement_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 
 	/*create_frame_fuzzing_ies(&timing_advertisement, "Timing advertisement", 
 		timing_advertisement_ie_ieee1999, 

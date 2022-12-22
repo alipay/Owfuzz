@@ -97,40 +97,57 @@ struct packet create_probe_request(struct ether_addr bssid, struct ether_addr sm
   uint8_t *ie_data;
   uint8_t ie_len;
   uint8_t ie_id;
+  int i,j;
 
   create_ieee_hdr(&probe, IEEE80211_TYPE_PROBEREQ, 'a', 0, dmac, smac, bssid, SE_NULLMAC, 0);
 
-  add_ie_data(&probe, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
-	if(fuzzing_opt.channel <= 14)
+  for(i=0; i<fuzzing_opt.cur_sfs_cnt; i++)
 	{
-		ie_data = IE_1_SUPPORTTED_RATES_B;
-		ie_id = ie_data[0];
-		ie_len = ie_data[1];
-		add_ie_data(&probe, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-
-    add_default_ie_data(&probe, 45);
-	}
-	else
-	{
-		ie_data = IE_1_SUPPORTTED_RATES_N_AC;
-		ie_id = ie_data[0];
-		ie_len = ie_data[1];
-		add_ie_data(&probe, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-
-    add_default_ie_data(&probe, 45);
-		ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
-		if(ie_data)
+		if(fuzzing_opt.sfs[i].frame_type == IEEE80211_TYPE_PROBEREQ && fuzzing_opt.sfs[i].bset == 1)
 		{
-			memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
-			ie_data[2] = fuzzing_opt.channel;
-			ie_id = ie_data[0];
-			ie_len = ie_data[1];
-			add_ie_data(&probe, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-			free(ie_data);
+			for(j=0; j<fuzzing_opt.sfs[i].ie_cnt; j++)
+			{
+				add_ie_data(&probe, fuzzing_opt.sfs[i].sies[j].id, SPECIFIC_VALUE, fuzzing_opt.sfs[i].sies[j].value, fuzzing_opt.sfs[i].sies[j].len);
+			}
+			break;
 		}
 	}
 
-  add_default_ie_data(&probe, 50);
+	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_PROBEREQ)
+	{
+    add_ie_data(&probe, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+    if(fuzzing_opt.channel <= 14)
+    {
+      ie_data = IE_1_SUPPORTTED_RATES_B;
+      ie_id = ie_data[0];
+      ie_len = ie_data[1];
+      add_ie_data(&probe, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+
+      add_default_ie_data(&probe, 45);
+    }
+    else
+    {
+      ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+      ie_id = ie_data[0];
+      ie_len = ie_data[1];
+      add_ie_data(&probe, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+
+      add_default_ie_data(&probe, 45);
+      ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
+      if(ie_data)
+      {
+        memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
+        ie_data[2] = fuzzing_opt.channel;
+        ie_id = ie_data[0];
+        ie_len = ie_data[1];
+        add_ie_data(&probe, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+        free(ie_data);
+      }
+    }
+
+    add_default_ie_data(&probe, 50);
+
+  }
 
   create_frame_fuzzing_ie(&probe, "Probe Request", probe_request_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 

@@ -41,6 +41,11 @@ struct ieee_hdr {
   uint16_t frag_seq;
 } __attribute__((packed));
 
+struct llc_h{
+  uint8_t dsap;
+  uint8_t ssap;
+  uint8_t ctrl;
+}__attribute__((packed));
 
 struct llc_hdr{
   uint8_t dsap;
@@ -106,6 +111,29 @@ struct ieee2016_ie_extended_capabilities
     uint16_t ec_80;
 };
 
+#define MAX_SFS_COUNT 16
+
+struct sniffed_ie{
+	uint8_t id;
+	uint8_t ext_id;
+	uint8_t len;
+	uint8_t value[255];
+};
+
+
+struct sniffed_frame{
+    uint8_t frame_type;
+    uint8_t bset;
+    int ie_cnt;
+    struct sniffed_ie sies[50];
+};
+
+struct ie_status{
+  uint8_t type;
+  uint8_t enabled;
+};
+
+
 typedef struct _fuzzing_option
 {
   struct osdep_instance ois[11];
@@ -118,6 +146,12 @@ typedef struct _fuzzing_option
 
 	char mode[5];
 	int fuzz_work_mode;
+
+  uint8_t current_frame;
+  uint8_t current_ie;
+  uint8_t current_ie_ext;
+  uint8_t fuzzing_step;
+  uint8_t fuzzing_value_step;
 
 	struct ether_addr source_addr;
   char szsource_addr[50];
@@ -179,6 +213,14 @@ typedef struct _fuzzing_option
 
   int log_level;
   char log_file[256];
+
+  struct sniffed_frame sfs[MAX_SFS_COUNT];
+  volatile int cur_sfs_cnt;
+
+  volatile uint8_t sniff_frames;
+
+  struct ie_status ies_status[255];
+  struct ie_status ext_ies_status[255];
 
 }fuzzing_option;
 

@@ -141,6 +141,7 @@ struct packet create_association_response(struct ether_addr bssid, struct ether_
 {
     struct packet association_response = {0};
     struct association_response_fixed *arf;
+	int i,j;
 
     create_ieee_hdr(&association_response, IEEE80211_TYPE_ASSOCRES, 'a', 0x013A, dmac, bssid, bssid, SE_NULLMAC, 0);
 
@@ -164,7 +165,22 @@ struct packet create_association_response(struct ether_addr bssid, struct ether_
 
     association_response.len += sizeof(struct association_response_fixed);
 
-	add_default_ie_data(&association_response, 1);
+	for(i=0; i<fuzzing_opt.cur_sfs_cnt; i++)
+	{
+		if(fuzzing_opt.sfs[i].frame_type == IEEE80211_TYPE_ASSOCRES && fuzzing_opt.sfs[i].bset == 1)
+		{
+			for(j=0; j<fuzzing_opt.sfs[i].ie_cnt; j++)
+			{
+				add_ie_data(&association_response, fuzzing_opt.sfs[i].sies[j].id, SPECIFIC_VALUE, fuzzing_opt.sfs[i].sies[j].value, fuzzing_opt.sfs[i].sies[j].len);
+			}
+			break;
+		}
+	}
+
+	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_ASSOCRES)
+	{
+		add_default_ie_data(&association_response, 1);
+	}
 
 	create_frame_fuzzing_ie(&association_response, "Association response", association_response_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 	

@@ -1,7 +1,7 @@
 #ifndef OSDEP_WIFI_TRANSMIT_H
 #define OSDEP_WIFI_TRANSMIT_H
 
-#include "./osdep/byteorder.h"
+#include "./osdep/osdep.h"
 
 #define MAX_IEEE_PACKET_SIZE 4096
 
@@ -9,6 +9,8 @@ struct packet {
   unsigned char data[MAX_IEEE_PACKET_SIZE];
   unsigned int len;
   unsigned char channel;
+  struct rx_info ri;
+  //struct tx_info ti;
 };
 
 struct devices

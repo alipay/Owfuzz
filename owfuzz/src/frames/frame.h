@@ -79,6 +79,7 @@ struct packet get_default_frame(uint8_t frame_type, struct ether_addr bssid, str
 int init_ping_sock();
 int check_alive_by_ping();
 int check_alive_by_deauth(struct packet *pkt);
+int check_alive_by_disassoc(struct packet *pkt);
 int check_alive_by_pkts(struct ether_addr smac);
 
 void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len);

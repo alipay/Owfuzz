@@ -220,3 +220,19 @@ int read_tlv(const struct buf *buf, int offset, uint8_t *type, uint16_t *len, co
 wire_error:
 	return OUT_OF_BOUNDS;
 }
+
+int read_tlv8(const struct buf *buf, int offset, uint8_t *type, uint8_t *len, const uint8_t **val)
+{
+	uint8_t _type;
+	uint8_t _len;
+	READ_U8(buf, offset, &_type);
+	READ_U8(buf, offset + 1, &_len);
+	READ_BYTES(buf, offset + 2, val, _len);
+	if (type)
+		*type = _type;
+	if (len)
+		*len = _len;
+	return _len + 2;
+wire_error:
+	return OUT_OF_BOUNDS;	
+}

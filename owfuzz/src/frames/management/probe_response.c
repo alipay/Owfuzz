@@ -100,6 +100,7 @@ struct packet create_probe_response(struct ether_addr bssid, struct ether_addr d
 	uint8_t *ie_data;
 	uint8_t ie_len;
 	uint8_t ie_id;
+	int i,j;
 	
 	create_ieee_hdr(&beacon, IEEE80211_TYPE_PROBERES, 'a', 0x013A, dmac, bssid, bssid, SE_NULLMAC, 0);
 
@@ -119,52 +120,67 @@ struct packet create_probe_response(struct ether_addr bssid, struct ether_addr d
 
 	beacon.len += sizeof(struct beacon_fixed);
 
-	if(request_elements != NULL && request_elements_len != 0)
+  for(i=0; i<fuzzing_opt.cur_sfs_cnt; i++)
 	{
-		memcpy(beacon.data + beacon.len, request_elements, request_elements_len);
-		beacon.len += request_elements_len;
-	}
-	else
-	{
-		add_ie_data(&beacon, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
-		if(fuzzing_opt.channel <= 14)
+		if(fuzzing_opt.sfs[i].frame_type == IEEE80211_TYPE_PROBERES && fuzzing_opt.sfs[i].bset == 1)
 		{
-			ie_data = IE_1_SUPPORTTED_RATES_B;
-			ie_id = ie_data[0];
-			ie_len = ie_data[1];
-			add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-		}
-		else
-		{
-			ie_data = IE_1_SUPPORTTED_RATES_N_AC;
-			ie_id = ie_data[0];
-			ie_len = ie_data[1];
-			add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-		}
-
-		add_default_ie_data(&beacon, 5);
-
-		if(fuzzing_opt.channel <= 14)
-		{
-			add_ie_data(&beacon, 3, SPECIFIC_VALUE, &fuzzing_opt.channel, 1);
-		}
-		else
-		{
-			add_default_ie_data(&beacon, 45);
-			ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
-			if(ie_data)
+			for(j=0; j<fuzzing_opt.sfs[i].ie_cnt; j++)
 			{
-				memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
-				ie_data[2] = fuzzing_opt.channel;
+				add_ie_data(&beacon, fuzzing_opt.sfs[i].sies[j].id, SPECIFIC_VALUE, fuzzing_opt.sfs[i].sies[j].value, fuzzing_opt.sfs[i].sies[j].len);
+			}
+			break;
+		}
+	}
+
+	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_PROBERES)
+	{
+		if(request_elements != NULL && request_elements_len != 0)
+		{
+			memcpy(beacon.data + beacon.len, request_elements, request_elements_len);
+			beacon.len += request_elements_len;
+		}
+		else
+		{
+			add_ie_data(&beacon, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+			if(fuzzing_opt.channel <= 14)
+			{
+				ie_data = IE_1_SUPPORTTED_RATES_B;
 				ie_id = ie_data[0];
 				ie_len = ie_data[1];
 				add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-				free(ie_data);
+			}
+			else
+			{
+				ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+				ie_id = ie_data[0];
+				ie_len = ie_data[1];
+				add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 			}
 
+			add_default_ie_data(&beacon, 5);
+
+			if(fuzzing_opt.channel <= 14)
+			{
+				add_ie_data(&beacon, 3, SPECIFIC_VALUE, &fuzzing_opt.channel, 1);
+			}
+			else
+			{
+				add_default_ie_data(&beacon, 45);
+				ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
+				if(ie_data)
+				{
+					memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
+					ie_data[2] = fuzzing_opt.channel;
+					ie_id = ie_data[0];
+					ie_len = ie_data[1];
+					add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+					free(ie_data);
+				}
+
+			}
 		}
 	}
-
+	
 	create_frame_fuzzing_ie(&beacon, "Probe Response", probe_response_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 
 	/*create_frame_fuzzing_ies(&beacon, "Probe response", 

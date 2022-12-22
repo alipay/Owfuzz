@@ -18,6 +18,11 @@
  */
 
 #include "awdl_frame.h"
+#include "wire.h"
+#include "../../frames/management/ies_creator.h"
+
+uint8_t awdl_ies[30] = {0,1,2,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+
 
 const char *awdl_frame_as_str(uint8_t type) {
 	switch (type) {
@@ -81,4 +86,56 @@ const char *awdl_tlv_as_str(uint8_t type) {
 		default:
 			return "Unknown";
 	}
+}
+
+struct packet create_action_awdl(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
+{
+	struct packet pkt={0};
+	struct ieee_hdr *hdr;
+    struct awdl_action *aa, *a;
+    struct buf abuf = {0};
+    uint8_t *tlvs;
+    int tlvs_len;
+    uint8_t tlv_type;
+    uint16_t tlv_len;
+    uint8_t tlv_value[255];
+    int offset;
+    int nread;
+	int i;
+
+    hdr = (struct ieee_hdr *) recv_pkt->data;
+    aa = (struct awdl_action *)(recv_pkt->data + sizeof(struct ieee_hdr));
+    tlvs = recv_pkt->data + sizeof(struct ieee_hdr) + sizeof(struct awdl_action);
+    tlvs_len = recv_pkt->len - sizeof(struct ieee_hdr) - sizeof(struct awdl_action);
+    abuf.data = tlvs;
+    abuf.len = tlvs_len;
+
+	create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
+
+	a = (struct awdl_action *)(pkt.data + sizeof(struct ieee_hdr));
+	a->category = 127;
+	memcpy(a->oui.byte, AWDL_OUI.byte, 3);
+	a->reserved = 0;
+	a->type = AWDL_TYPE;
+	a->subtype = aa->subtype;
+	a->version = aa->version;
+	a->target_tx = aa->phy_tx + 10;
+	a->phy_tx = aa->target_tx + 9;
+
+	pkt.len += sizeof(struct awdl_action);
+
+	i=0;
+	do
+	{
+		srandom(time(NULL)+i);
+		i = random() % (sizeof(awdl_ies)/sizeof(awdl_ies[0]));
+		add_attribute_tlv_fuzzing_data(&pkt, NULL, awdl_ies[i]);
+
+	}while(pkt.len < 1500);
+
+
+	pkt.channel = recv_pkt->channel;
+
+
+	return pkt;
 }

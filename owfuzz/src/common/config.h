@@ -38,7 +38,8 @@ int owfuzz_config_get_interfaces(fuzzing_option *fo);
 int owfuzz_config_get_fuzzing_option(fuzzing_option *fo);
 int owfuzz_config_get_channels(fuzzing_option *fo);
 int owfuzz_config_get_macs(fuzzing_option *fo);
-
+int owfuzz_config_get_ies_status(fuzzing_option *fo);
+int owfuzz_config_get_ext_ies_status(fuzzing_option *fo);
 
 int owfuzz_add_virtual_interface(char *iface, char *vif, char *type);
 int owfuzz_del_virtual_interface(char *vif);

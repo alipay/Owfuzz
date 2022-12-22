@@ -58,7 +58,7 @@ make
 ```
 
 ## Start in [openwifi](https://github.com/open-sdr/openwifi#quick-start)
-- Copy owfuzz and openwifi_owfuzz.sh to openwifi with password **openwifi**.
+- Copy owfuzz and openwifi_env.sh to openwifi with password **openwifi**.
   ```
   scp -r owfuzz openwifi_env.sh root@192.168.10.122:~/
   ```
@@ -80,7 +80,7 @@ make
 
 - Init openwifi env
   ```
-  ./openwifi_owfuzz.sh
+  ./openwifi_env.sh
   ```
 
 ## Example
@@ -102,7 +102,15 @@ sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -
 
 ## Discovered vulnerabilities
 
-Please see [here](https://github.com/E7mer/Owfuzz).
+- [CVE-2021-34173](#CVE-2021-34173)
+- [CVE-2021-34174](#CVE-2021-34174)
+- [CVE-2021-1903](#CVE-2021-1903)
+- [CVE-2021-30310](#CVE-2021-30310)
+- [CVE-2021-33028](#CVE-2021-33028)
+- [CVE-2021-33029](#CVE-2021-33029)
+- [CVE-2022-34744](#CVE-2022-34744)
+- [CVE-2022-34745](#CVE-2022-34745)
+
 
 
 

@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "./osdep/osdep.h"
 #include "osdep_wifi_transmit.h"
 
 
@@ -83,10 +82,10 @@ struct packet osdep_read_packet()
 {
 	struct wif *wi = _wi_in; /* XXX */
 	int rc;
-	struct packet pkt;
+	struct packet pkt={0};
 
 	do {
-	  rc = wi_read(wi, pkt.data, MAX_IEEE_PACKET_SIZE, NULL);
+	  rc = wi_read(wi, pkt.data, MAX_IEEE_PACKET_SIZE, &pkt.ri);
 	  if (rc == -1) {
 	    perror("wi_read()");
 	    pkt.len = 0;
@@ -188,7 +187,7 @@ struct packet osdep_read_packet_ex(struct osdep_instance* oi)
 	struct packet pkt = {0};
 
 	do {
-	  rc = wi_read(wi, pkt.data, MAX_IEEE_PACKET_SIZE, NULL);
+	  rc = wi_read(wi, pkt.data, MAX_IEEE_PACKET_SIZE, &pkt.ri);
 	  if (rc == -1) {
 	    perror("wi_read()");
 	    pkt.len = 0;

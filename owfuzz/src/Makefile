@@ -1,6 +1,6 @@
-# wifuzz
+# owfuzz
 #
-# Copyright (C) 2018 E7mer <haimohk@gmail.com>
+# Copyright (C) 2020 E7mer <haimohk@gmail.com>
 #
 
 export TOP_PATH CXX CC LD CCLD LDFLAGS CFLAGS CXXFLAGS CPPFLAGS LIBS KSLIBS PTHREADLIBS NETLINKLIBS KISMETWIFI OSDEPWIFI LIBMLIB
@@ -19,7 +19,7 @@ FRAMEOBJ = ./common/queue.o ./common/config.o ./common/pcap_log.o ./common/log.o
 ./frames/data/qos_data.o ./frames/data/data.o ./frames/data/d_cf_ack_poll.o ./frames/data/d_cf_ack.o ./frames/data/d_cf_poll.o ./frames/data/data_cf_ack_poll.o \
 ./frames/data/data_cf_ack.o ./frames/data/data_cf_poll.o ./frames/data/data_null.o ./frames/data/qos_cf_ack_poll.o ./frames/data/qos_cf_poll.o ./frames/data/qos_cf_ack.o \
 ./frames/data/qos_data_cf_ack_poll.o ./frames/data/qos_data_cf_ack.o ./frames/data/qos_data_cf_poll.o ./frames/data/qos_null.o \
-./procedures/direct/direct.o ./procedures/awdl/awdl.o ./procedures/awdl/awdl_frame.o ./procedures/awdl/wire.o
+./procedures/direct/direct.o ./procedures/awdl/awdl.o ./procedures/awdl/awdl_frame.o ./procedures/awdl/wire.o ./procedures/mesh/mesh.o
 
 OBJS = owfuzz.o fuzz_control.o
 

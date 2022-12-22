@@ -122,7 +122,15 @@ void create_ieee_hdr(struct packet *pkt, uint8_t type, char dsflags, uint16_t du
 
   hdr->type = type;
 
-  hdr->flags = 0x00;
+  srandom(time(NULL)+pkt->len);
+
+  if((hdr->type & 0x0F) == DATA_FRAME)
+  {
+    hdr->flags = random() % 256;
+  }else{
+     hdr->flags = 0;
+  }
+
   //if (wep) hdr->flags |= 0x40; //If somebody needs WEP, here it is :D
 
   switch (dsflags) {
@@ -156,7 +164,8 @@ void create_ieee_hdr(struct packet *pkt, uint8_t type, char dsflags, uint16_t du
 
   hdr->duration = htole16(duration);
 
-  hdr->frag_seq = htole16(fragment | (seqno << 4));
+  //hdr->frag_seq = htole16(fragment | (seqno << 4));
+  hdr->frag_seq = htole16((random() % 15) | (seqno << 4));
 
   pkt->len = sizeof(struct ieee_hdr);
 

@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include "beacon.h"
 #include "ies_creator.h"
+#include "../../procedures/awdl/wire.h" 
 
 extern fuzzing_option fuzzing_opt;
 
@@ -122,7 +123,19 @@ struct packet create_ap_beacon(struct ether_addr bssid, char adhoc, enum AP_AUTH
 
 	beacon.len += sizeof(struct beacon_fixed);
 
-	add_default_ie_data(&beacon, 0);
+	ie_len = strlen(fuzzing_opt.target_ssid);
+	if(ie_len)
+	{
+		beacon.data[beacon.len] = 0;
+		beacon.data[beacon.len+1] = ie_len;
+		memcpy(beacon.data + beacon.len + 2, fuzzing_opt.target_ssid, ie_len);
+		beacon.len += (2+ie_len);
+	}
+	else
+	{
+		add_default_ie_data(&beacon, 0);
+	}
+
 	if(fuzzing_opt.channel <= 14)
 	{
 		ie_data = IE_1_SUPPORTTED_RATES_B;
@@ -232,10 +245,10 @@ struct packet create_ap_beacon(struct ether_addr bssid, char adhoc, enum AP_AUTH
 		break;
 	}
 
-	ie_data = IE_221_VENDOR_SPECIFIC_HUAWEI_1;
+	/*ie_data = IE_221_VENDOR_SPECIFIC_HUAWEI_1;
 	ie_id = ie_data[0];
 	ie_len = ie_data[1];
-	add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+	add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);*/
 
 /*
 	ie_data = IE_221_VENDOR_SPECIFIC_WPS;
@@ -271,6 +284,7 @@ struct packet create_beacon(struct ether_addr bssid, char adhoc, char *ssid)
 	uint8_t *ie_data;
 	uint8_t ie_len;
 	uint8_t ie_id;
+	int i,j;
 
 	//bssid.ether_addr_octet[5] += 1;
 
@@ -295,43 +309,58 @@ struct packet create_beacon(struct ether_addr bssid, char adhoc, char *ssid)
 
 	beacon.len += sizeof(struct beacon_fixed);
 
-	add_ie_data(&beacon, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
-	
-	if(fuzzing_opt.channel <= 14)
+	for(i=0; i<fuzzing_opt.cur_sfs_cnt; i++)
 	{
-		ie_data = IE_1_SUPPORTTED_RATES_B;
-		ie_id = ie_data[0];
-		ie_len = ie_data[1];
-		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-	}
-	else
-	{
-		ie_data = IE_1_SUPPORTTED_RATES_N_AC;
-		ie_id = ie_data[0];
-		ie_len = ie_data[1];
-		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-	}
-
-	add_default_ie_data(&beacon, 5);
-
-	/*if(fuzzing_opt.channel <= 14)
-	{
-		add_ie_data(&beacon, 3, SPECIFIC_VALUE, &fuzzing_opt.channel, 1);
-	}
-	else
-	{
-		add_default_ie_data(&beacon, 45);
-		ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
-		if(ie_data)
+		if(fuzzing_opt.sfs[i].frame_type == IEEE80211_TYPE_BEACON && fuzzing_opt.sfs[i].bset == 1)
 		{
-			memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
-			ie_data[2] = fuzzing_opt.channel;
+			for(j=0; j<fuzzing_opt.sfs[i].ie_cnt; j++)
+			{
+				add_ie_data(&beacon, fuzzing_opt.sfs[i].sies[j].id, SPECIFIC_VALUE, fuzzing_opt.sfs[i].sies[j].value, fuzzing_opt.sfs[i].sies[j].len);
+			}
+			break;
+		}
+	}
+
+	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_BEACON)
+	{
+		add_ie_data(&beacon, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+		
+		if(fuzzing_opt.channel <= 14)
+		{
+			ie_data = IE_1_SUPPORTTED_RATES_B;
 			ie_id = ie_data[0];
 			ie_len = ie_data[1];
 			add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-			free(ie_data);
 		}
-	}*/
+		else
+		{
+			ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+			ie_id = ie_data[0];
+			ie_len = ie_data[1];
+			add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+		}
+
+		add_default_ie_data(&beacon, 5);
+
+		if(fuzzing_opt.channel <= 14)
+		{
+			add_ie_data(&beacon, 3, SPECIFIC_VALUE, &fuzzing_opt.channel, 1);
+		}
+		else
+		{
+			add_default_ie_data(&beacon, 45);
+			ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
+			if(ie_data)
+			{
+				memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
+				ie_data[2] = fuzzing_opt.channel;
+				ie_id = ie_data[0];
+				ie_len = ie_data[1];
+				add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+				free(ie_data);
+			}
+		}
+	}
 
 	create_frame_fuzzing_ie(&beacon, "Beacon", beacon_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 

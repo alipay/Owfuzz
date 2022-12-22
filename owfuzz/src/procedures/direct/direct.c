@@ -1358,7 +1358,7 @@ void handle_p2p(struct packet *pkt,struct ether_addr bssid, struct ether_addr sm
 
                         sleep(1);
 
-                        //if(fuzzing_opt->test_type == 3) fuzzing_opt->p2p_frame_test = 1;  
+                        //if(fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P) fuzzing_opt->p2p_frame_test = 1;  
 
                     }
                     else if(fuzzing_opt->source_group_owner_intent < fuzzing_opt->target_group_owner_intent)
@@ -1383,7 +1383,7 @@ void handle_p2p(struct packet *pkt,struct ether_addr bssid, struct ether_addr sm
 
                         sleep(1);
 
-                        //if(fuzzing_opt->test_type == 3) fuzzing_opt->p2p_frame_test = 1;  
+                        //if(fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P) fuzzing_opt->p2p_frame_test = 1;  
                     }
 
 
@@ -1455,7 +1455,7 @@ void handle_p2p(struct packet *pkt,struct ether_addr bssid, struct ether_addr sm
 
                     sleep(1);
 
-                    //if(fuzzing_opt->test_type == 3) fuzzing_opt->p2p_frame_test = 1;
+                    //if(fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P) fuzzing_opt->p2p_frame_test = 1;
                 }
          
             }

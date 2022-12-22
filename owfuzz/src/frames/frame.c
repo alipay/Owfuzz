@@ -38,6 +38,8 @@ struct packet get_frame(uint8_t frame_type,  struct ether_addr bssid, struct eth
 		pkt.channel = recv_pkt->channel;
 	}
 
+	fuzzing_opt.current_frame = frame_type;
+
 	switch(frame_type)
 	{
 	// management
@@ -426,7 +428,7 @@ int check_alive_by_ping()
 			}	
 		}
 	
-		usleep(500);
+		usleep(5000);
 	}
 
 	if(ec)
@@ -445,9 +447,23 @@ int check_alive_by_deauth(struct packet *pkt)
 	struct ieee_hdr *hdr;
 
 	hdr = (struct ieee_hdr *) pkt->data;
-	if(hdr->type == IEEE80211_TYPE_DEAUTH || hdr->type == IEEE80211_TYPE_DISASSOC)
+	if(hdr->type == IEEE80211_TYPE_DEAUTH)
 	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "Deauth/Disassoc Dos!!!.");
+		fuzz_logger_log(FUZZ_LOG_DEBUG, "Deauth Dos!!!.");
+		return 0;
+	}
+
+	return 1;
+}
+
+int check_alive_by_disassoc(struct packet *pkt)
+{
+	struct ieee_hdr *hdr;
+
+	hdr = (struct ieee_hdr *) pkt->data;
+	if(hdr->type == IEEE80211_TYPE_DISASSOC)
+	{
+		fuzz_logger_log(FUZZ_LOG_DEBUG, "Disassoc Dos!!!.");
 		return 0;
 	}
 
@@ -462,7 +478,7 @@ int check_alive_by_pkts(struct ether_addr smac)
 
 	//if(MAC_MATCHES(smac, SE_NULLMAC)) return 1;
 
-	if(MAC_MATCHES(smac, fuzzing_opt.source_addr)) return 1;
+	if(MAC_MATCHES(smac, fuzzing_opt.target_addr)) return 1;
 
 	current_time = time(NULL);
 	if(current_time - fuzzing_opt.last_recv_pkt_time > CHECK_ALIVE_TIME)

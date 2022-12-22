@@ -23,6 +23,7 @@
 
 #include "../80211_packet_common.h"
 
+
 #define DEFAULT_BEACON_INTERVAL	0x64
 
 
@@ -49,6 +50,7 @@ void load_beacon_state();
 struct packet create_beacon(struct ether_addr bssid, char adhoc, char* ssid);
 struct packet create_ap_beacon(struct ether_addr bssid, char adhoc, enum AP_AUTH_TYPE auth_type);
 void create_beacon_fuzzing_ies(struct packet *pkt);
+
 
 
 #endif 

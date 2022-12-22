@@ -41,10 +41,17 @@
 #define AP_MODE "ap"
 #define STA_MODE "sta"
 #define MITM_MODE "mitm"
+#define P2P_MODE "p2p"
+#define AWDL_MODE "awdl"
+#define MESH_MODE "mesh"
 
 #define FUZZ_WORK_MODE_AP	0
 #define FUZZ_WORK_MODE_STA	1
 #define FUZZ_WORK_MODE_MITM 2
+#define FUZZ_WORK_MODE_P2P 3
+#define FUZZ_WORK_MODE_AWDL 4
+#define FUZZ_WORK_MODE_MESH 5
+
 
 #define PRE_KEY "88888888"
 
@@ -57,7 +64,7 @@
 #define PING_ECHO_DATA "\x49\xde\x05\x00\x00\x00\x00\x00\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f\x30\x31\x32\x33\x34\x35\x36\x37"
 #define PING_ECHO_DATA_LEN 48
 
-#define CHECK_ALIVE_TIME 5
+#define CHECK_ALIVE_TIME 15
 
 
 enum AP_AUTH_TYPE

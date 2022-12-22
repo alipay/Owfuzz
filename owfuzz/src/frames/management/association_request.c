@@ -106,6 +106,7 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
   uint8_t *ie_data;
   uint8_t ie_len;
   uint8_t ie_id;
+  int i,j;
 
   create_ieee_hdr(&pkt, IEEE80211_TYPE_ASSOCREQ, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
@@ -120,64 +121,78 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
 
   pkt.len += 4;
 
-  add_ie_data(&pkt, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
-  //add_default_ie_data(&pkt, 1);
+	for(i=0; i<fuzzing_opt.cur_sfs_cnt; i++)
+	{
+		if(fuzzing_opt.sfs[i].frame_type == IEEE80211_TYPE_ASSOCREQ && fuzzing_opt.sfs[i].bset == 1)
+		{
+			for(j=0; j<fuzzing_opt.sfs[i].ie_cnt; j++)
+			{
+				add_ie_data(&pkt, fuzzing_opt.sfs[i].sies[j].id, SPECIFIC_VALUE, fuzzing_opt.sfs[i].sies[j].value, fuzzing_opt.sfs[i].sies[j].len);
+			}
+			break;
+		}
+	}
 
-  if(fuzzing_opt.channel <= 14)
-  {
-    ie_data = IE_1_SUPPORTTED_RATES_B;
-    ie_id = ie_data[0];
-    ie_len = ie_data[1];
-    add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_ASSOCREQ)
+	{
+    add_ie_data(&pkt, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+    //add_default_ie_data(&pkt, 1);
 
-    add_default_ie_data(&pkt, 45);
-  }
-  else
-  {
-    ie_data = IE_1_SUPPORTTED_RATES_N_AC;
-    ie_id = ie_data[0];
-    ie_len = ie_data[1];
-    add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-
-    add_default_ie_data(&pkt, 45);
-    ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
-    if(ie_data)
+    if(fuzzing_opt.channel <= 14)
     {
-      memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
-      ie_data[2] = fuzzing_opt.channel;
+      ie_data = IE_1_SUPPORTTED_RATES_B;
       ie_id = ie_data[0];
       ie_len = ie_data[1];
       add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-      free(ie_data);
+
+      add_default_ie_data(&pkt, 45);
     }
-  }
+    else
+    {
+      ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+      ie_id = ie_data[0];
+      ie_len = ie_data[1];
+      add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 
-  add_default_ie_data(&pkt, 50);
+      add_default_ie_data(&pkt, 45);
+      ie_data = (uint8_t*)malloc(strlen(IE_61_HT_INFORMATION));
+      if(ie_data)
+      {
+        memcpy(ie_data, IE_61_HT_INFORMATION, strlen(IE_61_HT_INFORMATION));
+        ie_data[2] = fuzzing_opt.channel;
+        ie_id = ie_data[0];
+        ie_len = ie_data[1];
+        add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+        free(ie_data);
+      }
+    }
 
-  if(fuzzing_opt.auth_type == WPA3)
-  {
-    add_default_ie_data(&pkt, 32);
-    ie_data = IE_48_RSN_WPA3_AES_ASSOCREQ;
-    ie_id = ie_data[0];
-    ie_len = ie_data[1];
-    add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
-    add_default_ie_data(&pkt, 127);
-  }
-  else if(fuzzing_opt.auth_type==WPA2_PSK_TKIP_AES || fuzzing_opt.auth_type==WPA2_PSK_AES || fuzzing_opt.auth_type==WPA2_PSK_TKIP || 
-  fuzzing_opt.auth_type==WPA_PSK_TKIP_AES || fuzzing_opt.auth_type==WPA_PSK_AES || fuzzing_opt.auth_type==WPA_PSK_TKIP)
-  {
-    add_default_ie_data(&pkt, 32);
-  }
-  else if(fuzzing_opt.auth_type==SHARE_WEP)
-  {
+    add_default_ie_data(&pkt, 50);
+
+    if(fuzzing_opt.auth_type == WPA3)
+    {
+      add_default_ie_data(&pkt, 32);
+      ie_data = IE_48_RSN_WPA3_AES_ASSOCREQ;
+      ie_id = ie_data[0];
+      ie_len = ie_data[1];
+      add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
+      add_default_ie_data(&pkt, 127);
+    }
+    else if(fuzzing_opt.auth_type==WPA2_PSK_TKIP_AES || fuzzing_opt.auth_type==WPA2_PSK_AES || fuzzing_opt.auth_type==WPA2_PSK_TKIP || 
+    fuzzing_opt.auth_type==WPA_PSK_TKIP_AES || fuzzing_opt.auth_type==WPA_PSK_AES || fuzzing_opt.auth_type==WPA_PSK_TKIP)
+    {
+      add_default_ie_data(&pkt, 32);
+    }
+    else if(fuzzing_opt.auth_type==SHARE_WEP)
+    {
+
+    }
+    else if(fuzzing_opt.auth_type==OPEN_WEP || fuzzing_opt.auth_type==OPEN_NONE)
+    {
+      
+    }
 
   }
-  else if(fuzzing_opt.auth_type==OPEN_WEP || fuzzing_opt.auth_type==OPEN_NONE)
-  {
-    
-  }
-
-  
 
   create_frame_fuzzing_ie(&pkt, "Association Request", association_request_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);
 
