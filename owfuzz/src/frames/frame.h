@@ -83,8 +83,8 @@ int check_alive_by_disassoc(struct packet *pkt);
 int check_alive_by_pkts(struct ether_addr smac);
 
 void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len);
-void hex_to_ascii_hex(unsigned char *phex, unsigned char *pascii, unsigned int len);
-int str_to_hex(unsigned char *pascii, unsigned char *phex, unsigned int len);
+void hex_to_ascii_hex(unsigned char *phex, char *pascii, unsigned int len);
+int str_to_hex(char *pascii, unsigned char *phex, unsigned int len);
 void log_pkt(int log_level, struct packet *pkt);
 void save_fuzzing_state();
 void load_fuzzing_state();

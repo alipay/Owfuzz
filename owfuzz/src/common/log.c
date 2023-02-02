@@ -24,7 +24,7 @@
 #include "log.h"
 
 static int default_level = FUZZ_LOG_INFO;
-static char *log_file = "fuzzer.log";
+// static char *log_file = "fuzzer.log";
 static int log_fd = INVALID_FD;
 void fuzz_logger_init(int log_level, char *file_log)
 {

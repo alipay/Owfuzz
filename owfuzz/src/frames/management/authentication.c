@@ -54,18 +54,6 @@ IE_EXT_93_ANTI_CLOGGING_TOKEN_CONTAINER,
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
-
 static int ieee2020 = 0;
 static int ieee2020_id = 0;
 
@@ -92,7 +80,6 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
     struct SAE_Commit *sae_commit, *rsae_commit;
     struct SAE_Confirm *sae_confirm, *rsae_confirm;
     int rlen = 0;
-    int i,j;
 
     create_ieee_hdr(&authentication, IEEE80211_TYPE_AUTH, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 

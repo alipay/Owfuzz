@@ -36,18 +36,6 @@ static uint8_t ie_extension[50] = {
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
-
 static int ieee2020 = 0;
 static int ieee2020_id = 0;
 

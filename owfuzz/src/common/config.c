@@ -18,6 +18,7 @@
 ****************************************************************************/
 #include "config.h"
 #include "log.h"
+#include "../../linux_wifi/control/kismet_wifi_control.h"
 
 FILE * owfuzz_config_open(char* cfg_file)
 {
@@ -49,8 +50,8 @@ FILE * owfuzz_config_open(char* cfg_file)
 int owfuzz_config_get_sta_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
 {
     FILE *fp1;
-    unsigned char buf[256];
-    unsigned char frame_name[64];
+    char buf[256] = {0};
+    char frame_name[64] = {0};
     int rc = 0,onoff;
     int frm_idx = 0;
 
@@ -301,8 +302,8 @@ int owfuzz_config_get_sta_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
 int owfuzz_config_get_ap_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
 {
     FILE *fp1;
-    unsigned char buf[256];
-    unsigned char frame_name[64];
+    char buf[256] = {0};
+    char frame_name[64] = {0};
     int rc = 0,onoff;
     int frm_idx = 0;
 
@@ -551,7 +552,7 @@ int owfuzz_config_get_ap_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
 int owfuzz_config_get_interfaces(fuzzing_option *fo)
 {
     FILE *fp1;
-    unsigned char buf[256];
+    char buf[256] = {0};
     int rc = 0;
     int cnt = 0;
 
@@ -584,7 +585,7 @@ int owfuzz_config_get_interfaces(fuzzing_option *fo)
                 if(rc)
                 {
                     memset(fo->ois[cnt].osdep_iface_out, 0, sizeof(fo->ois[cnt].osdep_iface_out));
-                    sscanf(buf, "%[^=]=%d", fo->ois[cnt].osdep_iface_out, &fo->ois[cnt].channel);
+                    sscanf(buf, "%[^=]=%hhd", fo->ois[cnt].osdep_iface_out, &fo->ois[cnt].channel);
                     if(cnt == 0)
                         fo->channel = fo->ois[cnt].channel;
                     cnt++;
@@ -606,7 +607,7 @@ int owfuzz_config_get_interfaces(fuzzing_option *fo)
 int owfuzz_config_get_channels(fuzzing_option *fo)
 {
     FILE *fp1;
-    unsigned char buf[256];
+    char buf[256] = {0};
     char iface[64] = {0};
     int rc = 0;
     int cnt = 0;
@@ -640,7 +641,7 @@ int owfuzz_config_get_channels(fuzzing_option *fo)
                 if(rc)
                 {
                     memset(iface, 0, sizeof(iface));
-                    sscanf(buf, "%[^=]=%d", iface, &fo->ois[cnt].channel);
+                    sscanf(buf, "%[^=]=%hhd", iface, &fo->ois[cnt].channel);
                     fuzz_logger_log(FUZZ_LOG_DEBUG,"interface: %s, channel: %d\n", iface, fo->ois[cnt].channel);
                     cnt++;
                 }
@@ -661,9 +662,9 @@ int owfuzz_config_get_channels(fuzzing_option *fo)
 int owfuzz_config_get_macs(fuzzing_option *fo)
 {
     FILE *fp1;
-    unsigned char buf[512];
-    char option_name[256];
-    char option_value[256];
+    char buf[512] = {0};
+    char option_name[256] = {0};
+    char option_value[256] = {0};
     int rc = 0;
 
     fp1 = owfuzz_config_open(NULL);
@@ -726,9 +727,9 @@ int owfuzz_config_get_macs(fuzzing_option *fo)
 int owfuzz_config_get_fuzzing_option(fuzzing_option *fo)
 {
     FILE *fp1;
-    unsigned char buf[512];
-    char option_name[256];
-    char option_value[256];
+    char buf[512] = {0};
+    char option_name[256] = {0};
+    char option_value[256] = {0};
     int rc = 0;
 
     fp1 = owfuzz_config_open(NULL);
@@ -884,8 +885,8 @@ int owfuzz_config_get_fuzzing_option(fuzzing_option *fo)
 int owfuzz_config_get_ies_status(fuzzing_option *fo)
 {
     FILE *fp1;
-    unsigned char buf[256];
-    unsigned char ie_type[64];
+    char buf[256] = {0};
+    char ie_type[64] = {0};
     int rc = 0,onoff;
     int ie_idx = 0;
 
@@ -946,8 +947,8 @@ int owfuzz_config_get_ies_status(fuzzing_option *fo)
 int owfuzz_config_get_ext_ies_status(fuzzing_option *fo)
 {
     FILE *fp1;
-    unsigned char buf[256];
-    unsigned char ie_type[64];
+    char buf[256] = {0};
+    char ie_type[64] = {0};
     int rc = 0,onoff;
     int ie_idx = 0;
 

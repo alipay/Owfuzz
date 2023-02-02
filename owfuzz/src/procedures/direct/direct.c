@@ -18,12 +18,14 @@
 ****************************************************************************/
 
 #include "direct.h"
+#include "../../linux_wifi/control/kismet_wifi_control.h"
+#include "../../fuzz_control.h"
 #include "../../frames/frame.h"
 #include "../../frames/management/ies_creator.h"
 
 #define P2P_BEACON_SSID "DIRECT-owf-fuzzing"
 
-#define VENDOR_SPECIFIC_P2P "\x50\x6f\x9a\x09\x02\x02\x00\x25\x00\x0d\x1b\x00\x66\xf6\x5c\x49\x1e\xb4\x01\x88\x00\x0a\x00\x50\xf2\x04\x00\x05\x00\x10\x11\x00\x06\x4e\x45\x58\x20\x33\x54"
+#define VENDOR_SPECIFIC_P2P (uint8_t *)"\x50\x6f\x9a\x09\x02\x02\x00\x25\x00\x0d\x1b\x00\x66\xf6\x5c\x49\x1e\xb4\x01\x88\x00\x0a\x00\x50\xf2\x04\x00\x05\x00\x10\x11\x00\x06\x4e\x45\x58\x20\x33\x54"
 #define VENDOR_SPECIFIC_P2P_LEN 39
 
 extern fuzzing_option fuzzing_opt;
@@ -212,7 +214,6 @@ void p2p_ie_fuzzing(struct packet *pkt, char *frame_name, uint8_t p2p_attrs[])
     uint8_t attr_id=0;
     struct p2p_ie p2pie = {0};
     struct ie_data attrdata; 
-    char *p = NULL;
 
     // P2P fuzzing
     p2pie.id = 0xDD;
@@ -250,8 +251,7 @@ void p2p_ie_fuzzing(struct packet *pkt, char *frame_name, uint8_t p2p_attrs[])
 void wps_ie_fuzzing(struct packet *pkt, char *frame_name)
 {
     struct wps_ie wpsie = {0};
-    char *p = NULL;
-    int i;
+    unsigned char *p = NULL;
 
     uint16_t data_element_type[] = {WPS_VERSION, WPS_REQUEST_TYPE, WPS_CONFIG_METHODS, WPS_UUID_E, WPS_PRIMARY_DEVICE_TYPE, WPS_RF_BANDS, 
     WPS_ASSOCIATION_STATE, WPS_CONFIGURATION_ERROR, WPS_DEVICE_PASSWORD_ID, WPS_MANUFACTURER, WPS_MODEL_NAME, WPS_MODEL_NUMBER, WPS_DEVICE_NAME, WPS_VENDOR_EXTENSION};
@@ -268,7 +268,7 @@ void wps_ie_fuzzing(struct packet *pkt, char *frame_name)
     pkt->len += sizeof(wpsie);
 
     srandom(time(NULL));
-    add_data_element_tlv_fuzzing_data(pkt, p, data_element_type[random() % (sizeof(data_element_type)/sizeof(data_element_type[0]))]);
+    add_data_element_tlv_fuzzing_data(pkt, (struct vendor_specific_ie *)p, data_element_type[random() % (sizeof(data_element_type)/sizeof(data_element_type[0]))]);
 
     /*for(i=0; i< sizeof(data_element_type)/sizeof(data_element_type[0]); i++)
     {
@@ -289,10 +289,7 @@ struct packet create_p2p_beacon(struct ether_addr bssid, struct ether_addr smac,
     uint8_t *ie_data;
 	uint8_t ie_len;
 	uint8_t ie_id;
-    uint8_t attr_id=0;
-    struct p2p_ie p2pie = {0};
-    struct ie_data attrdata;
-
+    
     create_ieee_hdr(&beacon, IEEE80211_TYPE_BEACON, 'a', 0, dmac, smac, bssid, SE_NULLMAC, 0);
 
 	bf = (struct beacon_fixed *) (beacon.data + beacon.len);
@@ -312,18 +309,18 @@ struct packet create_p2p_beacon(struct ether_addr bssid, struct ether_addr smac,
 
     beacon.len += sizeof(struct beacon_fixed);
 
-    add_ie_data(&beacon, 0, SPECIFIC_VALUE, P2P_BEACON_SSID, strlen(P2P_BEACON_SSID));
+    add_ie_data(&beacon, 0, SPECIFIC_VALUE, (uint8_t*)P2P_BEACON_SSID, strlen(P2P_BEACON_SSID));
 	
 	if(fuzzing_opt.channel <= 14)
 	{
-		ie_data = IE_1_SUPPORTTED_RATES_B;
+		ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_B;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 	}
 	else
 	{
-		ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+		ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_N_AC;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -381,12 +378,12 @@ struct packet create_p2p_association_request(struct ether_addr bssid, struct eth
 
     pkt.len += 4;
 
-    add_ie_data(&pkt, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+    add_ie_data(&pkt, 0, SPECIFIC_VALUE, (uint8_t*)fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
     //add_default_ie_data(&pkt, 1);
 
     if(fuzzing_opt.channel <= 14)
     {
-        ie_data = IE_1_SUPPORTTED_RATES_B;
+        ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_B;
         ie_id = ie_data[0];
         ie_len = ie_data[1];
         add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -395,7 +392,7 @@ struct packet create_p2p_association_request(struct ether_addr bssid, struct eth
     }
     else
     {
-        ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+        ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_N_AC;
         ie_id = ie_data[0];
         ie_len = ie_data[1];
         add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -418,7 +415,7 @@ struct packet create_p2p_association_request(struct ether_addr bssid, struct eth
     if(fuzzing_opt.auth_type == WPA3)
     {
         add_default_ie_data(&pkt, 32);
-        ie_data = IE_48_RSN_WPA3_AES_ASSOCREQ;
+        ie_data = (uint8_t*)IE_48_RSN_WPA3_AES_ASSOCREQ;
         ie_id = ie_data[0];
         ie_len = ie_data[1];
         add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -484,7 +481,7 @@ struct packet create_default_p2p_probe_request(struct ether_addr bssid, struct e
 
     create_ieee_hdr(&pkt, IEEE80211_TYPE_PROBEREQ, 'a', 0, SE_BROADCASTMAC, smac, SE_BROADCASTMAC, SE_NULLMAC, 0);
 
-    add_ie_data(&pkt, 0, SPECIFIC_VALUE, "DIRECT-", strlen("DIRECT-"));
+    add_ie_data(&pkt, 0, SPECIFIC_VALUE, (uint8_t*)"DIRECT-", strlen("DIRECT-"));
 
     add_default_ie_data(&pkt, 1); // supported rates
 
@@ -500,7 +497,7 @@ struct packet create_p2p_probe_request(struct ether_addr bssid, struct ether_add
 
     create_ieee_hdr(&pkt, IEEE80211_TYPE_PROBEREQ, 'a', 0, SE_BROADCASTMAC, smac, SE_BROADCASTMAC, SE_NULLMAC, 0);
 
-    add_ie_data(&pkt, 0, SPECIFIC_VALUE, "DIRECT-", strlen("DIRECT-"));
+    add_ie_data(&pkt, 0, SPECIFIC_VALUE, (uint8_t*)"DIRECT-", strlen("DIRECT-"));
 
     add_default_ie_data(&pkt, 1);
 
@@ -539,7 +536,7 @@ struct packet create_p2p_probe_response(struct ether_addr bssid, struct ether_ad
 	bf->capabilities |= 0x0010;
 	pkt.len += sizeof(struct beacon_fixed);
 
-    add_ie_data(&pkt, 0, SPECIFIC_VALUE, "DIRECT-", strlen("DIRECT-"));   // ssid
+    add_ie_data(&pkt, 0, SPECIFIC_VALUE, (uint8_t*)"DIRECT-", strlen("DIRECT-"));   // ssid
 
     add_default_ie_data(&pkt, 1); // supported rates
 
@@ -591,9 +588,6 @@ struct packet create_p2p_action_invitation_request(struct ether_addr bssid, stru
     struct packet pkt = {0};
     struct action_fixed *af;
 
-    struct vendor_specific_ie vs_ie_p2p = {0};
-    struct vendor_specific_ie vs_ie_wps = {0};
-
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
     af = (struct action_fixed*)(pkt.data + pkt.len);
@@ -629,9 +623,6 @@ struct packet create_p2p_action_invitation_response(struct ether_addr bssid, str
 {
     struct packet pkt = {0};
     struct action_fixed *af;
-
-    struct vendor_specific_ie vs_ie_p2p = {0};
-    struct vendor_specific_ie vs_ie_wps = {0};
 
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
@@ -669,9 +660,6 @@ struct packet create_p2p_action_device_discoverability_request(struct ether_addr
     struct packet pkt = {0};
     struct action_fixed *af;
 
-    struct vendor_specific_ie vs_ie_p2p = {0};
-    struct vendor_specific_ie vs_ie_wps = {0};
-
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
     af = (struct action_fixed*)(pkt.data + pkt.len);
@@ -707,9 +695,6 @@ struct packet create_p2p_action_device_discoverability_response(struct ether_add
 {
     struct packet pkt = {0};
     struct action_fixed *af;
-
-    struct vendor_specific_ie vs_ie_p2p = {0};
-    struct vendor_specific_ie vs_ie_wps = {0};
 
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
@@ -747,7 +732,6 @@ struct packet create_p2p_action_provision_discovery_request(struct ether_addr bs
     struct packet pkt = {0};
     struct action_fixed *af;
 
-    struct vendor_specific_ie vs_ie_p2p = {0};
     struct vendor_specific_ie vs_ie_wps = {0};
 
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
@@ -790,7 +774,7 @@ struct packet create_p2p_action_provision_discovery_request(struct ether_addr bs
     pkt.len += sizeof(vs_ie_wps);
 
     // config methods
-    add_data_element_tlv_fuzzing_data(&pkt, pkt.data + pkt.len,  0x1008);
+    add_data_element_tlv_fuzzing_data(&pkt, (struct vendor_specific_ie *)(pkt.data + pkt.len),  0x1008);
 
     return pkt; 
 
@@ -800,7 +784,6 @@ struct packet create_p2p_action_provision_discovery_response(struct ether_addr b
 {
     struct packet pkt = {0};
     struct action_fixed *af;
-    struct vendor_specific_ie vs_ie_wps = {0};
 
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
@@ -838,9 +821,6 @@ struct packet create_p2p_action_go_negotiation_request(struct ether_addr bssid, 
     struct packet pkt = {0};
     struct action_fixed *af;
 
-    struct vendor_specific_ie vs_ie_p2p = {0};
-    struct vendor_specific_ie vs_ie_wps = {0};
-
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
     af = (struct action_fixed*)(pkt.data + pkt.len);
@@ -876,9 +856,6 @@ struct packet create_p2p_action_go_negotiation_response(struct ether_addr bssid,
 {
     struct packet pkt = {0};
     struct action_fixed *af;
-
-    struct vendor_specific_ie vs_ie_p2p = {0};
-    struct vendor_specific_ie vs_ie_wps = {0};
 
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
@@ -917,9 +894,6 @@ struct packet create_p2p_action_go_negotiation_confirmation(struct ether_addr bs
     struct packet pkt = {0};
     struct action_fixed *af;
 
-    struct vendor_specific_ie vs_ie_p2p = {0};
-    struct vendor_specific_ie vs_ie_wps = {0};
-
     create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 
     af = (struct action_fixed*)(pkt.data + pkt.len);
@@ -954,7 +928,7 @@ struct packet create_p2p_action_go_negotiation_confirmation(struct ether_addr bs
 int is_p2p_beacon(struct packet *pkt)
 {
     struct ieee_hdr *hdr;
-    char *pie;
+    char *pie = NULL;
 
     hdr = (struct ieee_hdr *) pkt->data;
     if(hdr->type == IEEE80211_TYPE_BEACON)
@@ -962,7 +936,7 @@ int is_p2p_beacon(struct packet *pkt)
         if(pkt->len < sizeof(struct ieee_hdr)+12+2)
             return 0;
 
-        pie = pkt->data + sizeof(struct ieee_hdr) + 12;
+        pie = (char*)(pkt->data + sizeof(struct ieee_hdr) + 12);
         if(pie[0] != 0)
             return 0;
         
@@ -976,7 +950,7 @@ int is_p2p_beacon(struct packet *pkt)
 int is_p2p_probe(struct packet *pkt)
 {
     struct ieee_hdr *hdr;
-    char *pie;
+    char *pie = NULL;
 
     hdr = (struct ieee_hdr *) pkt->data;
     if(hdr->type == IEEE80211_TYPE_PROBEREQ)
@@ -984,7 +958,7 @@ int is_p2p_probe(struct packet *pkt)
         if(pkt->len < sizeof(struct ieee_hdr)+2)
             return 0;
 
-        pie = pkt->data + sizeof(struct ieee_hdr);
+        pie = (char*)(pkt->data + sizeof(struct ieee_hdr));
         if(pie[0] != 0)
             return 0;
         
@@ -996,7 +970,7 @@ int is_p2p_probe(struct packet *pkt)
         if(pkt->len < sizeof(struct ieee_hdr)+12+2)
             return 0;
 
-        pie = pkt->data + sizeof(struct ieee_hdr) + 12;
+        pie = (char*)pkt->data + sizeof(struct ieee_hdr) + 12;
         if(pie[0] != 0)
             return 0;
         
@@ -1010,7 +984,7 @@ int is_p2p_probe(struct packet *pkt)
 int is_p2p_action(struct packet *pkt)
 {
     struct ieee_hdr *hdr;
-    char *action;
+    unsigned char *action = NULL;
 
     hdr = (struct ieee_hdr *) pkt->data;
     if(hdr->type == IEEE80211_TYPE_ACTION)
@@ -1040,7 +1014,6 @@ void check_p2p_attributes(struct packet *pkt, struct ether_addr bssid, struct et
     uint8_t *ies = NULL;
     int attlen = 0;
     int left = 0;
-    int tmp = 0;
 
     hdr = (struct ieee_hdr *) pkt->data;
     if(hdr->type == IEEE80211_TYPE_ACTION)
@@ -1252,10 +1225,9 @@ void check_p2p_attributes(struct packet *pkt, struct ether_addr bssid, struct et
 
 void handle_p2p(struct packet *pkt,struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, fuzzing_option *fuzzing_opt)
 {
-    struct ieee_hdr *hdr;
-    struct action_fixed *af;
+    struct ieee_hdr *hdr = NULL;
 	struct packet fuzz_pkt = {0};
-    char *action;
+    unsigned char *action = NULL;
     struct ether_addr resp_mac = {0};
     struct ether_addr resp_bssid = {0};
     char szerr[256] = {0};
@@ -1544,7 +1516,6 @@ void handle_p2p(struct packet *pkt,struct ether_addr bssid, struct ether_addr sm
 struct packet create_p2p_action(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt)
 {
     struct packet pkt = {0};
-    uint8_t action_type = 0;
     static uint8_t action_types[] ={P2P_GO_NEGOTIATION_REQUEST, P2P_GO_NEGOTIATION_RESPONSE, P2P_GO_NEGOTIATION_CONFIRMATION, 
     P2P_INVITATION_REQUEST, P2P_INVITATION_RESPONSE, 
     P2P_DEVICE_DISCOVERABILITY_REQUEST,P2P_DEVICE_DISCOVERABILITY_RESPONSE,
@@ -1595,7 +1566,6 @@ struct packet create_p2p_action(struct ether_addr bssid, struct ether_addr smac,
 struct packet get_p2p_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
 	struct packet pkt = {0};
-	struct ieee_hdr *hdr;
 
 	fuzzing_opt.fuzz_pkt_num++;
 

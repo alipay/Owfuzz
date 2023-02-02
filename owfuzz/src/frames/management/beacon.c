@@ -64,18 +64,6 @@ IE_EXT_16_SERVICE_HASH,
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
-
 static int ieee2020 = 0;
 static int ieee2020_id = 0;
 
@@ -138,14 +126,14 @@ struct packet create_ap_beacon(struct ether_addr bssid, char adhoc, enum AP_AUTH
 
 	if(fuzzing_opt.channel <= 14)
 	{
-		ie_data = IE_1_SUPPORTTED_RATES_B;
+		ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_B;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 	}
 	else
 	{
-		ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+		ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_N_AC;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -176,7 +164,7 @@ struct packet create_ap_beacon(struct ether_addr bssid, char adhoc, enum AP_AUTH
 	add_default_ie_data(&beacon, 50);
 	add_default_ie_data(&beacon, 42);
 
-	ie_data = IE_74_OVERLAPPING_BSS_SCAN_PARAMETERS_DATA;
+	ie_data = (uint8_t*)IE_74_OVERLAPPING_BSS_SCAN_PARAMETERS_DATA;
 	ie_id = ie_data[0];
 	ie_len = ie_data[1];
 	add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -194,49 +182,49 @@ struct packet create_ap_beacon(struct ether_addr bssid, char adhoc, enum AP_AUTH
 	case SHARE_WEP:
 		break;
 	case WPA_PSK_TKIP:
-		ie_data = IE_221_VENDOR_SPECIFIC_WPA_TKIP;
+		ie_data = (uint8_t*)IE_221_VENDOR_SPECIFIC_WPA_TKIP;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		break;
 	case WPA_PSK_AES:
-		ie_data = IE_221_VENDOR_SPECIFIC_WPA_AES;
+		ie_data = (uint8_t*)IE_221_VENDOR_SPECIFIC_WPA_AES;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		break;
 	case WPA_PSK_TKIP_AES:
-		ie_data = IE_221_VENDOR_SPECIFIC_WPA_TKIP_AES;
+		ie_data = (uint8_t*)IE_221_VENDOR_SPECIFIC_WPA_TKIP_AES;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		break;
 	case WPA2_PSK_TKIP:
-		ie_data = IE_48_RSN_WPA2_TKIP;
+		ie_data = (uint8_t*)IE_48_RSN_WPA2_TKIP;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		break;
 	case WPA2_PSK_AES:
-		ie_data = IE_48_RSN_WPA2_AES;
+		ie_data = (uint8_t*)IE_48_RSN_WPA2_AES;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		break;
 	case WPA2_PSK_TKIP_AES:
-		ie_data = IE_48_RSN_WPA2_TKIP_AES;
+		ie_data = (uint8_t*)IE_48_RSN_WPA2_TKIP_AES;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		break;
 	case EAP_8021X:
-		ie_data = IE_48_RSN_8021X_BEACON;
+		ie_data = (uint8_t*)IE_48_RSN_8021X_BEACON;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		break;
 	case WPA3:
-		ie_data = IE_48_RSN_WPA3_AES_BEACON;
+		ie_data = (uint8_t*)IE_48_RSN_WPA3_AES_BEACON;
 		ie_id = ie_data[0];
 		ie_len = ie_data[1];
 		add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -256,7 +244,7 @@ struct packet create_ap_beacon(struct ether_addr bssid, char adhoc, enum AP_AUTH
 	ie_len = ie_data[1];
 	add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);*/
 	
-	ie_data = IE_221_VENDOR_SPECIFIC_WMM_WME;
+	ie_data = (uint8_t*)IE_221_VENDOR_SPECIFIC_WMM_WME;
 	ie_id = ie_data[0];
 	ie_len = ie_data[1];
 	add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -323,18 +311,18 @@ struct packet create_beacon(struct ether_addr bssid, char adhoc, char *ssid)
 
 	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_BEACON)
 	{
-		add_ie_data(&beacon, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+		add_ie_data(&beacon, 0, SPECIFIC_VALUE, (uint8_t*)fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
 		
 		if(fuzzing_opt.channel <= 14)
 		{
-			ie_data = IE_1_SUPPORTTED_RATES_B;
+			ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_B;
 			ie_id = ie_data[0];
 			ie_len = ie_data[1];
 			add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 		}
 		else
 		{
-			ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+			ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_N_AC;
 			ie_id = ie_data[0];
 			ie_len = ie_data[1];
 			add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);

@@ -17,6 +17,7 @@
 * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
 ****************************************************************************/
 
+#include <string.h>
 #include "pcap_log.h"
 #include "log.h"
 
@@ -29,11 +30,11 @@ int open_pcap()
 	char *ptr;
 
 	if(readlink("/proc/self/exe", owfuzz_path,sizeof(owfuzz_path)) <= 0)
-		return;
+		return 0;
     
 	ptr = strrchr(owfuzz_path, '/');
 	if(!ptr)
-		return;
+		return 0;
 
 	ptr[1] = '\0';
 	strcat(owfuzz_path, "poc.pcap");
@@ -46,7 +47,7 @@ int open_pcap()
     }
 
     pcap_fp = pcap_dump_open(p, owfuzz_path);
-    if(NULL==pcap_fp)
+    if(NULL == pcap_fp)
     {
         fuzz_logger_log(FUZZ_LOG_ERR, "pcap_dump_open failed");
         return 0;

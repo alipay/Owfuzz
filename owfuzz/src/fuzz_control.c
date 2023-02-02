@@ -179,7 +179,6 @@ void* test_bad_frame(void *param)
 	uint16_t next_seqno = 0;
 	struct ieee_hdr *hdr;
 	uint8_t dsflags;
-	int t=0;
 	struct beacon_fixed *bf;
   	static uint64_t internal_timestamp = 0;
 
@@ -458,7 +457,7 @@ void sniff_ies(struct packet *pkt)
 				tlv_len=0;
 				tlv_type=0;
 				tlv_value = NULL;
-				nread = read_tlv8(&abuf, offset, &tlv_type, &tlv_len, &tlv_value);
+				nread = read_tlv8(&abuf, offset, &tlv_type, &tlv_len, (const unsigned char**)&tlv_value);
 				//printf("type: %d, len: %d\n", tlv_type, tlv_len);
 				if(nread)
 				{
@@ -537,7 +536,6 @@ void* oi_receive_thread_ex(void *param)
 int init_ex()
 {
 	int i= 0;
-	char szerr[256];
 
 	ow_queue_init(&owq);
 	pthread_mutex_init(&owq_mutex, NULL);
@@ -1195,7 +1193,7 @@ int is_target_beacon(struct packet *pkt, struct ether_addr bssid, fuzzing_option
     hdr = (struct ieee_hdr *) pkt->data;
     if(hdr->type == IEEE80211_TYPE_BEACON)
     {
-        ies = pkt->data + sizeof(struct ieee_hdr) + sizeof(struct beacon_fixed);
+        ies = (char*)(pkt->data + sizeof(struct ieee_hdr) + sizeof(struct beacon_fixed));
         left = pkt->len - sizeof(struct ieee_hdr) - sizeof(struct beacon_fixed);
         if(MAC_MATCHES(bssid, fuzzing_opt->target_addr))
         {
@@ -1235,7 +1233,7 @@ int clone_ap(struct packet *pkt, fuzzing_option *fuzzing_opt)
         fuzzing_opt->mitm_ap_bcn.len = pkt->len;
         memcpy(fuzzing_opt->mitm_ap_bcn.data, pkt->data, pkt->len);
 
-        ies = fuzzing_opt->mitm_ap_bcn.data + sizeof(struct ieee_hdr) + sizeof(struct beacon_fixed);
+        ies = (char *)(fuzzing_opt->mitm_ap_bcn.data + sizeof(struct ieee_hdr) + sizeof(struct beacon_fixed));
         left = fuzzing_opt->mitm_ap_bcn.len - sizeof(struct ieee_hdr) - sizeof(struct beacon_fixed);
         while(left>0)
         {
@@ -1473,7 +1471,6 @@ void handle_mitm(struct packet *pkt,struct ether_addr bssid, struct ether_addr s
     struct ieee_hdr *hdr;
 
     hdr = (struct ieee_hdr *) pkt->data;
-	struct packet ack_pkt;
 
 	fuzz_logger_log(FUZZ_LOG_DEBUG, "mitm --> fuzzing_opt->mitm_state: %d..", fuzzing_opt->mitm_state);
 
@@ -1521,6 +1518,7 @@ void handle_mitm(struct packet *pkt,struct ether_addr bssid, struct ether_addr s
 			{
 				if(MAC_MATCHES(smac, fuzzing_opt->source_addr))
 					fuzzing_opt->mitm_state == 0;
+					
 				else if(MAC_MATCHES(dmac, fuzzing_opt->source_addr))
 				{
 					if(fuzzing_opt->mitm_state == 2)
@@ -1640,15 +1638,14 @@ void* start_fuzzing(void *param)
 	uint16_t recv_seq_ctrl = 0;
 
 	struct timeval tv;
-	uint64_t current_time;
-	uint64_t pass_time;
-	uint64_t ping_pass_time;
+	// uint64_t current_time;
+	// uint64_t pass_time;
+	// uint64_t ping_pass_time;
 
 	char szerr[64] = {0};
 
 	struct packet fuzz_pkt = {0};
 
-	struct timeval tv2;
 	uint64_t current_time2;
 	uint64_t pass_time2;
 	uint64_t fuzz_current_time2;
@@ -1661,11 +1658,11 @@ void* start_fuzzing(void *param)
 	fuzzing_opt->wpa_s = WPA_DISCONNECTED;
 
  	gettimeofday(&tv,NULL);
-	pass_time = tv.tv_sec;
+	// pass_time = tv.tv_sec;
 	pass_time2 = tv.tv_sec*1000 + tv.tv_usec/1000;
 	fuzz_pass_time2 = tv.tv_sec*1000 + tv.tv_usec/1000;
 
-	ping_pass_time = tv.tv_sec;
+	// ping_pass_time = tv.tv_sec;
 	fuzzing_opt->last_recv_pkt_time = 0;
 
 	if(fuzzing_opt->test_type == 2)
@@ -1725,7 +1722,7 @@ void* start_fuzzing(void *param)
 		memset(frame_name, 0, sizeof(frame_name));
 
 		gettimeofday(&tv,NULL);
-		current_time = tv.tv_sec;
+		// current_time = tv.tv_sec;
 		
 		//gettimeofday(&tv2,NULL);
 		current_time2 = tv.tv_sec*1000 + tv.tv_usec/1000;
@@ -2209,7 +2206,7 @@ void* start_fuzzing(void *param)
 
 			if(FUZZ_WORK_MODE_MESH == fuzzing_opt->fuzz_work_mode)
 			{
-				handle_mesh(&pkt, bssid, smac, dmac, tmac, &fuzzing_opt);
+				handle_mesh(&pkt, bssid, smac, dmac, tmac, fuzzing_opt);
 			}
 
 			if((memcmp(&dmac.ether_addr_octet,&fuzzing_opt->target_addr.ether_addr_octet, 6) == 0 && memcmp(&smac.ether_addr_octet,&fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 ) ||
@@ -2583,9 +2580,7 @@ void save_packet(struct packet *pkt)
 
 int fuzzing(int argc, char* argv[])
 {
-	int ret;
 	unsigned char c = 0;
-	struct packet pkt;
 	char *fuzz_mode = NULL;
 	char *interface = NULL;
 	char *target_ssid = NULL;
@@ -2599,7 +2594,6 @@ int fuzzing(int argc, char* argv[])
 	char *channel_str = NULL;
 	char *target_ip = NULL;
 	int channel = 0;
-	int seq_num = 0;
 	int tid;
 	int test_type = -1;
 	int log_level = -1;
@@ -2928,7 +2922,6 @@ int fuzzing(int argc, char* argv[])
 void print_status(struct packet *pkt)
 {
 	int i;
-	char szerr[256] = {0};
 
 	printf("\033c");
 	printf("\033[0;0H");
@@ -2985,7 +2978,7 @@ void print_status(struct packet *pkt)
 		}
 		else if(fuzzing_opt.fuzz_work_mode == FUZZ_WORK_MODE_P2P)
 		{
-			printf("\tFuzzing Type: %d (p2p frame testing)\t\tFrame types: %d\n", fuzzing_opt.test_type, sizeof(p2p_frames)/sizeof(p2p_frames[0]));
+			printf("\tFuzzing Type: %d (p2p frame testing)\t\tFrame types: %lu\n", fuzzing_opt.test_type, sizeof(p2p_frames)/sizeof(p2p_frames[0]));
 		}
 	}
 
@@ -3003,7 +2996,7 @@ void print_status(struct packet *pkt)
 	printf("\tCurrent Frame: %02X\t\t\tCurrent IE: %d\t\tCurrent IE EXT: %d\n\tFuzzing Step: %d\t\t\t\tFuzzing Value Step: %d\n", fuzzing_opt.current_frame,
 	fuzzing_opt.current_ie, fuzzing_opt.current_ie_ext, fuzzing_opt.fuzzing_step, fuzzing_opt.fuzzing_value_step);
 
-	printf("\tFuzzing Frame Count: %lu\t\t\tPoC Count: \033[22;31m%lu\033[22;39m\n", fuzzing_opt.fuzz_pkt_num, fuzzing_opt.fuzz_exp_pkt_cnt);
+	printf("\tFuzzing Frame Count: %u\t\t\tPoC Count: \033[22;31m%u\033[22;39m\n", fuzzing_opt.fuzz_pkt_num, fuzzing_opt.fuzz_exp_pkt_cnt);
 
 
 	if(pkt){

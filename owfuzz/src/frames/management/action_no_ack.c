@@ -34,7 +34,6 @@ struct packet create_action_no_ack(struct ether_addr bssid, struct ether_addr sm
 {
     struct ieee_hdr *hdr;
     struct packet pkt = {0};
-    uint8_t rlen = 0;
 
     pkt = create_action(bssid, smac, dmac, 0, recv_pkt);
     hdr = (struct ieee_hdr *) pkt.data;

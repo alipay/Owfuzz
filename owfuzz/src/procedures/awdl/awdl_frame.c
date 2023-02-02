@@ -91,24 +91,24 @@ const char *awdl_tlv_as_str(uint8_t type) {
 struct packet create_action_awdl(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
 	struct packet pkt={0};
-	struct ieee_hdr *hdr;
+	// struct ieee_hdr *hdr;
     struct awdl_action *aa, *a;
-    struct buf abuf = {0};
-    uint8_t *tlvs;
-    int tlvs_len;
-    uint8_t tlv_type;
-    uint16_t tlv_len;
-    uint8_t tlv_value[255];
-    int offset;
-    int nread;
+    // struct buf abuf = {0};
+    // uint8_t *tlvs;
+    // int tlvs_len;
+    // uint8_t tlv_type;
+    // uint16_t tlv_len;
+    // uint8_t tlv_value[255];
+    // int offset;
+    // int nread;
 	int i;
 
-    hdr = (struct ieee_hdr *) recv_pkt->data;
+    // hdr = (struct ieee_hdr *) recv_pkt->data;
     aa = (struct awdl_action *)(recv_pkt->data + sizeof(struct ieee_hdr));
-    tlvs = recv_pkt->data + sizeof(struct ieee_hdr) + sizeof(struct awdl_action);
-    tlvs_len = recv_pkt->len - sizeof(struct ieee_hdr) - sizeof(struct awdl_action);
-    abuf.data = tlvs;
-    abuf.len = tlvs_len;
+    // tlvs = recv_pkt->data + sizeof(struct ieee_hdr) + sizeof(struct awdl_action);
+    // tlvs_len = recv_pkt->len - sizeof(struct ieee_hdr) - sizeof(struct awdl_action);
+    // abuf.data = tlvs;
+    // abuf.len = tlvs_len;
 
 	create_ieee_hdr(&pkt, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
 

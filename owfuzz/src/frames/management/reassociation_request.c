@@ -17,6 +17,7 @@
 * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
 ****************************************************************************/
 
+#include "ies_creator.h"
 #include "reassociation_request.h"
 
 extern fuzzing_option fuzzing_opt;
@@ -69,18 +70,6 @@ IE_EXT_88_MSCS_DESCRIPTOR,
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
-
 static int ieee2020 = 0;
 static int ieee2020_id = 0;
 
@@ -115,7 +104,7 @@ struct packet create_reassociation_request(struct ether_addr bssid, struct ether
     memcpy(ap_addr, &fuzzing_opt.target_addr, sizeof(fuzzing_opt.target_addr));
     pkt.len += sizeof(fuzzing_opt.target_addr);
 
-    add_ie_data(&pkt, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+    add_ie_data(&pkt, 0, SPECIFIC_VALUE, (uint8_t*)fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
     add_default_ie_data(&pkt, 1);
 
     create_frame_fuzzing_ie(&pkt, "Reassociation Request", reassociation_request_ie_ieee2020, &ieee2020, &ieee2020_id, ie_extension, &ie_extension_id, &fuzzing_step, &fuzzing_value_step);

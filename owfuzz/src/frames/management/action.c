@@ -35,25 +35,15 @@ static uint8_t ie_extension[50] = {
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
-
 static int ieee2020 = 0;
 static int ieee2020_id = 0;
 
-uint8_t action_category[24] = {WLAN_ACTION_SPECTRUM_MGMT, WLAN_ACTION_QOS, WLAN_ACTION_DLS, WLAN_ACTION_BLOCK_ACK, WLAN_ACTION_PUBLIC, WLAN_ACTION_RADIO_MEASUREMENT, WLAN_ACTION_FT,
-                                WLAN_ACTION_HT,WLAN_ACTION_SA_QUERY,WLAN_ACTION_PROTECTED_DUAL,WLAN_ACTION_WNM,WLAN_ACTION_UNPROTECTED_WNM,WLAN_ACTION_TDLS,WLAN_ACTION_MESH,WLAN_ACTION_MULTIHOP,WLAN_ACTION_SELF_PROTECTED,
-                                WLAN_ACTION_DMG,WLAN_ACTION_WMM,WLAN_ACTION_FST,WLAN_ACTION_ROBUST_AV_STREAMING,WLAN_ACTION_UNPROTECTED_DMG,WLAN_ACTION_VHT,WLAN_ACTION_FILS,WLAN_ACTION_VENDOR_SPECIFIC_PROTECTED,
-                                WLAN_ACTION_VENDOR_SPECIFIC};
+uint8_t action_category[25] = {
+    WLAN_ACTION_SPECTRUM_MGMT, WLAN_ACTION_QOS, WLAN_ACTION_DLS, WLAN_ACTION_BLOCK_ACK, WLAN_ACTION_PUBLIC, WLAN_ACTION_RADIO_MEASUREMENT, WLAN_ACTION_FT, // 7
+    WLAN_ACTION_HT, WLAN_ACTION_SA_QUERY, WLAN_ACTION_PROTECTED_DUAL, WLAN_ACTION_WNM, WLAN_ACTION_UNPROTECTED_WNM, WLAN_ACTION_TDLS, WLAN_ACTION_MESH, // 7
+    WLAN_ACTION_MULTIHOP, WLAN_ACTION_SELF_PROTECTED, WLAN_ACTION_DMG, WLAN_ACTION_WMM, WLAN_ACTION_FST, WLAN_ACTION_ROBUST_AV_STREAMING, // 6
+    WLAN_ACTION_UNPROTECTED_DMG, WLAN_ACTION_VHT, WLAN_ACTION_FILS, WLAN_ACTION_VENDOR_SPECIFIC_PROTECTED, WLAN_ACTION_VENDOR_SPECIFIC // 5
+    };
 
 void save_action_state()
 {
@@ -69,9 +59,9 @@ void load_action_state()
 struct packet create_action(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt)
 {
     struct packet action = {0};
-    struct action_fixed *af;
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     uint8_t rlen = 0;
+    struct action_fixed *af;
 
     create_ieee_hdr(&action, IEEE80211_TYPE_ACTION, 'a', 0x013A, dmac, smac, bssid, SE_NULLMAC, 0);
     m_action = (struct ieee80211_mgmt *)action.data;
@@ -283,8 +273,7 @@ void create_action_ies(struct packet *pkt)
 
 void handle_action_spectrum(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {Measurement_Request, Measurement_Report, TPC_Request, TPC_Report, Channel_Switch_Announcement} ac;
-    struct action_fixed *af;
+    static enum action_code {Measurement_Request, Measurement_Report, TPC_Request, TPC_Report, Channel_Switch_Announcement};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[5] = {Measurement_Request, Measurement_Report, TPC_Request,  TPC_Report/*, Channel_Switch_Announcement*/};
 
@@ -320,8 +309,7 @@ void handle_action_spectrum(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_qos(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {ADDTS_Request, ADDTS_Response, DELTS, Schedule, QoS_Map_Configure, ADDTS_Reserve_Request, ADDTS_Reserve_Response} ac;
-    struct action_fixed *af;
+    static enum action_code {ADDTS_Request, ADDTS_Response, DELTS, Schedule, QoS_Map_Configure, ADDTS_Reserve_Request, ADDTS_Reserve_Response};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[7] = {ADDTS_Request, ADDTS_Response, DELTS, Schedule, QoS_Map_Configure, ADDTS_Reserve_Request, ADDTS_Reserve_Response};
 
@@ -360,8 +348,7 @@ void handle_action_qos(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_dls(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {DLS_Request, DLS_Response, DLS_Teardown} ac;
-    struct action_fixed *af;
+    static enum action_code {DLS_Request, DLS_Response, DLS_Teardown};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[3] = {DLS_Request, DLS_Response, DLS_Teardown};
 
@@ -392,8 +379,7 @@ void handle_action_dls(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_block_ack(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {ADDBA_Request, ADDBA_Response, DELBA} ac;
-    struct action_fixed *af;
+    static enum action_code {ADDBA_Request, ADDBA_Response, DELBA};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[3] = {ADDBA_Request, ADDBA_Response, DELBA};
 
@@ -429,8 +415,8 @@ void handle_action_public(struct packet *pkt, struct packet *recv_pkt)
         GAS_Comeback_Request, GAS_Comeback_Response, TDLS_Discovery_Response, Location_Track_Notification, QAB_Request_frame, QAB_Response_frame, QMF_Policy,
         QMF_Policy_Change, QLoad_Request, QLoad_Report, HCCA_TXOP_Advertisement, HCCA_TXOP_Response, Public_Key, Channel_Availability_Query, Channel_Schedule_Management,
         Contact_Verification_Signal, GDD_Enablement_Request, GDD_Enablement_Response, Network_Channel_Control, White_Space_Map_Announcement, Fine_Timing_Measurement_Request,
-        Fine_Timing_Measurement} ac;
-    struct action_fixed *af;
+        Fine_Timing_Measurement};
+
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[34] = {x20_40_BSS_Coexistence_Management, DSE_enablement, DSE_deenablement, DSE_Registered_Location_Announcement, Extended_Channel_Switch_Announcement,
         DSE_measurement_request, DSE_measurement_report, Measurement_Pilot, DSE_power_constraint, Vendor_Specific, GAS_Initial_Request, GAS_Initial_Response,
@@ -528,8 +514,7 @@ void handle_action_public(struct packet *pkt, struct packet *recv_pkt)
 void handle_action_radio_measurement(struct packet *pkt, struct packet *recv_pkt)
 {
     static enum action_code {Radio_Measurement_Request, Radio_Measurement_Report, Link_Measurement_Request, Link_Measurement_Report, Neighbor_Report_Request,
-        Neighbor_Report_Response} ac;
-    struct action_fixed *af;
+        Neighbor_Report_Response};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[6] = {Radio_Measurement_Request, Radio_Measurement_Report, Link_Measurement_Request, Link_Measurement_Report, Neighbor_Report_Request,
         Neighbor_Report_Response};
@@ -566,8 +551,7 @@ void handle_action_radio_measurement(struct packet *pkt, struct packet *recv_pkt
 
 void handle_action_ft(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {FT_Request_frames = 1, FT_Response_frames, FT_Confirm_frames, FT_Ack_frames} ac;
-    struct action_fixed *af;
+    static enum action_code {FT_Request_frames = 1, FT_Response_frames, FT_Confirm_frames, FT_Ack_frames};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[4] = {FT_Request_frames, FT_Response_frames, FT_Confirm_frames, FT_Ack_frames};
 
@@ -599,8 +583,7 @@ void handle_action_ft(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_ht(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {Notify_Channel_Width, SM_Power_Save, PSMP, Set_PCO_Phase, CSI, Noncompressed_Beamforming, Compressed_Beamforming, ASEL_Indices_Feedback} ac;
-    struct action_fixed *af;
+    static enum action_code {Notify_Channel_Width, SM_Power_Save, PSMP, Set_PCO_Phase, CSI, Noncompressed_Beamforming, Compressed_Beamforming, ASEL_Indices_Feedback};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[8] = {Notify_Channel_Width, SM_Power_Save, PSMP, Set_PCO_Phase, CSI, Noncompressed_Beamforming, Compressed_Beamforming, ASEL_Indices_Feedback};
 
@@ -641,8 +624,7 @@ void handle_action_ht(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_sa_query(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {SA_Query_Request, SA_Query_Response} ac;
-    struct action_fixed *af;
+    static enum action_code {SA_Query_Request, SA_Query_Response};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[2] = {SA_Query_Request, SA_Query_Response};
 
@@ -674,8 +656,7 @@ void handle_action_protected_dual(struct packet *pkt, struct packet *recv_pkt)
     Protected_GAS_Comeback_Request, Protected_GAS_Comeback_Response, QAB_Request = 16, QAB_Response, Protected_QMF_Policy, Protected_QMF_Policy_Change,
     Protected_QLoad_Request, Protected_QLoad_Report, Protected_HCCA_TXOP_Advertisement, Protected_HCCA_TXOP_Response, Protected_Channel_Availability_Query = 25,
     Protected_Channel_Schedule_Management, Protected_Contact_Verification_Signal, Protected_GDD_Enablement_Request, Protected_GDD_Enablement_Response,
-    Protected_Network_Channel_Control, Protected_White_Space_Map_Announcement} ac;
-    struct action_fixed *af;
+    Protected_Network_Channel_Control, Protected_White_Space_Map_Announcement};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[26] = {Protected_DSE_Enablement, Protected_DSE_Deenablement, Protected_Extended_Channel_Switch_Announcement, Protected_Measurement_Request,
     Protected_Measurement_Report, Protected_DSE_Power_Constraint, Protected_Vendor_Specific, Protected_GAS_Initial_Request, Protected_GAS_Initial_Response,
@@ -760,8 +741,8 @@ void handle_action_wnm(struct packet *pkt, struct packet *recv_pkt)
     BSS_Transition_Management_Query, BSS_Transition_Management_Request, BSS_Transition_Management_Response, FMS_Request, FMS_Response, Collocated_Interference_Request,
     Collocated_Interference_Report, TFS_Request, TFS_Response, TFS_Notify, WNM_Sleep_Mode_Request, WNM_Sleep_Mode_Response, TIM_Broadcast_Request, TIM_Broadcast_Response,
     QoS_Traffic_Capability_Update, Channel_Usage_Request, Channel_Usage_Response, DMS_Request, DMS_Response, Timing_Measurement_Request, WNM_Notification_Request,
-    WNM_Notification_Response, WNM_Notify_Response} ac;
-    struct action_fixed *af;
+    WNM_Notification_Response, WNM_Notify_Response};
+
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[29] = {Event_Request, Event_Report, Diagnostic_Request, Diagnostic_Report, Location_Configuration_Request, Location_Configuration_Response,
     BSS_Transition_Management_Query, BSS_Transition_Management_Request, BSS_Transition_Management_Response, FMS_Request, FMS_Response, Collocated_Interference_Request,
@@ -848,8 +829,7 @@ void handle_action_wnm(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_unprotected_wnm(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {TIM, Timing_Measurement} ac;
-    struct action_fixed *af;
+    static enum action_code {TIM, Timing_Measurement};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[2] = {TIM, Timing_Measurement};
 
@@ -879,8 +859,7 @@ void handle_action_unprotected_wnm(struct packet *pkt, struct packet *recv_pkt)
 void handle_action_tdls(struct packet *pkt, struct packet *recv_pkt)
 {
     static enum action_code {TDLS_Setup_Request, TDLS_Setup_Response, TDLS_Setup_Confirm, TDLS_Teardown, TDLS_Peer_Traffic_Indication, TDLS_Channel_Switch_Request,
-        TDLS_Channel_Switch_Response, TDLS_Peer_PSM_Request, TDLS_Peer_PSM_Response, TDLS_Peer_Traffic_Response, TDLS_Discovery_Request} ac;
-    struct action_fixed *af;
+        TDLS_Channel_Switch_Response, TDLS_Peer_PSM_Request, TDLS_Peer_PSM_Response, TDLS_Peer_Traffic_Response, TDLS_Discovery_Request};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[10] = {TDLS_Setup_Request, TDLS_Setup_Response, TDLS_Setup_Confirm, TDLS_Teardown, TDLS_Peer_Traffic_Indication, TDLS_Channel_Switch_Request,
         TDLS_Channel_Switch_Response, TDLS_Peer_PSM_Request, TDLS_Peer_PSM_Response, TDLS_Peer_Traffic_Response, TDLS_Discovery_Request};
@@ -929,8 +908,7 @@ void handle_action_tdls(struct packet *pkt, struct packet *recv_pkt)
 void handle_action_mesh(struct packet *pkt, struct packet *recv_pkt)
 {
     static enum action_code {Mesh_Link_Metric_Report, HWMP_Mesh_Path_Selection, Gate_Announcement, Congestion_Control_Notification, MCCA_Setup_Request, MCCA_Setup_Reply,
-        MCCA_Advertisement_Request, MCCA_Advertisement, MCCA_Teardown, TBTT_Adjustment_Request, TBTT_Adjustment_Response} ac;
-    struct action_fixed *af;
+        MCCA_Advertisement_Request, MCCA_Advertisement, MCCA_Teardown, TBTT_Adjustment_Request, TBTT_Adjustment_Response};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[11] = {Mesh_Link_Metric_Report, HWMP_Mesh_Path_Selection, Gate_Announcement, Congestion_Control_Notification, MCCA_Setup_Request, MCCA_Setup_Reply,
         MCCA_Advertisement_Request, MCCA_Advertisement, MCCA_Teardown, TBTT_Adjustment_Request, TBTT_Adjustment_Response};
@@ -978,8 +956,7 @@ void handle_action_mesh(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_multihop(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {Proxy_Update, Proxy_Update_Confirmation} ac;
-    struct action_fixed *af;
+    static enum action_code {Proxy_Update, Proxy_Update_Confirmation};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[2] = {Proxy_Update, Proxy_Update_Confirmation};
 
@@ -1007,8 +984,7 @@ void handle_action_multihop(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_self_protected(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {Mesh_Peering_Open, Mesh_Peering_Confirm, Mesh_Peering_Close, Mesh_Group_Key_Inform, Mesh_Group_Key_Acknowledge} ac;
-    struct action_fixed *af;
+    static enum action_code {Mesh_Peering_Open, Mesh_Peering_Confirm, Mesh_Peering_Close, Mesh_Group_Key_Inform, Mesh_Group_Key_Acknowledge};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[5] = {Mesh_Peering_Open, Mesh_Peering_Confirm, Mesh_Peering_Close, Mesh_Group_Key_Inform, Mesh_Group_Key_Acknowledge};
 
@@ -1044,8 +1020,7 @@ void handle_action_dmg(struct packet *pkt, struct packet *recv_pkt)
     static enum action_code {Power_Save_Configuration_Request, Power_Save_Configuration_Response, Information_Request, Information_Response, Handover_Request, Handover_Response,
         DTP_Request, DTP_Response, Relay_Search_Request, Relay_Search_Response, Multi_Relay_Channel_Measurement_Request, Multi_Relay_Channel_Measurement_Report,
         RLS_Request, RLS_Response, RLS_Announcement, RLS_Teardown, Relay_Ack_Request, Relay_Ack_Response, TPA_Request, TPA_Response, TPA_Report, ROC_Request,
-        ROC_Response} ac;
-    struct action_fixed *af;
+        ROC_Response};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[23] = {Power_Save_Configuration_Request, Power_Save_Configuration_Response, Information_Request, Information_Response, Handover_Request, Handover_Response,
         DTP_Request, DTP_Response, Relay_Search_Request, Relay_Search_Response, Multi_Relay_Channel_Measurement_Request, Multi_Relay_Channel_Measurement_Report,
@@ -1117,10 +1092,9 @@ void handle_action_dmg(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_wmm(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {a} ac;
-    struct action_fixed *af;
+    static enum action_code {a};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
-    static uint8_t action_codes[6] = {0,1,2,3,4,5,6};
+    static uint8_t action_codes[7] = {0,1,2,3,4,5,6};
 
     m_action = (struct ieee80211_mgmt *)pkt->data;
     if(recv_pkt)
@@ -1137,8 +1111,7 @@ void handle_action_wmm(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_fst(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {FST_Setup_Request, FST_Setup_Response, FST_Teardown, FST_Ack_Request, FST_Ack_Response, On_channel_Tunnel_Request} ac;
-    struct action_fixed *af;
+    static enum action_code {FST_Setup_Request, FST_Setup_Response, FST_Teardown, FST_Ack_Request, FST_Ack_Response, On_channel_Tunnel_Request};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[6] = {FST_Setup_Request, FST_Setup_Response, FST_Teardown, FST_Ack_Request, FST_Ack_Response, On_channel_Tunnel_Request};
 
@@ -1173,8 +1146,7 @@ void handle_action_fst(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_robust_av_streaming(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {SCS_Request, SCS_Response, Group_Membership_Request, Group_Membership_Response} ac;
-    struct action_fixed *af;
+    static enum action_code {SCS_Request, SCS_Response, Group_Membership_Request, Group_Membership_Response};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[4] = {SCS_Request, SCS_Response, Group_Membership_Request, Group_Membership_Response};
 
@@ -1206,8 +1178,7 @@ void handle_action_robust_av_streaming(struct packet *pkt, struct packet *recv_p
 
 void handle_action_unprotected_dmg(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {Announce, BRP} ac;
-    struct action_fixed *af;
+    static enum action_code {Announce, BRP};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[2] = {Announce, BRP};
 
@@ -1238,8 +1209,7 @@ void handle_action_unprotected_dmg(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_vht(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {VHT_Compressed_Beamforming, Group_ID_Management, Operating_Mode_Notification} ac;
-    struct action_fixed *af;
+    static enum action_code {VHT_Compressed_Beamforming, Group_ID_Management, Operating_Mode_Notification};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[3] = {VHT_Compressed_Beamforming, Group_ID_Management, Operating_Mode_Notification};
 
@@ -1271,8 +1241,7 @@ void handle_action_vht(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_fils(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {a} ac;
-    struct action_fixed *af;
+    static enum action_code {a};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[3] = {0,1,2};
 
@@ -1292,8 +1261,7 @@ void handle_action_fils(struct packet *pkt, struct packet *recv_pkt)
 
 void handle_action_vendor_specific_protected(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {a} ac;
-    struct action_fixed *af;
+    static enum action_code {a};
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[3] = {0,1,2};
 
@@ -1312,8 +1280,6 @@ void handle_action_vendor_specific_protected(struct packet *pkt, struct packet *
 
 void handle_action_vendor_specific(struct packet *pkt, struct packet *recv_pkt)
 {
-    static enum action_code {a} ac;
-    struct action_fixed *af;
     struct ieee80211_mgmt *m_action, *mgmt_action; 
     static uint8_t action_codes[3] = {0,1,2};
 

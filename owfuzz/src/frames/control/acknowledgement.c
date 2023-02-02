@@ -23,7 +23,6 @@ struct packet create_ack(struct ether_addr dmac)
 {
     struct packet pkt = {0};
     struct ieee_hdr *hdr;
-    uint8_t rlen = 0;
 
     hdr = (struct ieee_hdr *) pkt.data;
     hdr->type = IEEE80211_TYPE_ACK;

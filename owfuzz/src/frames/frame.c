@@ -31,7 +31,6 @@ extern fuzzing_option fuzzing_opt;
 struct packet get_frame(uint8_t frame_type,  struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
 	struct packet pkt = {0};
-	struct ieee_hdr *hdr;
 
 	//fuzzing_opt.fuzz_pkt_num++;
 	if(recv_pkt){
@@ -272,9 +271,9 @@ unsigned short calc_chksum(unsigned short *buff,int len)
 
 int pack_icmp(uint8_t *buff, int seq)
 {
-    int i, packsize;
-	struct icmphdr *icmp_h;
-	struct timeval *tval;
+    int packsize = 0;
+	struct icmphdr *icmp_h = NULL;
+	struct timeval *tval = NULL;
 
 	icmp_h = (struct icmp*)buff;
 	icmp_h->type = ICMP_ECHO;
@@ -307,11 +306,11 @@ void tv_sub(struct timeval *out,struct timeval *in)
 
 int unpack_icmp(uint8_t *buff, int len, struct timeval tvrecv)
 {
-    int i,iphdrlen;
-	struct iphdr *ip_h;
-	struct icmphdr *icmp_h;
-	struct timeval *tvsend;
-	double rtt;
+    int iphdrlen = 0;
+	struct iphdr *ip_h = NULL;
+	struct icmphdr *icmp_h = NULL;
+	struct timeval *tvsend = NULL;
+	// double rtt;
 
 	ip_h = (struct iphdr *)buff;
 	iphdrlen = ip_h->ihl << 2;    			     
@@ -328,7 +327,7 @@ int unpack_icmp(uint8_t *buff, int len, struct timeval tvrecv)
 	{
 		tvsend = (struct timeval *)((uint8_t*)icmp_h + sizeof(struct icmphdr));
 		tv_sub(&tvrecv, tvsend);
-		rtt = tvrecv.tv_sec * 1000 + tvrecv.tv_usec / 1000;
+		// rtt = tvrecv.tv_sec * 1000 + tvrecv.tv_usec / 1000;
 
 		return 1;
 	}
@@ -376,13 +375,12 @@ int check_alive_by_ping()
 {
 	uint8_t sendpacket[PING_PACKET_SIZE];
 	uint8_t recvpacket[PING_PACKET_SIZE];
-	int datalen = 56;
 	int nsend = 0, nreceived = 0;
 	struct sockaddr_in from = {0};
 	struct timeval tvrecv = {0};
-	int size = 8 * 1024;
 	int packetsize = 0;
-    int n = 0, fromlen = 0;
+    int n = 0;
+	socklen_t fromlen = 0;
 	static uint16_t seq = 0;
 	int ec = 0;
 
@@ -553,7 +551,7 @@ void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len)
     }
 }
 
-void hex_to_ascii_hex(unsigned char *phex, unsigned char *pascii, unsigned int len)
+void hex_to_ascii_hex(unsigned char *phex, char *pascii, unsigned int len)
 {
     unsigned char nibble[2];
     unsigned int i,j;
@@ -579,7 +577,7 @@ void hex_to_ascii_hex(unsigned char *phex, unsigned char *pascii, unsigned int l
     }
 }
 
-int str_to_hex(unsigned char *pascii, unsigned char *phex, unsigned int len)
+int str_to_hex(char *pascii, unsigned char *phex, unsigned int len)
 {
 	int i = 0;
 	int str_len;
@@ -587,7 +585,7 @@ int str_to_hex(unsigned char *pascii, unsigned char *phex, unsigned int len)
 	unsigned char s1, s2;
 
 	if(pascii == NULL || phex == NULL || len == 0)
-		return;
+		return 0;
 
 	str_len = strlen(pascii)/4;
 	if(str_len)
@@ -623,7 +621,7 @@ void log_pkt(int log_level, struct packet *pkt)
 	if(log_level > fuzzing_opt.log_level)
 		return;
 
-	if(pkt->data == NULL || pkt->len <= 0)
+	if(pkt->data[0] == 0 || pkt->len <= 0)
 		return;
 
 	hdr = (struct ieee_hdr *) pkt->data;

@@ -912,8 +912,6 @@ static default_ie default_ie_data[256] = {
 
 volatile IEEE_80211_VERSION g_current_version = IEEE_80211_UNKNOWN;
 
-static struct ie_creator ies_creator[256];
-
 int add_attribute_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi, uint8_t id)
 {
     struct attribute_tlv atlv = {0};
@@ -1353,8 +1351,9 @@ void create_frame_fuzzing_ie(struct packet *pkt,
 {
 	struct ie_data iedata = {0};
 
-    if(frame_ies[0] == 0xff)
+    if(frame_ies[0] == 0xff) {
         return;
+    }
 
 	if( *ieee_ver == 1)
 	{
@@ -1469,14 +1468,18 @@ void create_frame_ies(struct packet *pkt,
 {
 	struct ie_data iedata = {0};
 
-    if(frame_ie_ieee1999[0] == 0xff)
+    if(frame_ie_ieee1999[0] == 0xff) {
         *ieee1999 = 1;
-    if(frame_ie_ieee2007[0] == 0xff)
+    }
+    if(frame_ie_ieee2007[0] == 0xff) {
         *ieee2007 = 1;
-    if(frame_ie_ieee2012[0] == 0xff)
+    }
+    if(frame_ie_ieee2012[0] == 0xff) {
         *ieee2012 = 1;
-    if(frame_ie_ieee2016[0] == 0xff)
+    }
+    if(frame_ie_ieee2016[0] == 0xff) {
         *ieee2016 = 1;
+    }
 
 	if(*ieee1999 == 1 && *ieee2007 == 1 && *ieee2012 == 1 && *ieee2016 == 1)
 	{
@@ -1666,7 +1669,6 @@ void create_frame_fuzzing_ies(struct packet *pkt,
     int ie_array_size;
     int ie_cnt = 0;
     int i;
-    int ieee_id;
     int max_ies = 5;
 
     create_frame_ies(pkt, 
@@ -1782,6 +1784,8 @@ uint8_t get_ie_status(uint8_t ie_type, uint8_t is_ext)
                 return fuzzing_opt.ext_ies_status[i].enabled;
         }
     }
+
+    return 0;
 }
 
 void init_ie_creator()

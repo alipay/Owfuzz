@@ -27,7 +27,8 @@ uint8_t association_response_ie_ieee2007[10] = {1, 50, 12, 221, 0};
 uint8_t association_response_ie_ieee2012[30] = {1, 50, 12, 53, 65, 70, 54, 55, 58, 56, 45, 61, 72, 74, 127, 90, 95, 110, 221, 0};
 uint8_t association_response_ie_ieee2016[50] = {1, 50, 12, 53, 65, 70, 54, 55, 58, 56, 45, 61, 72, 74, 127, 90, 95, 110, 181, 158, 
                                                 148, 151, 170, 52, 191, 192, 199, 255, 221, 0};
-uint8_t association_response_ie_ieee2020[50] = {1, 50, 12, 53, 65, 70, 54, 55, 58, 56, 45, 61, 72, 74, 127, 90, 95, 110, 181, 158, 148, 151, 170, 52, 191, 192, 199,
+uint8_t association_response_ie_ieee2020[54] = {
+	1, 50, 12, 53, 65, 70, 54, 55, 58, 56, 45, 61, 72, 74, 127, 90, 95, 110, 181, 158, 148, 151, 170, 52, 191, 192, 199,
 255,
 255,
 255,
@@ -75,18 +76,6 @@ IE_EXT_88_MSCS_DESCRIPTOR,
 
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
-
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
 
 static int ieee2020 = 0;
 static int ieee2020_id = 0;

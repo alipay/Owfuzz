@@ -61,18 +61,6 @@ IE_EXT_16_SERVICE_HASH,
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
-
 static int ieee2020 = 0;
 static int ieee2020_id = 0;
 
@@ -141,17 +129,17 @@ struct packet create_probe_response(struct ether_addr bssid, struct ether_addr d
 		}
 		else
 		{
-			add_ie_data(&beacon, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+			add_ie_data(&beacon, 0, SPECIFIC_VALUE, (uint8_t*)fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
 			if(fuzzing_opt.channel <= 14)
 			{
-				ie_data = IE_1_SUPPORTTED_RATES_B;
+				ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_B;
 				ie_id = ie_data[0];
 				ie_len = ie_data[1];
 				add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
 			}
 			else
 			{
-				ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+				ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_N_AC;
 				ie_id = ie_data[0];
 				ie_len = ie_data[1];
 				add_ie_data(&beacon, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);

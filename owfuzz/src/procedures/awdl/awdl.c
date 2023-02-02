@@ -1,5 +1,5 @@
 #include "awdl.h"
-
+#include "../../fuzz_control.h"
 #include "awdl_frame.h"
 #include "wire.h"
 
@@ -9,9 +9,13 @@
 llc_hdr
 awdl_data_hdr
 */
-struct llc_hdr awdl_data_llc = {0xaa, 0xaa, 0x03, 0x00, 0x17, 0xf2, 0x08, 0x00};
-                                              /*Seq num*/
-struct awdl_data awdl_data_hdr = {0x03, 0x04, 0x00, 0x00, 0x00, 0x00, 0x86, 0xdd};
+
+// sizeof llc_hdr is 2 * sizeof(uint8_t) + 3 * sizeof(uint8_t) + sizeof(uint16_t) = 2 * 1 + 3 * 1 + 2 = 7
+struct llc_hdr awdl_data_llc = {0xaa, 0xaa, 0x03, {0x00, 0x17, 0xf2}, 0x0800};
+/*Seq num*/
+
+// sizeof awdl_data is 4 * sizeof(uint16_t) = 2bytes => 8bytes 
+struct awdl_data awdl_data_hdr = {0x0304, 0x0000, 0x0000, 0x86dd};
 
 
 
@@ -42,7 +46,7 @@ int is_awdl_frame(struct packet *pkt)
 
 void handle_awdl(struct packet *pkt,struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, fuzzing_option *fuzzing_opt)
 {
-    struct ieee_hdr *hdr;
+    // struct ieee_hdr *hdr;
     struct awdl_action *aa;
     struct buf abuf = {0};
     uint8_t *tlvs;
@@ -54,7 +58,7 @@ void handle_awdl(struct packet *pkt,struct ether_addr bssid, struct ether_addr s
     int nread;
     struct packet awdl_packet = {0};
 
-    hdr = (struct ieee_hdr *) pkt->data;
+    // hdr = (struct ieee_hdr *) pkt->data;
     aa = (struct awdl_action *)(pkt->data + sizeof(struct ieee_hdr));
     tlvs = pkt->data + sizeof(struct ieee_hdr) + sizeof(struct awdl_action);
     tlvs_len = pkt->len - sizeof(struct ieee_hdr) - sizeof(struct awdl_action);
@@ -70,7 +74,7 @@ void handle_awdl(struct packet *pkt,struct ether_addr bssid, struct ether_addr s
     offset = 0;
     while(tlvs_len)
     {
-        nread = read_tlv(&abuf, offset, &tlv_type, &tlv_len, &tlv_value);
+        nread = read_tlv(&abuf, offset, &tlv_type, &tlv_len, (const unsigned char**)&tlv_value);
         fuzz_logger_log(FUZZ_LOG_DEBUG, "tag: %s", awdl_tlv_as_str(tlv_type));
 
         offset += nread;

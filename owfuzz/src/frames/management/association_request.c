@@ -73,18 +73,6 @@ IE_EXT_88_MSCS_DESCRIPTOR,
 static FUZZING_VALUE_TYPE fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 static FUZZING_TYPE fuzzing_step = NOT_PRESENT;
 
-static int ieee1999 = 0;
-static int ieee1999_id = 0;
-
-static int ieee2007 = 0;
-static int ieee2007_id = 0;
-
-static int ieee2012 = 0;
-static int ieee2012_id = 0;
-
-static int ieee2016 = 0;
-static int ieee2016_id = 0;
-
 static int ieee2020 = 0;
 static int ieee2020_id = 0;
 
@@ -135,12 +123,12 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
 
 	if(fuzzing_opt.sfs[i].frame_type != IEEE80211_TYPE_ASSOCREQ)
 	{
-    add_ie_data(&pkt, 0, SPECIFIC_VALUE, fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
+    add_ie_data(&pkt, 0, SPECIFIC_VALUE, (uint8_t*)fuzzing_opt.target_ssid, strlen(fuzzing_opt.target_ssid));
     //add_default_ie_data(&pkt, 1);
 
     if(fuzzing_opt.channel <= 14)
     {
-      ie_data = IE_1_SUPPORTTED_RATES_B;
+      ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_B;
       ie_id = ie_data[0];
       ie_len = ie_data[1];
       add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -149,7 +137,7 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
     }
     else
     {
-      ie_data = IE_1_SUPPORTTED_RATES_N_AC;
+      ie_data = (uint8_t*)IE_1_SUPPORTTED_RATES_N_AC;
       ie_id = ie_data[0];
       ie_len = ie_data[1];
       add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);
@@ -172,7 +160,7 @@ struct packet create_association_request(struct ether_addr bssid, struct ether_a
     if(fuzzing_opt.auth_type == WPA3)
     {
       add_default_ie_data(&pkt, 32);
-      ie_data = IE_48_RSN_WPA3_AES_ASSOCREQ;
+      ie_data = (uint8_t*)IE_48_RSN_WPA3_AES_ASSOCREQ;
       ie_id = ie_data[0];
       ie_len = ie_data[1];
       add_ie_data(&pkt, ie_id, SPECIFIC_VALUE, ie_data + 2, ie_len);

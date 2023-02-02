@@ -28,16 +28,13 @@ extern fuzzing_option fuzzing_opt;
 struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt)
 {
     struct packet data = {0};
-    struct ieee_hdr *hdr, *hdr_new;
+    // struct ieee_hdr *hdr;
+    struct ieee_hdr *hdr_new;
     struct llc_hdr *llc_h, llc;
     struct ieee802_1x_hdr *ieee8021x_hdr, ieee8021xdhr;
     struct eap_hdr *eaphdr, eap;
     struct ieee8021x_auth *wpa_auth;
     uint8_t eap_type = EAP_TYPE_NONE;
-    enum { PAIRWISE_2, PAIRWISE_4, GROUP_2, REQUEST } msg;
-    char *msgtxt;
-    uint16_t key_info, key_data_length;
-    uint16_t mic_len = 16;
     struct wep_param wp={0};
     char dsflag = 'a';
     int dlen;
@@ -52,7 +49,7 @@ struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, s
     
     if(recv_pkt)
     {
-        hdr = (struct ieee_hdr *) recv_pkt->data;
+        // hdr = (struct ieee_hdr *) recv_pkt->data;
 
         if(fuzzing_opt.auth_type >= WPA_PSK_TKIP) 
         {

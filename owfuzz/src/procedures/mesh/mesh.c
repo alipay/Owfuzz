@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "../../fuzz_control.h"
 
 #define MESH_STP "\x08\x02\x00\x00\x01\x80\xc2\x00\x00\x00\x04\xd9\xf5\x27\x32\x60\x04\xd9\xf5\x27\x32\x60\x10\x89\x42\x42\x03\x00\x00\x00\x00\x00\x80\x00\x04\xd9\xf5\x27\x32\x60\x00\x00\x00\x00\x80\x00\x04\xd9\xf5\x27\x32\x60\x80\x05\x00\x00\x14\x00\x02\x00\x02\x00"
 #define MESH_STP_LEN 62
@@ -37,7 +38,7 @@ void find_mesh_node_by_beacon(struct packet *pkt)
     offset = 0;
     while(tlvs_len)
     {
-        nread = read_tlv8(&abuf, offset, &tlv_type, &tlv_len, &tlv_value);
+        nread = read_tlv8(&abuf, offset, &tlv_type, &tlv_len, (const uint8_t**)&tlv_value);
         if(tlv_type == 0)
         {
             memset(xssid, 0, sizeof(xssid));
@@ -59,7 +60,7 @@ void find_mesh_node_by_lldp(struct packet *pkt, struct ether_addr bssid, struct 
 {
     struct ieee_hdr *hdr;
     struct spanning_tree_protocol *stp;
-    struct packet stp_pkt = {0};
+    // struct packet stp_pkt = {0};
     struct packet probe_req = {0};
 
     hdr = (struct ieee_hdr *) pkt->data;
@@ -115,7 +116,7 @@ void find_mesh_node_by_lldp(struct packet *pkt, struct ether_addr bssid, struct 
 void handle_mesh(struct packet *pkt,struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct ether_addr tmac, fuzzing_option *fuzzing_opt)
 {
     struct ieee_hdr *hdr;
-    struct packet mesh_stp = {0};
+    // struct packet mesh_stp = {0};
 
     hdr = (struct ieee_hdr *) pkt->data;
 
