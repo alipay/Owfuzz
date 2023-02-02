@@ -1,21 +1,21 @@
 /**************************************************************************
-* Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
-* *
-* This file is part of owfuzz.
-* *
-* Owfuzz is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* *
-* Owfuzz is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* *
-* You should have received a copy of the GNU General Public License
-* along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
-****************************************************************************/
+ * Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
+ * *
+ * This file is part of owfuzz.
+ * *
+ * Owfuzz is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * *
+ * Owfuzz is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * *
+ * You should have received a copy of the GNU General Public License
+ * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 #ifndef _INCLUDE_H
 #define _INCLUDE_H
@@ -45,19 +45,18 @@
 #define AWDL_MODE "awdl"
 #define MESH_MODE "mesh"
 
-#define FUZZ_WORK_MODE_AP	0
-#define FUZZ_WORK_MODE_STA	1
+#define FUZZ_WORK_MODE_AP 0
+#define FUZZ_WORK_MODE_STA 1
 #define FUZZ_WORK_MODE_MITM 2
 #define FUZZ_WORK_MODE_P2P 3
 #define FUZZ_WORK_MODE_AWDL 4
 #define FUZZ_WORK_MODE_MESH 5
 
-
 #define PRE_KEY "88888888"
 
-#define PING_PACKET_SIZE     1024
-#define PING_MAX_WAIT_TIME   1
-#define PING_MAX_NO_PACKETS  3
+#define PING_PACKET_SIZE 1024
+#define PING_MAX_WAIT_TIME 1
+#define PING_MAX_NO_PACKETS 3
 #define PING_ECHO_ID 0xfbfa
 #define PING_CHECK_TIME 1
 
@@ -66,20 +65,19 @@
 
 #define CHECK_ALIVE_TIME 15
 
-
 enum AP_AUTH_TYPE
 {
-  OPEN_NONE,
-  OPEN_WEP,
-  SHARE_WEP,
-  WPA_PSK_TKIP,
-  WPA_PSK_AES,
-  WPA_PSK_TKIP_AES,
-  WPA2_PSK_TKIP,
-  WPA2_PSK_AES,
-  WPA2_PSK_TKIP_AES,
-  EAP_8021X,
-  WPA3
+	OPEN_NONE,
+	OPEN_WEP,
+	SHARE_WEP,
+	WPA_PSK_TKIP,
+	WPA_PSK_AES,
+	WPA_PSK_TKIP_AES,
+	WPA2_PSK_TKIP,
+	WPA2_PSK_AES,
+	WPA2_PSK_TKIP_AES,
+	EAP_8021X,
+	WPA3
 };
 
 /**
@@ -92,7 +90,8 @@ enum AP_AUTH_TYPE
  * wrapper functions wpa_sm_get_state() and wpa_sm_set_state() should be used
  * to access the state variable.
  */
-enum wpa_states {
+enum wpa_states
+{
 	/**
 	 * WPA_DISCONNECTED - Disconnected state
 	 *
@@ -162,7 +161,7 @@ enum wpa_states {
 
 	/**
 	 * 802.1X EAP
-	*/
+	 */
 	WPA_EAP_HANDSHAKE,
 
 	/**

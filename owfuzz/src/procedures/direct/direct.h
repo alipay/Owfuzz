@@ -1,21 +1,21 @@
 /**************************************************************************
-* Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
-* *
-* This file is part of owfuzz.
-* *
-* Owfuzz is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* *
-* Owfuzz is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* *
-* You should have received a copy of the GNU General Public License
-* along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
-****************************************************************************/
+ * Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
+ * *
+ * This file is part of owfuzz.
+ * *
+ * Owfuzz is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * *
+ * Owfuzz is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * *
+ * You should have received a copy of the GNU General Public License
+ * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 #ifndef _DIRECT_H_
 #define _DIRECT_H_
@@ -34,14 +34,12 @@
 #define P2P_PROVISION_DISCOVERY_RESPONSE 8
 // 9-255 Reserved
 
-
 // P2P Action frames
 #define P2P_ACTION_NOTICE_OF_ABSENCE 0
 #define P2P_ACTION_P2P_PRESENCE_REQUEST 1
 #define P2P_ACTION_P2P_PRESENCE_RESPONSE 2
 #define P2P_ACTION_GO_DISCOVERABILITY_REQUEST 3
 // 4-255 Reserved
-
 
 // attribute
 #define P2P_ATTRIBUTE_STATUS 0
@@ -73,9 +71,6 @@
 #define P2P_ATTRIBUTE_FEATURE_CAPABILITY_INFO 27
 #define P2P_ATTRIBUTE_PERSISTENT_GROUP_INFO 28
 
-
-
-
 // P2P Service Protocol Types
 #define P2P_SERVICE_ALL 0
 #define P2P_SERVICE_BONJOUR 1
@@ -92,14 +87,12 @@
 // 12-254 Reserved
 #define P2P_SERVICE_VENDOR_SPECIFIC 12
 
-
 // Service Discovery Status Codes
 #define P2P_SERVICE_SUCCESS 0
 #define P2P_SERVICE_PROTOCOL_TYPE_NOT_AVAILABLE 1
 #define P2P_SERVICE_REQUESTED_INFORMATION_NOT_AVAILABLE 2
 #define P2P_SERVICE_BAD_REQUEST 3
 // 4-255 Reserved
-
 
 #define WPS_VERSION 0x104A
 #define WPS_REQUEST_TYPE 0x103A
@@ -116,32 +109,34 @@
 #define WPS_DEVICE_NAME 0x1011
 #define WPS_VENDOR_EXTENSION 0x1011
 
-struct wps_ie{
-    uint8_t id;      // 0xDD
-    uint8_t length;  //
-    uint8_t oui[3];  //0x00 0x50 0xF2
-    uint8_t oui_type;// 0x04
+struct wps_ie
+{
+    uint8_t id;       // 0xDD
+    uint8_t length;   //
+    uint8_t oui[3];   // 0x00 0x50 0xF2
+    uint8_t oui_type; // 0x04
     // WPS Data Element
-}__attribute__((packed));
+} __attribute__((packed));
 
-struct p2p_ie{
-    uint8_t id;      // 0xDD
-    uint8_t length;  //
-    uint8_t oui[3];  //0x50 0x6F 0x9A
-    uint8_t oui_type;// 0x09
+struct p2p_ie
+{
+    uint8_t id;       // 0xDD
+    uint8_t length;   //
+    uint8_t oui[3];   // 0x50 0x6F 0x9A
+    uint8_t oui_type; // 0x09
     // P2P Attributes
-}__attribute__((packed));
+} __attribute__((packed));
 
-struct p2p_action{
+struct p2p_action
+{
     uint8_t category;     // 0x04
     uint8_t action_field; // 0x09
     uint8_t oui[3];       // 0x50 0x6F 0x9A
     uint8_t oui_type;     // 0x09
-    uint8_t oui_subtype;  
+    uint8_t oui_subtype;
     uint8_t dialog_token; // set to a nonzero value to identify the request response
     // elements P2P IE or other
-}__attribute__((packed));
-
+} __attribute__((packed));
 
 /*
 
@@ -149,7 +144,7 @@ STA1                                     STA2
 probe request(P2P IE)
                                      probe response
 
-// 
+//
 action(p2p invitation request)
                                      action(p2p invitation response)
 
@@ -159,56 +154,54 @@ action(p2p go negotiation request)
                                      action(p2p go negotiation response)
 action(p2p go negotiation confirm)
 
-// WSC 
+// WSC
 action(p2p provision discovery request)
 
                                      action(p2p provision discovery response)
 
 */
 
-
 // scan
-struct packet create_default_p2p_probe_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_probe_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_probe_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
+struct packet create_default_p2p_probe_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_probe_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_probe_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
 
 // service discovery
-struct packet create_p2p_gas_initial_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_gas_initial_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_gas_initial_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_gas_initial_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
 
 // group owner negotiation
-struct packet create_p2p_action_go_negotiation_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_action_go_negotiation_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_action_go_negotiation_confirmation(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_go_negotiation_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_go_negotiation_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_go_negotiation_confirmation(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
 
 // invitation
-struct packet create_p2p_action_invitation_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_action_invitation_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_invitation_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_invitation_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
 
 // device discovery
-struct packet create_p2p_action_device_discoverability_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_action_device_discoverability_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_device_discoverability_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_device_discoverability_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
 
-// 
-struct packet create_p2p_action_provision_discovery_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_action_provision_discovery_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-
+//
+struct packet create_p2p_action_provision_discovery_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action_provision_discovery_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
 
 // beacon
-struct packet create_p2p_beacon(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_association_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_association_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
-struct packet create_p2p_action(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac,char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_beacon(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_association_request(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_association_response(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
+struct packet create_p2p_action(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt);
 
-struct ie_data create_frame_p2p_fuzzing_attribute(struct packet *pkt, 
-					char *frame_name,
-					uint8_t attr_id);
+struct ie_data create_frame_p2p_fuzzing_attribute(struct packet *pkt,
+                                                  char *frame_name,
+                                                  uint8_t attr_id);
 
-struct ie_data get_p2p_attribute_by_fuzzing_type(uint8_t id, 
-							FUZZING_TYPE fuzzing_type, 
-							FUZZING_VALUE_TYPE value_type, 
-							uint8_t *specific_data, 
-							int specific_data_len);
+struct ie_data get_p2p_attribute_by_fuzzing_type(uint8_t id,
+                                                 FUZZING_TYPE fuzzing_type,
+                                                 FUZZING_VALUE_TYPE value_type,
+                                                 uint8_t *specific_data,
+                                                 int specific_data_len);
 
 void p2p_ie_fuzzing(struct packet *pkt, char *frame_name, uint8_t p2p_attrs[]);
 void wps_ie_fuzzing(struct packet *pkt, char *frame_name);
@@ -221,8 +214,7 @@ int is_p2p_frame(struct packet *pkt);
 
 void check_p2p_attributes(struct packet *pkt, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac);
 
-void handle_p2p(struct packet *pkt,struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, fuzzing_option *fuzzing_opt);
+void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, fuzzing_option *fuzzing_opt);
 struct packet get_p2p_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt);
-
 
 #endif

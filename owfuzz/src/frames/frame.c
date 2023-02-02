@@ -1,21 +1,21 @@
 /**************************************************************************
-* Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
-* *
-* This file is part of owfuzz.
-* *
-* Owfuzz is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* *
-* Owfuzz is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* *
-* You should have received a copy of the GNU General Public License
-* along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
-****************************************************************************/
+ * Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
+ * *
+ * This file is part of owfuzz.
+ * *
+ * Owfuzz is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * *
+ * Owfuzz is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * *
+ * You should have received a copy of the GNU General Public License
+ * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 #include <stdio.h>
 #include <unistd.h>
@@ -24,32 +24,33 @@
 #include "frame.h"
 #include "osdep_wifi_transmit.h"
 #include "./management/ies_creator.h"
-#include "../common/log.h" 
+#include "../common/log.h"
 
 extern fuzzing_option fuzzing_opt;
 
-struct packet get_frame(uint8_t frame_type,  struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
+struct packet get_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
 	struct packet pkt = {0};
 
-	//fuzzing_opt.fuzz_pkt_num++;
-	if(recv_pkt){
+	// fuzzing_opt.fuzz_pkt_num++;
+	if (recv_pkt)
+	{
 		pkt.channel = recv_pkt->channel;
 	}
 
 	fuzzing_opt.current_frame = frame_type;
 
-	switch(frame_type)
+	switch (frame_type)
 	{
 	// management
-	case IEEE80211_TYPE_ASSOCRES:   // AP
+	case IEEE80211_TYPE_ASSOCRES: // AP
 		pkt = create_association_response(bssid, smac, dmac, 0, recv_pkt);
 		break;
 	case IEEE80211_TYPE_REASSOCRES:
 		pkt = create_reassociation_response(bssid, dmac, 0);
 		break;
 	case IEEE80211_TYPE_PROBERES:
-		if(recv_pkt)
+		if (recv_pkt)
 			pkt = create_probe_response(bssid, dmac, 0, NULL, recv_pkt->data + sizeof(struct ieee_hdr), recv_pkt->len - sizeof(struct ieee_hdr));
 		else
 			pkt = create_probe_response(bssid, dmac, 0, NULL, NULL, 0);
@@ -60,7 +61,7 @@ struct packet get_frame(uint8_t frame_type,  struct ether_addr bssid, struct eth
 	case IEEE80211_TYPE_BEACON:
 		pkt = create_beacon(bssid, 0, NULL);
 		break;
-	case IEEE80211_TYPE_ATIM: //xx
+	case IEEE80211_TYPE_ATIM: // xx
 		pkt = create_atim(bssid, smac, dmac, 0, recv_pkt);
 		break;
 	case IEEE80211_TYPE_DISASSOC:
@@ -75,7 +76,7 @@ struct packet get_frame(uint8_t frame_type,  struct ether_addr bssid, struct eth
 	case IEEE80211_TYPE_ACTIONNOACK:
 		pkt = create_action_no_ack(bssid, smac, dmac, 0, recv_pkt);
 		break;
-	case IEEE80211_TYPE_ASSOCREQ:    // STA
+	case IEEE80211_TYPE_ASSOCREQ: // STA
 		pkt = create_association_request(bssid, smac, dmac, 0, recv_pkt);
 		break;
 	case IEEE80211_TYPE_REASSOCREQ:
@@ -178,104 +179,101 @@ struct packet get_frame(uint8_t frame_type,  struct ether_addr bssid, struct eth
 		break;
 	default:
 		break;
-
 	}
 
 	return pkt;
 }
 
-struct packet get_default_frame(uint8_t frame_type,  struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
+struct packet get_default_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
 	struct packet pkt = {0};
 	struct ieee_hdr *hdr;
 
-	switch(frame_type)
+	switch (frame_type)
 	{
 	// management
-	case IEEE80211_TYPE_ASSOCRES:   // AP
+	case IEEE80211_TYPE_ASSOCRES: // AP
 		pkt = create_ap_association_response(bssid, smac, dmac, 0);
 		break;
 	case IEEE80211_TYPE_REASSOCRES:
-		//pkt = create_reassociation_response(bssid, dmac, 0);
+		// pkt = create_reassociation_response(bssid, dmac, 0);
 		break;
 	case IEEE80211_TYPE_PROBERES:
-		hdr = (struct ieee_hdr *) recv_pkt->data;
-		if(hdr->type == IEEE80211_TYPE_PROBEREQ)
+		hdr = (struct ieee_hdr *)recv_pkt->data;
+		if (hdr->type == IEEE80211_TYPE_PROBEREQ)
 		{
-			//pkt = create_probe_response(bssid, dmac, 0, NULL, recv_pkt->data + sizeof(struct ieee_hdr), recv_pkt->len - sizeof(struct ieee_hdr));
+			// pkt = create_probe_response(bssid, dmac, 0, NULL, recv_pkt->data + sizeof(struct ieee_hdr), recv_pkt->len - sizeof(struct ieee_hdr));
 		}
 		break;
 	case IEEE80211_TYPE_TIMADVERT:
-		//pkt = create_timing_advertisement(bssid, dmac, 0);
+		// pkt = create_timing_advertisement(bssid, dmac, 0);
 		break;
 	case IEEE80211_TYPE_BEACON:
 		pkt = create_ap_beacon(bssid, 0, fuzzing_opt.auth_type);
 		break;
-	case IEEE80211_TYPE_ATIM: //xx
+	case IEEE80211_TYPE_ATIM: // xx
 		break;
 	case IEEE80211_TYPE_DISASSOC:
-		//pkt = create_disassociation(bssid, dmac, 0, recv_pkt);
+		// pkt = create_disassociation(bssid, dmac, 0, recv_pkt);
 		break;
 	case IEEE80211_TYPE_DEAUTH:
-		//pkt = create_deauthentication(bssid, dmac, 0, recv_pkt);
+		// pkt = create_deauthentication(bssid, dmac, 0, recv_pkt);
 		break;
 	case IEEE80211_TYPE_ACTION:
-		//pkt = create_action(bssid, dmac, 0, recv_pkt);
+		// pkt = create_action(bssid, dmac, 0, recv_pkt);
 		break;
 	case IEEE80211_TYPE_ACTIONNOACK:
 		break;
-	case IEEE80211_TYPE_ASSOCREQ:    // STA
+	case IEEE80211_TYPE_ASSOCREQ: // STA
 		break;
 	case IEEE80211_TYPE_REASSOCREQ:
 		break;
 	case IEEE80211_TYPE_PROBEREQ:
 		break;
 	case IEEE80211_TYPE_AUTH:
-		//pkt = create_authentication(bssid, dmac, 0);
+		// pkt = create_authentication(bssid, dmac, 0);
 		break;
 	// control
 	// data
 	default:
 		break;
-
 	}
 
 	return pkt;
 }
 
-
-unsigned short calc_chksum(unsigned short *buff,int len)
+unsigned short calc_chksum(unsigned short *buff, int len)
 {
-    int blen = len;
-    unsigned short *mid = (unsigned short*)buff;
-    unsigned short te = 0;
-    unsigned int sum = 0;
- 
-    while(blen > 1)
-    {
-       sum += *mid++;
-       blen -= 2; 
-    }
-   
-    if(blen == 1)
-    {  
-       te = *(unsigned char*)mid;
-       te  = (te << 8) & 0xff;
-       sum += te;                
-    }
+	int blen = len;
+	unsigned short *mid = (unsigned short *)buff;
+	unsigned short te = 0;
+	unsigned int sum = 0;
 
-    sum = (sum >> 16) + (sum & 0xffff); 
-    sum += sum >> 16;  
-    return (unsigned short)(~sum);
+	while (blen > 1)
+	{
+		sum += *mid++;
+		blen -= 2;
+	}
+
+	if (blen == 1)
+	{
+		te = *(unsigned char *)mid;
+		te = (te << 8) & 0xff;
+		sum += te;
+	}
+
+	sum = (sum >> 16) + (sum & 0xffff);
+	sum += sum >> 16;
+	return (unsigned short)(~sum);
 }
 
 int pack_icmp(uint8_t *buff, int seq)
 {
-    int packsize = 0;
+	int packsize = 0;
 	struct icmphdr *icmp_h = NULL;
 	struct timeval *tval = NULL;
 
-	icmp_h = (struct icmp*)buff;
+	icmp_h = (struct icmp *)buff;
 	icmp_h->type = ICMP_ECHO;
 	icmp_h->code = 0;
 	icmp_h->checksum = 0;
@@ -284,54 +282,54 @@ int pack_icmp(uint8_t *buff, int seq)
 	icmp_h->un.echo.id = PING_ECHO_ID;
 
 	packsize = 8 + 8 + 48;
-	tval= (struct timeval *)(buff + sizeof(struct icmphdr));
+	tval = (struct timeval *)(buff + sizeof(struct icmphdr));
 
-	gettimeofday(tval,NULL);                                
+	gettimeofday(tval, NULL);
 	memcpy(buff + sizeof(struct icmphdr) + sizeof(struct timeval), PING_ECHO_DATA, PING_ECHO_DATA_LEN);
-	icmp_h->checksum = calc_chksum((unsigned short*)buff, packsize);
+	icmp_h->checksum = calc_chksum((unsigned short *)buff, packsize);
 
 	return packsize;
 }
 
-void tv_sub(struct timeval *out,struct timeval *in)
+void tv_sub(struct timeval *out, struct timeval *in)
 {
-	if((out->tv_usec -= in->tv_usec) < 0)
+	if ((out->tv_usec -= in->tv_usec) < 0)
 	{
 		--out->tv_sec;
 		out->tv_usec += 1000000;
 	}
 
-	out->tv_sec-=in->tv_sec;
+	out->tv_sec -= in->tv_sec;
 }
 
 int unpack_icmp(uint8_t *buff, int len, struct timeval tvrecv)
 {
-    int iphdrlen = 0;
+	int iphdrlen = 0;
 	struct iphdr *ip_h = NULL;
 	struct icmphdr *icmp_h = NULL;
 	struct timeval *tvsend = NULL;
 	// double rtt;
 
 	ip_h = (struct iphdr *)buff;
-	iphdrlen = ip_h->ihl << 2;    			     
-	icmp_h = (struct icmphdr *)(buff + iphdrlen); 
-	len -= iphdrlen;            			      
-	
-	if(len < 8)                				    
-	{   
+	iphdrlen = ip_h->ihl << 2;
+	icmp_h = (struct icmphdr *)(buff + iphdrlen);
+	len -= iphdrlen;
+
+	if (len < 8)
+	{
 		fuzz_logger_log(FUZZ_LOG_DEBUG, "packets\'s length is less than 8");
 		return 0;
 	}
 
-	if((icmp_h->type == ICMP_ECHOREPLY) && (icmp_h->un.echo.id == PING_ECHO_ID))
+	if ((icmp_h->type == ICMP_ECHOREPLY) && (icmp_h->un.echo.id == PING_ECHO_ID))
 	{
-		tvsend = (struct timeval *)((uint8_t*)icmp_h + sizeof(struct icmphdr));
+		tvsend = (struct timeval *)((uint8_t *)icmp_h + sizeof(struct icmphdr));
 		tv_sub(&tvrecv, tvsend);
 		// rtt = tvrecv.tv_sec * 1000 + tvrecv.tv_usec / 1000;
 
 		return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -340,9 +338,9 @@ int init_ping_sock()
 	int sockfd;
 	in_addr_t inaddr = 0;
 	int size = 1024;
-	struct timeval tv_timeout = {0};	
+	struct timeval tv_timeout = {0};
 
-	if((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
+	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
 	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "init socket error");
 		return -1;
@@ -352,15 +350,15 @@ int init_ping_sock()
 	tv_timeout.tv_usec = 0;
 	setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv_timeout, sizeof(tv_timeout));
 	setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
-	
+
 	bzero(&fuzzing_opt.ping_dst_addr, sizeof(fuzzing_opt.ping_dst_addr));
 	inaddr = inet_addr(fuzzing_opt.target_ip);
-	if( inaddr == INADDR_NONE)
+	if (inaddr == INADDR_NONE)
 	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "Target's IP is error");
 		return -1;
 	}
-	else 
+	else
 	{
 		fuzzing_opt.ping_dst_addr.sin_family = AF_INET;
 		fuzzing_opt.ping_dst_addr.sin_addr.s_addr = inaddr;
@@ -379,59 +377,59 @@ int check_alive_by_ping()
 	struct sockaddr_in from = {0};
 	struct timeval tvrecv = {0};
 	int packetsize = 0;
-    int n = 0;
+	int n = 0;
 	socklen_t fromlen = 0;
 	static uint16_t seq = 0;
 	int ec = 0;
 
-	if(fuzzing_opt.ping_sockfd <= 0)
+	if (fuzzing_opt.ping_sockfd <= 0)
 	{
 		return 0;
 	}
 
-	while(nsend < PING_MAX_NO_PACKETS)
+	while (nsend < PING_MAX_NO_PACKETS)
 	{
 		memset(sendpacket, 0, sizeof(sendpacket));
 		packetsize = pack_icmp(sendpacket, seq++);
-		if(sendto(fuzzing_opt.ping_sockfd, sendpacket, packetsize, 0, (struct sockaddr *)&fuzzing_opt.ping_dst_addr, sizeof(fuzzing_opt.ping_dst_addr)) <= 0)
+		if (sendto(fuzzing_opt.ping_sockfd, sendpacket, packetsize, 0, (struct sockaddr *)&fuzzing_opt.ping_dst_addr, sizeof(fuzzing_opt.ping_dst_addr)) <= 0)
 		{
 			fuzz_logger_log(FUZZ_LOG_INFO, "sendto error");
 			continue;
 		}
 
-		//dumphex(sendpacket, packetsize);
+		// dumphex(sendpacket, packetsize);
 		nsend++;
 		usleep(100);
 
 		memset(recvpacket, 0, sizeof(recvpacket));
 		memset(&from, 0, sizeof(from));
 		fromlen = sizeof(from);
-		if( (n = recvfrom(fuzzing_opt.ping_sockfd, recvpacket, sizeof(recvpacket), 0, (struct sockaddr *)&from, &fromlen)) <= 0)
-		{		
+		if ((n = recvfrom(fuzzing_opt.ping_sockfd, recvpacket, sizeof(recvpacket), 0, (struct sockaddr *)&from, &fromlen)) <= 0)
+		{
 			fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom error, n = %d", n);
-			//exit(-1);
+			// exit(-1);
 		}
 		else
 		{
 			nreceived++;
-			gettimeofday(&tvrecv, NULL); 
-			if(1 == unpack_icmp(recvpacket, n, tvrecv))
+			gettimeofday(&tvrecv, NULL);
+			if (1 == unpack_icmp(recvpacket, n, tvrecv))
 			{
 				ec++;
 				break;
 			}
 			else
 			{
-				fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom , not ereply");  //not ECHO_REPLY
-			}	
+				fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom , not ereply"); // not ECHO_REPLY
+			}
 		}
-	
+
 		usleep(5000);
 	}
 
-	if(ec)
+	if (ec)
 	{
-		//fuzz_logger_log(FUZZ_LOG_DEBUG, "Target is alive");
+		// fuzz_logger_log(FUZZ_LOG_DEBUG, "Target is alive");
 		return 1;
 	}
 
@@ -444,8 +442,8 @@ int check_alive_by_deauth(struct packet *pkt)
 {
 	struct ieee_hdr *hdr;
 
-	hdr = (struct ieee_hdr *) pkt->data;
-	if(hdr->type == IEEE80211_TYPE_DEAUTH)
+	hdr = (struct ieee_hdr *)pkt->data;
+	if (hdr->type == IEEE80211_TYPE_DEAUTH)
 	{
 		fuzz_logger_log(FUZZ_LOG_DEBUG, "Deauth Dos!!!.");
 		return 0;
@@ -458,8 +456,8 @@ int check_alive_by_disassoc(struct packet *pkt)
 {
 	struct ieee_hdr *hdr;
 
-	hdr = (struct ieee_hdr *) pkt->data;
-	if(hdr->type == IEEE80211_TYPE_DISASSOC)
+	hdr = (struct ieee_hdr *)pkt->data;
+	if (hdr->type == IEEE80211_TYPE_DISASSOC)
 	{
 		fuzz_logger_log(FUZZ_LOG_DEBUG, "Disassoc Dos!!!.");
 		return 0;
@@ -470,22 +468,24 @@ int check_alive_by_disassoc(struct packet *pkt)
 
 int check_alive_by_pkts(struct ether_addr smac)
 {
-	time_t  current_time = 0;
+	time_t current_time = 0;
 
-	if(fuzzing_opt.last_recv_pkt_time == 0) return 1;
+	if (fuzzing_opt.last_recv_pkt_time == 0)
+		return 1;
 
-	//if(MAC_MATCHES(smac, SE_NULLMAC)) return 1;
+	// if(MAC_MATCHES(smac, SE_NULLMAC)) return 1;
 
-	if(MAC_MATCHES(smac, fuzzing_opt.target_addr)) return 1;
+	if (MAC_MATCHES(smac, fuzzing_opt.target_addr))
+		return 1;
 
 	current_time = time(NULL);
-	if(current_time - fuzzing_opt.last_recv_pkt_time > CHECK_ALIVE_TIME)
+	if (current_time - fuzzing_opt.last_recv_pkt_time > CHECK_ALIVE_TIME)
 	{
 		fuzz_logger_log(FUZZ_LOG_DEBUG, "Target is dead!!!.");
 		return 0;
 	}
 
-	//fuzzing_opt.target_alive = 1;
+	// fuzzing_opt.target_alive = 1;
 
 	return 1;
 }
@@ -526,55 +526,54 @@ void load_fuzzing_state()
 	load_timing_advertisement_state();
 }
 
-
 void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len)
 {
-    unsigned char nibble[2];
-    unsigned int i,j;
-    for (i = 0; i < len; i++)
+	unsigned char nibble[2];
+	unsigned int i, j;
+	for (i = 0; i < len; i++)
 	{
-        nibble[0] = (phex[i] & 0xF0) >> 4;
-        nibble[1] = phex[i] & 0x0F;
-        for (j = 0; j < 2; j++)
+		nibble[0] = (phex[i] & 0xF0) >> 4;
+		nibble[1] = phex[i] & 0x0F;
+		for (j = 0; j < 2; j++)
 		{
-            if (nibble[j] < 10)
-			{            
-                nibble[j] += 0x30;
-            }
-            else
+			if (nibble[j] < 10)
 			{
-                if (nibble[j] < 16)
-                    nibble[j] = nibble[j] - 10 + 'A';
-            }
-            *pascii++ = nibble[j];
-        }
-    }
+				nibble[j] += 0x30;
+			}
+			else
+			{
+				if (nibble[j] < 16)
+					nibble[j] = nibble[j] - 10 + 'A';
+			}
+			*pascii++ = nibble[j];
+		}
+	}
 }
 
 void hex_to_ascii_hex(unsigned char *phex, char *pascii, unsigned int len)
 {
-    unsigned char nibble[2];
-    unsigned int i,j;
-    for (i = 0; i < len; i++)
+	unsigned char nibble[2];
+	unsigned int i, j;
+	for (i = 0; i < len; i++)
 	{
 		*pascii++ = '\\';
 		*pascii++ = 'x';
-        nibble[0] = (phex[i] & 0xF0) >> 4;
-        nibble[1] = phex[i] & 0x0F;
-        for (j = 0; j < 2; j++)
+		nibble[0] = (phex[i] & 0xF0) >> 4;
+		nibble[1] = phex[i] & 0x0F;
+		for (j = 0; j < 2; j++)
 		{
-            if (nibble[j] < 10)
-			{            
-                nibble[j] += 0x30;
-            }
-            else
+			if (nibble[j] < 10)
 			{
-                if (nibble[j] < 16)
-                    nibble[j] = nibble[j] - 10 + 'A';
-            }
-            *pascii++ = nibble[j];
-        }
-    }
+				nibble[j] += 0x30;
+			}
+			else
+			{
+				if (nibble[j] < 16)
+					nibble[j] = nibble[j] - 10 + 'A';
+			}
+			*pascii++ = nibble[j];
+		}
+	}
 }
 
 int str_to_hex(char *pascii, unsigned char *phex, unsigned int len)
@@ -584,26 +583,26 @@ int str_to_hex(char *pascii, unsigned char *phex, unsigned int len)
 	char h1, h2;
 	unsigned char s1, s2;
 
-	if(pascii == NULL || phex == NULL || len == 0)
+	if (pascii == NULL || phex == NULL || len == 0)
 		return 0;
 
-	str_len = strlen(pascii)/4;
-	if(str_len)
+	str_len = strlen(pascii) / 4;
+	if (str_len)
 	{
-		for(i=0; i<str_len; i++)
+		for (i = 0; i < str_len; i++)
 		{
-			h1 = pascii[4*i + 2];
-			h2 = pascii[4*i + 3];
+			h1 = pascii[4 * i + 2];
+			h2 = pascii[4 * i + 3];
 
 			s1 = toupper(h1) - 0x30;
-			if(s1 > 9)
+			if (s1 > 9)
 				s1 -= 7;
 
 			s2 = toupper(h2) - 0x30;
-			if(s2 > 9)
+			if (s2 > 9)
 				s2 -= 7;
-			
-			if(i < len)
+
+			if (i < len)
 				phex[i] = s1 * 16 + s2;
 		}
 	}
@@ -618,17 +617,17 @@ void log_pkt(int log_level, struct packet *pkt)
 	int log_txt_len = 0, len = 0;
 	char buf[MAX_PRINT_BUF_LEN * 5] = {0};
 
-	if(log_level > fuzzing_opt.log_level)
+	if (log_level > fuzzing_opt.log_level)
 		return;
 
-	if(pkt->data[0] == 0 || pkt->len <= 0)
+	if (pkt->data[0] == 0 || pkt->len <= 0)
 		return;
 
-	hdr = (struct ieee_hdr *) pkt->data;
-	switch(hdr->type)
+	hdr = (struct ieee_hdr *)pkt->data;
+	switch (hdr->type)
 	{
-	// Management 
-	case IEEE80211_TYPE_ASSOCRES: 
+	// Management
+	case IEEE80211_TYPE_ASSOCRES:
 		strcpy(log_txt, "(management)IEEE80211_TYPE_ASSOCRES");
 		break;
 	case IEEE80211_TYPE_REASSOCRES:
@@ -658,7 +657,7 @@ void log_pkt(int log_level, struct packet *pkt)
 	case IEEE80211_TYPE_ACTIONNOACK:
 		strcpy(log_txt, "(management)IEEE80211_TYPE_ACTIONNOACK");
 		break;
-	case IEEE80211_TYPE_ASSOCREQ:   
+	case IEEE80211_TYPE_ASSOCREQ:
 		strcpy(log_txt, "(management)IEEE80211_TYPE_ASSOCREQ");
 		break;
 	case IEEE80211_TYPE_REASSOCREQ:
@@ -770,7 +769,7 @@ void log_pkt(int log_level, struct packet *pkt)
 	strcat(log_txt, "-->");
 	log_txt_len = strlen(log_txt);
 
-	if(pkt->len > MAX_IEEE_PACKET_SIZE)
+	if (pkt->len > MAX_IEEE_PACKET_SIZE)
 	{
 		fuzz_logger_log(FUZZ_LOG_INFO, log_txt);
 		dumphex(pkt->data, MAX_IEEE_PACKET_SIZE);
@@ -782,12 +781,8 @@ void log_pkt(int log_level, struct packet *pkt)
 	len = strlen(log_txt);
 	strncat(buf, log_txt, len);
 
-	if(pkt->len)
-		hex_to_ascii_hex(pkt->data, buf+log_txt_len + len, pkt->len);
+	if (pkt->len)
+		hex_to_ascii_hex(pkt->data, buf + log_txt_len + len, pkt->len);
 
 	fuzz_logger_log(FUZZ_LOG_INFO, buf);
-
 }
-
-
-
