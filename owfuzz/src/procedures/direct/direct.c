@@ -1228,7 +1228,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
     char szerr[256] = {0};
     int i = 0;
 
-    // if(fuzzing_opt->test_type == TEST_POC && MAC_MATCHES(smac, fuzzing_opt->source_addr))
+    // if(fuzzing_opt->test_type == 1 && MAC_MATCHES(smac, fuzzing_opt->source_addr))
     //{// 1,6,11
     //     return;
     // }
@@ -1253,7 +1253,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
         {
         case P2P_GO_NEGOTIATION_REQUEST:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_go_negotiation_request, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_go_negotiation_response(resp_bssid, resp_mac, smac, 0, pkt);
             else
             {
@@ -1291,12 +1291,12 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
             break;
         case P2P_GO_NEGOTIATION_RESPONSE:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_go_negotiation_response, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_go_negotiation_confirmation(resp_bssid, resp_mac, smac, 0, pkt);
             break;
         case P2P_GO_NEGOTIATION_CONFIRMATION:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_go_negotiation_confirmation, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
             {
                 fuzz_pkt = create_p2p_action_invitation_request(resp_bssid, resp_mac, smac, 0, pkt);
             }
@@ -1357,7 +1357,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
             break;
         case P2P_INVITATION_REQUEST:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_invitation_request, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_invitation_response(resp_bssid, resp_mac, smac, 0, pkt);
             else
             {
@@ -1387,7 +1387,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
             break;
         case P2P_INVITATION_RESPONSE:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_invitation_response, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_device_discoverability_request(resp_bssid, resp_mac, smac, 0, pkt);
             else
             {
@@ -1426,22 +1426,22 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
             break;
         case P2P_DEVICE_DISCOVERABILITY_REQUEST:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_device_discoverability_request, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_device_discoverability_response(resp_bssid, resp_mac, smac, 0, pkt);
             break;
         case P2P_DEVICE_DISCOVERABILITY_RESPONSE:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_device_discoverability_response, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_device_discoverability_request(resp_bssid, resp_mac, smac, 0, pkt);
             break;
         case P2P_PROVISION_DISCOVERY_REQUEST:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_provision_discovery_request, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_provision_discovery_response(resp_bssid, resp_mac, smac, 0, pkt);
             break;
         case P2P_PROVISION_DISCOVERY_RESPONSE:
             fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_action_provision_discovery_response, P2P Device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
-            if (fuzzing_opt->test_type == TEST_POC)
+            if (fuzzing_opt->test_type == 1)
                 fuzz_pkt = create_p2p_action_go_negotiation_request(resp_bssid, resp_mac, smac, 0, pkt);
             break;
         default:
@@ -1458,7 +1458,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
                         smac.ether_addr_octet[4],
                         smac.ether_addr_octet[5]);
 
-        if (fuzzing_opt->test_type == TEST_POC)
+        if (fuzzing_opt->test_type == 1)
         {
             fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, resp_bssid, resp_mac, smac, pkt);
             fuzz_pkt.channel = pkt->channel;
@@ -1476,7 +1476,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
                         smac.ether_addr_octet[4],
                         smac.ether_addr_octet[5]);
 
-        if (fuzzing_opt->test_type == TEST_POC)
+        if (fuzzing_opt->test_type == 1)
         {
             fuzz_pkt = create_p2p_probe_request(SE_BROADCASTMAC, fuzzing_opt->source_addr, SE_BROADCASTMAC, 0, pkt);
             fuzz_pkt.channel = pkt->channel;
@@ -1496,7 +1496,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
                         smac.ether_addr_octet[5]);
     }
 
-    if (fuzzing_opt->test_type == TEST_POC && fuzz_pkt.len)
+    if (fuzzing_opt->test_type == 1 && fuzz_pkt.len)
     {
         fuzz_pkt.channel = pkt->channel;
         fuzzing_opt->fuzz_pkt_num++;

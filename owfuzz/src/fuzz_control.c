@@ -161,13 +161,13 @@ void usage_help(char *name)
 		   "\t-s [mac]\n"
 		   "\t   Fuzzer's (source) Mac address.\n"
 		   "\t-T [test type]\n"
-		   "\t   Test type, default %d, %d: Poc test, %d: interactive test, %d: frames test, %d: interactive & frames test\n"
+		   "\t   Test type, default 1, 0: Poc test, 1: interactive test, 2: frames test, 3: interactive & frames test\n"
 		   //		"\t-l [log level]\n"
 		   //		"\t   Log level, 8:DEBUG, 7:INFO, 6:NOTICE, 5:WARN, 4:ERR, 3:CRIT, 2:ALERT, 1:EMERG, 0:STDERR\n"
 		   "\t-f [log file]\n"
 		   "\t   Log file path\n"
 		   "\t-h\n"
-		   "\t   Help.\n", TEST_POC, TEST_POC, TEST_INTERACTIVE, TEST_FRAME, TEST_INTERACTIVE);
+		   "\t   Help.\n");
 }
 
 void *test_bad_frame(void *param)
@@ -721,7 +721,7 @@ int send_frame(struct packet *pkt)
 		dumphex(pkt->data, MAX_IEEE_PACKET_SIZE);
 	}
 
-	if (fuzzing_opt.test_type == TEST_POC)
+	if (fuzzing_opt.test_type == 1)
 	{
 		times = 3;
 	}
@@ -806,7 +806,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 		}
 		else
 		{
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				print_interaction_status(bssid, smac, dmac, "Probe Request", "");
 
@@ -833,7 +833,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 	break;
 	case IEEE80211_TYPE_AUTH:
 	{
-		if (fuzzing_opt->test_type == TEST_POC)
+		if (fuzzing_opt->test_type == 1)
 		{
 			fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 			send_packet_ex(&fuzz_pkt);
@@ -847,7 +847,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 	case IEEE80211_TYPE_ASSOCREQ:
 	case IEEE80211_TYPE_REASSOCREQ:
 	{
-		if (fuzzing_opt->test_type == TEST_POC)
+		if (fuzzing_opt->test_type == 1)
 		{
 			print_interaction_status(bssid, smac, dmac, "Association Request", "Association Response");
 
@@ -885,7 +885,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 	break;
 	case IEEE80211_TYPE_DATA:
 	{
-		if (fuzzing_opt->test_type == TEST_POC)
+		if (fuzzing_opt->test_type == 1)
 		{
 			fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 			send_packet_ex(&fuzz_pkt);
@@ -898,7 +898,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 	break;
 	case IEEE80211_TYPE_QOSDATA:
 	{
-		if (fuzzing_opt->test_type == TEST_POC)
+		if (fuzzing_opt->test_type == 1)
 		{
 			fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 			send_packet_ex(&fuzz_pkt);
@@ -910,7 +910,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 	}
 	break;
 	case IEEE80211_TYPE_DISASSOC:
-		if (fuzzing_opt->test_type == TEST_POC)
+		if (fuzzing_opt->test_type == 1)
 		{
 			fuzzing_opt->wpa_s = WPA_DISCONNECTED;
 			fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
@@ -920,7 +920,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 		}
 		break;
 	case IEEE80211_TYPE_DEAUTH:
-		if (fuzzing_opt->test_type == TEST_POC)
+		if (fuzzing_opt->test_type == 1)
 		{
 			fuzzing_opt->wpa_s = WPA_DISCONNECTED;
 			fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
@@ -940,7 +940,7 @@ void handle_sta_auth(struct packet *pkt, struct ether_addr bssid, struct ether_a
 		}
 		else
 		{
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 				send_packet_ex(&fuzz_pkt);
@@ -982,7 +982,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 			}
 			else
 			{
-				if (fuzzing_opt->test_type == TEST_POC)
+				if (fuzzing_opt->test_type == 1)
 				{
 					if (fuzzing_opt->wpa_s < WPA_SCANNING)
 					{
@@ -1008,7 +1008,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 			}
 			else
 			{
-				if (fuzzing_opt->test_type == TEST_POC)
+				if (fuzzing_opt->test_type == 1)
 				{
 					fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 					send_packet_ex(&fuzz_pkt);
@@ -1022,7 +1022,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 			}
 			break;
 		case IEEE80211_TYPE_AUTH:
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 				send_packet_ex(&fuzz_pkt);
@@ -1045,7 +1045,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 			}
 			break;
 		case IEEE80211_TYPE_ASSOCRES:
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				print_interaction_status(bssid, smac, dmac, "Association Response", "");
 
@@ -1074,7 +1074,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 			}
 			break;
 		case IEEE80211_TYPE_REASSOCRES:
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				print_interaction_status(bssid, smac, dmac, "Reassociation Response", "");
 
@@ -1104,7 +1104,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 
 			break;
 		case IEEE80211_TYPE_DEAUTH:
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				print_interaction_status(bssid, smac, dmac, "Deauth", "");
 
@@ -1117,7 +1117,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 
 			break;
 		case IEEE80211_TYPE_DISASSOC:
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				print_interaction_status(bssid, smac, dmac, "Disassoc", "");
 
@@ -1139,7 +1139,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 			}
 			else
 			{
-				if (fuzzing_opt->test_type == TEST_POC)
+				if (fuzzing_opt->test_type == 1)
 				{
 					fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 					send_packet_ex(&fuzz_pkt);
@@ -1151,7 +1151,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 
 			break;
 		case IEEE80211_TYPE_DATA:
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 				send_packet_ex(&fuzz_pkt);
@@ -1161,7 +1161,7 @@ void handle_ap_auth(struct packet *pkt, struct ether_addr bssid, struct ether_ad
 			}
 			break;
 		case IEEE80211_TYPE_QOSDATA:
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				fuzz_pkt = get_frame(IEEE80211_TYPE_ACK, bssid, dmac, smac, pkt);
 				send_packet_ex(&fuzz_pkt);
@@ -1656,7 +1656,7 @@ void *start_fuzzing(void *param)
 	// ping_pass_time = tv.tv_sec;
 	fuzzing_opt->last_recv_pkt_time = 0;
 
-	if (fuzzing_opt->test_type == TEST_FRAME)
+	if (fuzzing_opt->test_type == 2)
 	{
 		if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
 		{
@@ -1690,7 +1690,7 @@ void *start_fuzzing(void *param)
 	owfuzz_config_get_ies_status(fuzzing_opt);
 	owfuzz_config_get_ext_ies_status(fuzzing_opt);
 
-	if (fuzzing_opt->test_type == TEST_FRAME)
+	if (fuzzing_opt->test_type == 2)
 	{
 		fuzzing_opt->sniff_frames = 1;
 
@@ -1718,7 +1718,7 @@ void *start_fuzzing(void *param)
 		current_time2 = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 		fuzz_current_time2 = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 
-		/*if((current_time - pass_time >= DEAUTH_TIME) && fuzzing_opt->test_type == TEST_POC)
+		/*if((current_time - pass_time >= DEAUTH_TIME) && fuzzing_opt->test_type == 1)
 		{
 			fuzz_pkt = get_frame(IEEE80211_TYPE_DEAUTH, fuzzing_opt->bssid, fuzzing_opt->source_addr, fuzzing_opt->target_addr, NULL);
 			send_packet_ex(&fuzz_pkt);
@@ -2130,7 +2130,7 @@ void *start_fuzzing(void *param)
 
 		if (current_time2 - pass_time2 >= 100)
 		{
-			if (fuzzing_opt->test_type == TEST_POC)
+			if (fuzzing_opt->test_type == 1)
 			{
 				if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_AP)
 				{
@@ -2177,7 +2177,7 @@ void *start_fuzzing(void *param)
 
 			if (fuzzing_opt->sniff_frames == 1 /*FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode || FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode*/)
 			{
-				if (fuzzing_opt->test_type == TEST_FRAME)
+				if (fuzzing_opt->test_type == 2)
 				{
 					sniff_ies(&pkt);
 
@@ -2211,7 +2211,7 @@ void *start_fuzzing(void *param)
 										smac.ether_addr_octet[4],
 										smac.ether_addr_octet[5]);
 
-						if (fuzzing_opt->test_type == TEST_FRAME)
+						if (fuzzing_opt->test_type == 2)
 						{
 							save_exp_payload(&fuzzing_opt->fuzz_pkt);
 							log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
@@ -2241,7 +2241,7 @@ void *start_fuzzing(void *param)
 										smac.ether_addr_octet[4],
 										smac.ether_addr_octet[5]);
 
-						if (fuzzing_opt->test_type == TEST_FRAME)
+						if (fuzzing_opt->test_type == 2)
 						{
 							save_exp_payload(&fuzzing_opt->fuzz_pkt);
 							log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
@@ -2294,7 +2294,7 @@ void *start_fuzzing(void *param)
 					}
 				}
 
-				if (fuzzing_opt->test_type == TEST_POC)
+				if (fuzzing_opt->test_type == 1)
 				{
 					if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
 					{
@@ -2346,7 +2346,7 @@ void *start_fuzzing(void *param)
 
 				fuzzing_opt->target_alive = 1;
 
-				if (fuzzing_opt->test_type == TEST_POC)
+				if (fuzzing_opt->test_type == 1)
 				{
 					if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
 					{
@@ -2372,7 +2372,7 @@ void *start_fuzzing(void *param)
 				}
 			}
 
-			if (fuzzing_opt->test_type == TEST_FRAME)
+			if (fuzzing_opt->test_type == 2)
 			{
 				if (/*fuzzing_opt->cur_sfs_cnt >= 1*/ fuzzing_opt->sniff_frames == 0)
 				{
@@ -2579,7 +2579,7 @@ int fuzzing(int argc, char *argv[])
 	char *target_ip = NULL;
 	int channel = 0;
 	int tid;
-	int test_type = TEST_UNKNOWN;
+	int test_type = -1;
 	int log_level = -1;
 	char *file_log_path = NULL;
 	pthread_t fthread;
@@ -2900,7 +2900,7 @@ int fuzzing(int argc, char *argv[])
 		init_ping_sock(&fuzzing_opt);
 	}
 
-	if (fuzzing_opt.test_type == TEST_POC)
+	if (fuzzing_opt.test_type == 1)
 	{
 		fuzzing_opt.wpa_s = WPA_DISCONNECTED;
 	}
@@ -2976,11 +2976,11 @@ void print_status(struct packet *pkt)
 		printf("\t*p2p_operating_interface_id: %d\n", fuzzing_opt.p2p_operating_interface_id);
 	}
 
-	if (fuzzing_opt.test_type == TEST_POC)
+	if (fuzzing_opt.test_type == 1)
 	{
 		printf("\tFuzzing Type: %d (Interactive)\n", fuzzing_opt.test_type);
 	}
-	else if (fuzzing_opt.test_type == TEST_FRAME)
+	else if (fuzzing_opt.test_type == 2)
 	{
 		if (fuzzing_opt.fuzz_work_mode == FUZZ_WORK_MODE_AP || fuzzing_opt.fuzz_work_mode == FUZZ_WORK_MODE_STA)
 		{

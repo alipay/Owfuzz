@@ -45,11 +45,6 @@
 #define AWDL_MODE "awdl"
 #define MESH_MODE "mesh"
 
-#define TEST_UNKNOWN -1
-#define TEST_POC 1
-#define TEST_FRAME 2
-#define TEST_INTERACTIVE 3
-
 #define FUZZ_WORK_MODE_AP 0
 #define FUZZ_WORK_MODE_STA 1
 #define FUZZ_WORK_MODE_MITM 2
