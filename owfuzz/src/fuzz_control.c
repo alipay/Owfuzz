@@ -2757,7 +2757,7 @@ int fuzzing(int argc, char *argv[])
 			return -1;
 		}
 
-		if (target_ip)
+		if (NULL != target_ip)
 		{
 			if (inet_addr(target_ip) == INADDR_NONE)
 			{
@@ -2767,7 +2767,7 @@ int fuzzing(int argc, char *argv[])
 			}
 		}
 
-		if (fuzz_mode == NULL)
+		if (NULL == fuzz_mode)
 		{
 			fuzz_mode = AP_MODE;
 			strncpy(fuzzing_opt.mode, fuzz_mode, sizeof(fuzzing_opt.mode) - 1);
