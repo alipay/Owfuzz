@@ -7,26 +7,27 @@
 #define NULLMAC "\x00\x00\x00\x00\x00\x00"
 #define BROADCAST "\xFF\xFF\xFF\xFF\xFF\xFF"
 
-#define MAC_IS_NULL(x) (! memcmp((x).ether_addr_octet, NULLMAC, ETHER_ADDR_LEN))
+#define MAC_IS_NULL(x) (!memcmp((x).ether_addr_octet, NULLMAC, ETHER_ADDR_LEN))
 #define MAC_SET_NULL(x) (memset((x).ether_addr_octet, 0x00, ETHER_ADDR_LEN))
-#define MAC_IS_BCAST(x) (! memcmp((x).ether_addr_octet, BROADCAST, ETHER_ADDR_LEN))
+#define MAC_IS_BCAST(x) (!memcmp((x).ether_addr_octet, BROADCAST, ETHER_ADDR_LEN))
 #define MAC_SET_BCAST(x) (memset((x).ether_addr_octet, 0xFF, ETHER_ADDR_LEN))
-#define MAC_MATCHES(x,y) (! memcmp((x).ether_addr_octet, (y).ether_addr_octet, ETHER_ADDR_LEN))
-#define MAC_COPY(x,y) (memcpy((x).ether_addr_octet, (y).ether_addr_octet, ETHER_ADDR_LEN))
+#define MAC_MATCHES(x, y) (!memcmp((x).ether_addr_octet, (y).ether_addr_octet, ETHER_ADDR_LEN))
+#define MAC_COPY(x, y) (memcpy((x).ether_addr_octet, (y).ether_addr_octet, ETHER_ADDR_LEN))
 
 #define MAC_PRINT_FORMAT "%02x:%02x:%02x:%02x:%02x:%02x"
-#define MAC_FORMAT(x) (((x).ether_addr_octet[0]), ((x).ether_addr_octet[1]), ((x).ether_addr_octet[2]), ((x).ether_addr_octet[3]),((x). ether_addr_octet[4]), ((x).ether_addr_octet[5]))
+#define MAC_FORMAT(x) (((x).ether_addr_octet[0]), ((x).ether_addr_octet[1]), ((x).ether_addr_octet[2]), ((x).ether_addr_octet[3]), ((x).ether_addr_octet[4]), ((x).ether_addr_octet[5]))
 
 #ifdef __GNUC__
-#define VARIABLE_IS_NOT_USED __attribute__ ((unused))
+#define VARIABLE_IS_NOT_USED __attribute__((unused))
 #else
 #define VARIABLE_IS_NOT_USED
 #endif
 
-static VARIABLE_IS_NOT_USED struct ether_addr SE_NULLMAC = { .ether_addr_octet = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
-static VARIABLE_IS_NOT_USED struct ether_addr SE_BROADCASTMAC = { .ether_addr_octet = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
+static VARIABLE_IS_NOT_USED struct ether_addr SE_NULLMAC = {.ether_addr_octet = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+static VARIABLE_IS_NOT_USED struct ether_addr SE_BROADCASTMAC = {.ether_addr_octet = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};
 
-enum mac_kind {
+enum mac_kind
+{
   MAC_KIND_RANDOM,
   MAC_KIND_CLIENT,
   MAC_KIND_AP

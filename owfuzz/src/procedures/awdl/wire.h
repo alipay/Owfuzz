@@ -49,7 +49,6 @@
 
 #endif /* __APPLE__ */
 
-
 /** @brief Opaque buffer used to transport network packets.
  *
  * We can read from and write to a buffer using dedicated
@@ -58,17 +57,19 @@
  * @see buf_data
  * @see buf_len
  */
-//struct buf;
-struct buf {
-	const uint8_t *orig;
-	uint8_t *data;
-	int len;
-	int owned;
+// struct buf;
+struct buf
+{
+  const uint8_t *orig;
+  uint8_t *data;
+  int len;
+  int owned;
 };
 
 /* TODO change interface: only return wire_error or 0, do not return length */
 
-enum wire_error {
+enum wire_error
+{
   OUT_OF_BOUNDS = -1,
 };
 
@@ -114,11 +115,12 @@ const uint8_t *buf_data(const struct buf *buf);
 /** @brief Length of internal bytes array. */
 int buf_len(const struct buf *buf);
 
-#define BUF_STRIP(buf, len) \
-  do { \
+#define BUF_STRIP(buf, len)           \
+  do                                  \
+  {                                   \
     int result = buf_strip(buf, len); \
-    if (result < 0) \
-      goto wire_error; \
+    if (result < 0)                   \
+      goto wire_error;                \
   } while (0)
 
 /** @brief Strip {@code len} bytes from the front of {@code buf}.
@@ -127,11 +129,12 @@ int buf_len(const struct buf *buf);
  */
 int buf_strip(const struct buf *buf, int len);
 
-#define BUF_TAKE(buf, len) \
-  do { \
+#define BUF_TAKE(buf, len)           \
+  do                                 \
+  {                                  \
     int result = buf_take(buf, len); \
-    if (result < 0) \
-      goto wire_error; \
+    if (result < 0)                  \
+      goto wire_error;               \
   } while (0)
 
 /** @brief Strip {@code len} bytes from the end of {@code buf}.
@@ -154,11 +157,12 @@ int write_ether_addr(struct buf *buf, int offset, const struct ether_addr *addr)
 
 int write_bytes(struct buf *buf, int offset, const uint8_t *bytes, int length);
 
-#define CHECKED_READ(type, ...) \
-  do { \
+#define CHECKED_READ(type, ...)            \
+  do                                       \
+  {                                        \
     int result = read_##type(__VA_ARGS__); \
-    if (result < 0) \
-      goto wire_error; \
+    if (result < 0)                        \
+      goto wire_error;                     \
   } while (0)
 
 #define READ_U8(...) CHECKED_READ(u8, __VA_ARGS__)

@@ -6,7 +6,7 @@
 #include <assert.h>
 #include "osdep_wifi_transmit.h"
 
-struct qlink 
+struct qlink
 {
     struct packet pkt;
     struct qlink *next;
@@ -24,6 +24,5 @@ int ow_queue_empty(struct ow_queue *owq);
 void ow_queue_push(struct ow_queue *owq, struct packet *pkt);
 int ow_queue_pop(struct ow_queue *owq, struct packet *pkt);
 void ow_queue_destroy(struct ow_queue *owq);
-
 
 #endif

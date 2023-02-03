@@ -15,13 +15,13 @@ int ow_queue_empty(struct ow_queue *owq)
 void ow_queue_push(struct ow_queue *owq, struct packet *pkt)
 {
     struct qlink *node;
-    node = (struct qlink*)malloc(sizeof(struct qlink));
+    node = (struct qlink *)malloc(sizeof(struct qlink));
     assert(node != NULL);
 
     node->pkt = *pkt;
     node->next = NULL;
 
-    if(ow_queue_empty(owq))
+    if (ow_queue_empty(owq))
     {
         owq->front = node;
         owq->rear = node;
@@ -39,7 +39,7 @@ int ow_queue_pop(struct ow_queue *owq, struct packet *pkt)
 {
     struct qlink *tmp;
 
-    if(ow_queue_empty(owq))
+    if (ow_queue_empty(owq))
     {
         return 0;
     }
@@ -58,7 +58,7 @@ void ow_queue_destroy(struct ow_queue *owq)
 {
     struct qlink *tmp;
 
-    while(owq->front)
+    while (owq->front)
     {
         tmp = owq->front;
         owq->front = owq->front->next;

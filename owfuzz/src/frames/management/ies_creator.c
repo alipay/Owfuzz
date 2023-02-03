@@ -1,21 +1,21 @@
 /**************************************************************************
-* Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
-* *
-* This file is part of owfuzz.
-* *
-* Owfuzz is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* *
-* Owfuzz is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* *
-* You should have received a copy of the GNU General Public License
-* along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
-****************************************************************************/
+ * Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
+ * *
+ * This file is part of owfuzz.
+ * *
+ * Owfuzz is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * *
+ * Owfuzz is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * *
+ * You should have received a copy of the GNU General Public License
+ * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 #include "ies.h"
 #include "ies_creator.h"
@@ -23,896 +23,887 @@
 
 extern fuzzing_option fuzzing_opt;
 
-//802.11a/b
-static int ie_ranges1999[10][3]={
-{0, 0, 32},    // SSID
-{1, 1, 8},     // Supported rates
-{2, 5, 5},     // FH Parameter Set
-{3, 1, 1},     // DS Parameter Set
-{4, 6, 6},     // CF Parameter Set 
-{5, 4, 254},   // TIM
-{6, 2, 2},     // IBSS Parameter Set
-{16, 1, 253},  // Challenge Text
-{-1, 0, 0}
-};
+// 802.11a/b
+static int ie_ranges1999[10][3] = {
+    {0, 0, 32},   // SSID
+    {1, 1, 8},    // Supported rates
+    {2, 5, 5},    // FH Parameter Set
+    {3, 1, 1},    // DS Parameter Set
+    {4, 6, 6},    // CF Parameter Set
+    {5, 4, 254},  // TIM
+    {6, 2, 2},    // IBSS Parameter Set
+    {16, 1, 253}, // Challenge Text
+    {-1, 0, 0}};
 
-//802.11g
-static int ie_ranges2007[40][3]={
-{0, 0, 32},   // SSID
-{1, 1, 8},    // Supported rates
-{2, 5, 5},    // FH Parameter Set
-{3, 1, 1},    // DS Parameter Set
-{4, 6, 6},    // CF Parameter Set
-{5, 4, 254},  // TIM
-{6, 2, 2},    // IBSS Parameter Set
-{7, 6, 254},  // Country
-{8, 2, 2},    // Hopping Pattern Parameters
-{9, 4, 254},  // Hopping Pattern Table
-{10, 0, 254}, // Request
-{11, 5, 5},   // BSS Load
-{12, 18, 18}, // EDCA Parameter Set
-{13, 55, 55}, // TSPEC
-{14, 0, 255}, // TCLAS
-{15, 14, 14}, // Schedule
-{16, 1, 253}, // Challenge text
-{32, 1, 1},   // Power Constraint
-{33, 2, 2},   // Power Capability
-{34, 0, 0},   // TPC Request
-{35, 2, 2},   // TPC Report
-{36, 2, 254}, // Supported Channels
-{37, 3, 3},   // Channel Switch Announcement
-{38, 3, 14},  // Measurement Request 
-{39, 3, 22},  // Measurement Report
-{40, 6, 6},   // Quiet   
-{41, 8, 253}, // IBSS DFS   
-{42, 1, 1},   // ERP Information
-{43, 4, 4},   // TS Delay 
-{44, 1, 1},   // TCLAS Processing
-{46, 1, 1},   // QoS Capability
-{48, 34, 254},// RSN
-{50, 1, 255}, // Extended Supported Rates
-{127, 0, 255},// Extened Capabilities
-{221, 1, 254},// Vendor Specific
-{-1, 0, 0}
-};
+// 802.11g
+static int ie_ranges2007[40][3] = {
+    {0, 0, 32},    // SSID
+    {1, 1, 8},     // Supported rates
+    {2, 5, 5},     // FH Parameter Set
+    {3, 1, 1},     // DS Parameter Set
+    {4, 6, 6},     // CF Parameter Set
+    {5, 4, 254},   // TIM
+    {6, 2, 2},     // IBSS Parameter Set
+    {7, 6, 254},   // Country
+    {8, 2, 2},     // Hopping Pattern Parameters
+    {9, 4, 254},   // Hopping Pattern Table
+    {10, 0, 254},  // Request
+    {11, 5, 5},    // BSS Load
+    {12, 18, 18},  // EDCA Parameter Set
+    {13, 55, 55},  // TSPEC
+    {14, 0, 255},  // TCLAS
+    {15, 14, 14},  // Schedule
+    {16, 1, 253},  // Challenge text
+    {32, 1, 1},    // Power Constraint
+    {33, 2, 2},    // Power Capability
+    {34, 0, 0},    // TPC Request
+    {35, 2, 2},    // TPC Report
+    {36, 2, 254},  // Supported Channels
+    {37, 3, 3},    // Channel Switch Announcement
+    {38, 3, 14},   // Measurement Request
+    {39, 3, 22},   // Measurement Report
+    {40, 6, 6},    // Quiet
+    {41, 8, 253},  // IBSS DFS
+    {42, 1, 1},    // ERP Information
+    {43, 4, 4},    // TS Delay
+    {44, 1, 1},    // TCLAS Processing
+    {46, 1, 1},    // QoS Capability
+    {48, 34, 254}, // RSN
+    {50, 1, 255},  // Extended Supported Rates
+    {127, 0, 255}, // Extened Capabilities
+    {221, 1, 254}, // Vendor Specific
+    {-1, 0, 0}};
 
-//802.11n
-static int ie_ranges2012[180][3]={
-{0, 0, 32},    // SSID
-{1, 1, 8},     // Supported rates
-{2, 5, 5},     // FH Parameter Set
-{3, 1, 1},     // DSSS Parameter Set
-{4, 6, 6},     // CF Parameter Set
-{5, 4, 254},   // TIM
-{6, 2, 2},     // IBSS Parameter Set
-{7, 6, 254},   // Country
-{8, 2, 2},     // Hopping Pattern Parameters
-{9, 4, 254},   // Hopping Pattern Table
-{10, 0, 254},  // Request
-{11, 5, 5},    // BSS Load
-{12, 18, 18},  // EDCA Parameter
-{13, 55, 55},  // TSPEC
-{14, 0, 255},  // TCLAS
-{15, 14, 14},  // Schedule
-{16, 1, 253},  // Challenge text
-{32, 1, 1},    // Power Constraint
-{33, 2, 2},    // Power Capability
-{34, 0, 0},    // TPC Request
-{35, 2, 2},    // TPC Report
-{36, 2, 254},  // Supported Channels
-{37, 3, 3},    // Channel Switch Announcement
-{38, 3, 255},  // Measurement Request
-{39, 3, 255},  // Measurement Report
-{40, 6, 6},    // Quiet
-{41, 8, 253},  // IBSS DFS
-{42, 1, 1},    // ERP
-{43, 4, 4},    // TS Delay
-{44, 1, 1},    // TCLAS Processing
-{45, 26, 26},  // HT Capabilities
-{46, 1, 1},    // QoS Capability
-{48, 34, 254}, // RSN
-{50, 1, 255},  // Extended Supported Rates
-{51, 1, 255},  // AP Channel Report
-{52, 13, 255}, // Neighbor Report
-{53, 1, 1},    // RCPI
-{54, 3, 3},    // Mobility Domain
-{55, 82, 255}, // Fast BSS Transition
-{56, 5, 5},    // Timeout Interval
-{57, 4, 4},    // RIC Data
-{58, 20, 20},  // DSE Registered Location
-{59, 2, 253},  // Supported Operating Classes
-{60, 4, 4},    // Extended Channel Switch Anouncement
-{61, 22, 22},  // HT Operation
-{62, 1, 1},    // Secondary Channel Offset
-{63, 1, 1},    // BSS Average Access Delay
-{64, 1, 1},    // Antenna
-{65, 1, 1},    // RSNI
-{66, 1, 255},  // Measurement Pilot Transmission
-{67, 2, 26},   // BSS Available Admission Capacity
-{68, 4, 4},    // BSS AC Access Delay
-{69, 1, 16},   // Time Advertisement
-{70, 5, 5},    // RM Enabled Capabilities
-{71, 1, 255},  // Multipe BSSID
-{72, 1, 1},    // 20/40 BSS Coexistence
-{73, 1, 255},  // 20/40 BSS Intolerant Channel Report
-{74, 14, 14},  // Overlapping BSS Scan Parameters
-{75, 1, 255},  // RIC Descriptor
-{76, 16, 16},  // Management MIC
-{78, 3, 255},  // Event Request
-{79, 3, 255},  // Event Report
-{80, 4, 255},  // Diagnostic Request
-{81, 3, 255},  // Diagnostic Report
-{82, 0, 255},  // Location Parameters
-{83, 2, 2},    // Nontransmitted BSSID Capability
-{84, 0, 255},  // SSID List
-{85, 1, 3},    // Multiple BSSID-Index
-{86, 1, 255},  // FMS Descriptor
-{87, 1, 255},  // FMS Request
-{88, 16, 255}, // FMS Response
-{89, 1, 3},    // QoS Traffic Capability
-{90, 3, 3},    // BSS Max Idle Period
-{91, 4, 255},  // TFS Request
-{92, 4, 254},  // TFS Response
-{93, 4, 4},    // WNM-Sleep Mode
-{94, 1, 1},    // TIM Broadcast Request
-{95, 1, 10},   // TIM Broadcast Response
-{96, 21, 21},  // Collocated Interference
-{97, 1, 255},  // Channel Usage
-{98, 1, 255},  // Time Zone
-{99, 1, 255},  // DMS Request
-{100, 1, 255}, // DMS Response
-{101, 18, 18}, // Link Identifier
-{102, 18, 18}, // Wakeup Schedule
-{104, 4, 4},   // Channel Switch Timing
-{105, 3, 3},   // PTI Control
-{106, 1, 1},   // TPU Buffer Status
-{107, 1, 9},   // Interworking
-{108, 0, 255}, // Advertisement Protocol
-{109, 1, 1},   // Expedited Bandwidth Request
-{110, 16, 58}, // QoS Map Set
-{111, 0, 255}, // Roaming Consortium
-{112, 8, 8},   // Emergency Alert Identitier
-{113, 7, 7},   // Mesh Configuration
-{114, 0, 32},  // Mesh ID
-{115, 1, 255}, // Mesh Link Metric Report
-{116, 14, 14}, // Congestion Notification
-{117, 3, 23},  // Mesh Peering Management
-{118, 6, 6},   // Mesh Channel Switch Parameters
-{119, 2, 2},   // Mesh Awake Window
-{120, 1, 253}, // Beacon Timing
-{121, 6, 6},   // MCCAOP Setup Request
-{122, 2, 7},   // MCCAOP Setup Reply
-{123, 2, 255}, // MCCAOP Advertisement
-{124, 1, 7},   // MCCAOP Teardown
-{125, 15, 15}, // GANN
-{126, 21, 21}, // RANN
-{127, 1, 6},   // Extended Capabilities
-{130, 37, 252},// PREQ
-{131, 31, 37}, // PREP 
-{132, 15, 249},// PERR
-{137, 19, 255},// PXU
-{138, 7, 7},   // PXUC
-{139, 84, 255},// Authenticated Mesh Peering Exchange
-{140, 16, 16}, // MIC
-{141, 1, 255}, // Destination URI
-{142, 12, 255},// U-APSD Coexistence
-{174, 6, 6},   // MCCAOP Advertisement Overview
-{221, 1, 254}, // Vendor Specific
-{-1, 0, 0}
-};
+// 802.11n
+static int ie_ranges2012[180][3] = {
+    {0, 0, 32},     // SSID
+    {1, 1, 8},      // Supported rates
+    {2, 5, 5},      // FH Parameter Set
+    {3, 1, 1},      // DSSS Parameter Set
+    {4, 6, 6},      // CF Parameter Set
+    {5, 4, 254},    // TIM
+    {6, 2, 2},      // IBSS Parameter Set
+    {7, 6, 254},    // Country
+    {8, 2, 2},      // Hopping Pattern Parameters
+    {9, 4, 254},    // Hopping Pattern Table
+    {10, 0, 254},   // Request
+    {11, 5, 5},     // BSS Load
+    {12, 18, 18},   // EDCA Parameter
+    {13, 55, 55},   // TSPEC
+    {14, 0, 255},   // TCLAS
+    {15, 14, 14},   // Schedule
+    {16, 1, 253},   // Challenge text
+    {32, 1, 1},     // Power Constraint
+    {33, 2, 2},     // Power Capability
+    {34, 0, 0},     // TPC Request
+    {35, 2, 2},     // TPC Report
+    {36, 2, 254},   // Supported Channels
+    {37, 3, 3},     // Channel Switch Announcement
+    {38, 3, 255},   // Measurement Request
+    {39, 3, 255},   // Measurement Report
+    {40, 6, 6},     // Quiet
+    {41, 8, 253},   // IBSS DFS
+    {42, 1, 1},     // ERP
+    {43, 4, 4},     // TS Delay
+    {44, 1, 1},     // TCLAS Processing
+    {45, 26, 26},   // HT Capabilities
+    {46, 1, 1},     // QoS Capability
+    {48, 34, 254},  // RSN
+    {50, 1, 255},   // Extended Supported Rates
+    {51, 1, 255},   // AP Channel Report
+    {52, 13, 255},  // Neighbor Report
+    {53, 1, 1},     // RCPI
+    {54, 3, 3},     // Mobility Domain
+    {55, 82, 255},  // Fast BSS Transition
+    {56, 5, 5},     // Timeout Interval
+    {57, 4, 4},     // RIC Data
+    {58, 20, 20},   // DSE Registered Location
+    {59, 2, 253},   // Supported Operating Classes
+    {60, 4, 4},     // Extended Channel Switch Anouncement
+    {61, 22, 22},   // HT Operation
+    {62, 1, 1},     // Secondary Channel Offset
+    {63, 1, 1},     // BSS Average Access Delay
+    {64, 1, 1},     // Antenna
+    {65, 1, 1},     // RSNI
+    {66, 1, 255},   // Measurement Pilot Transmission
+    {67, 2, 26},    // BSS Available Admission Capacity
+    {68, 4, 4},     // BSS AC Access Delay
+    {69, 1, 16},    // Time Advertisement
+    {70, 5, 5},     // RM Enabled Capabilities
+    {71, 1, 255},   // Multipe BSSID
+    {72, 1, 1},     // 20/40 BSS Coexistence
+    {73, 1, 255},   // 20/40 BSS Intolerant Channel Report
+    {74, 14, 14},   // Overlapping BSS Scan Parameters
+    {75, 1, 255},   // RIC Descriptor
+    {76, 16, 16},   // Management MIC
+    {78, 3, 255},   // Event Request
+    {79, 3, 255},   // Event Report
+    {80, 4, 255},   // Diagnostic Request
+    {81, 3, 255},   // Diagnostic Report
+    {82, 0, 255},   // Location Parameters
+    {83, 2, 2},     // Nontransmitted BSSID Capability
+    {84, 0, 255},   // SSID List
+    {85, 1, 3},     // Multiple BSSID-Index
+    {86, 1, 255},   // FMS Descriptor
+    {87, 1, 255},   // FMS Request
+    {88, 16, 255},  // FMS Response
+    {89, 1, 3},     // QoS Traffic Capability
+    {90, 3, 3},     // BSS Max Idle Period
+    {91, 4, 255},   // TFS Request
+    {92, 4, 254},   // TFS Response
+    {93, 4, 4},     // WNM-Sleep Mode
+    {94, 1, 1},     // TIM Broadcast Request
+    {95, 1, 10},    // TIM Broadcast Response
+    {96, 21, 21},   // Collocated Interference
+    {97, 1, 255},   // Channel Usage
+    {98, 1, 255},   // Time Zone
+    {99, 1, 255},   // DMS Request
+    {100, 1, 255},  // DMS Response
+    {101, 18, 18},  // Link Identifier
+    {102, 18, 18},  // Wakeup Schedule
+    {104, 4, 4},    // Channel Switch Timing
+    {105, 3, 3},    // PTI Control
+    {106, 1, 1},    // TPU Buffer Status
+    {107, 1, 9},    // Interworking
+    {108, 0, 255},  // Advertisement Protocol
+    {109, 1, 1},    // Expedited Bandwidth Request
+    {110, 16, 58},  // QoS Map Set
+    {111, 0, 255},  // Roaming Consortium
+    {112, 8, 8},    // Emergency Alert Identitier
+    {113, 7, 7},    // Mesh Configuration
+    {114, 0, 32},   // Mesh ID
+    {115, 1, 255},  // Mesh Link Metric Report
+    {116, 14, 14},  // Congestion Notification
+    {117, 3, 23},   // Mesh Peering Management
+    {118, 6, 6},    // Mesh Channel Switch Parameters
+    {119, 2, 2},    // Mesh Awake Window
+    {120, 1, 253},  // Beacon Timing
+    {121, 6, 6},    // MCCAOP Setup Request
+    {122, 2, 7},    // MCCAOP Setup Reply
+    {123, 2, 255},  // MCCAOP Advertisement
+    {124, 1, 7},    // MCCAOP Teardown
+    {125, 15, 15},  // GANN
+    {126, 21, 21},  // RANN
+    {127, 1, 6},    // Extended Capabilities
+    {130, 37, 252}, // PREQ
+    {131, 31, 37},  // PREP
+    {132, 15, 249}, // PERR
+    {137, 19, 255}, // PXU
+    {138, 7, 7},    // PXUC
+    {139, 84, 255}, // Authenticated Mesh Peering Exchange
+    {140, 16, 16},  // MIC
+    {141, 1, 255},  // Destination URI
+    {142, 12, 255}, // U-APSD Coexistence
+    {174, 6, 6},    // MCCAOP Advertisement Overview
+    {221, 1, 254},  // Vendor Specific
+    {-1, 0, 0}};
 
-//802.11ac
-static int ie_ranges2016[260][3]={
-{0, 0, 32},    // SSID
-{1, 1, 8},     // Supported Rates and BSS Membership Selectors
-{3, 1, 1},     // DSSS Parameter Set
-{4, 6, 6},     // CF Parameter Set
-{5, 4, 254},   // TIM
-{6, 2, 2},     // IBSS Parameter Set
-{7, 6, 254},   // Country
-{10, 0, 254},  // Request
-{11, 5, 5},    // BSS Load
-{12, 18, 18},  // EDCA Parameter Set
-{13, 55, 55},  // TSPEC
-{14, 0, 255},  // TCLAS
-{15, 14, 14},  // Schedule
-{16, 1, 253},  // Challenge text
-{32, 1, 1},    // Power Constraint
-{33, 2, 2},    // Power Capability
-{34, 0, 0},    // TPC Request
-{35, 2, 2},    // TPC Report
-{36, 2, 2},    // Supported Channels
-{37, 3, 3},    // Channel Switch Announcement
-{38, 3, 255},  // Measurement Request
-{39, 3, 255},  // Measurement Report
-{40, 6, 6},    // Quiet
-{41, 9, 253},  // IBSS DFS
-{42, 1, 1},    // ERP
-{43, 4, 4},    // TS Delay
-{44, 1, 1},    // TCLAS Processing
-{45, 26, 26},  // HT Capabilities
-{46, 1, 1},    // QoS Capability
-{48, 34, 254}, // RSN
-{50, 1, 255},  // Extended Supported Rates and BSS Membership Selectors
-{51, 1, 255},  // AP Channel Report
-{52, 13, 255}, // Neighbor Report
-{53, 1, 1},    // RCPI
-{54, 3, 3},    // Mobility Domain
-{55, 82, 255}, // Fast BSS Transition
-{56, 5, 5},    // Timeout Interval
-{57, 4, 4},    // RIC Data (RDE)
-{58, 20, 20},  // DSE Registered Location
-{59, 2, 253},  // Supported Operating Classes
-{60, 4, 4},    // Extended Channel Switch Announcement
-{61, 22, 22},  // HT Operation
-{62, 1, 1},    // Secondary Channel Offset
-{63, 1, 1},    // BSS Average Access Delay
-{64, 1, 1},    // Antenna
-{65, 1, 1},    // RSNI
-{66, 1, 255},  // Measurement Pilot Transmission
-{67, 2, 26},   // BSS Available Admission Capacity
-{68, 4, 4},    // BSS AC Access Delay
-{69, 1, 16},   // Time Advertisement
-{70, 5, 5},    // RM Enabled Capabilities
-{71, 1, 255},  // Multiple BSSID
-{72, 1, 1},    // 20/40 BSS Coexistence
-{73, 1, 255},  // 20/40 BSS Intolerant Channel Report
-{74, 14, 14},  // Overlapping BSS Scan Parameters
-{75, 1, 255},  // RIC Descriptor
-{76, 16, 16},  // Management MIC
-{78, 3, 255},  // Event Request
-{79, 3, 255},  // Event Report
-{80, 4, 255},  // Diagnostic Request
-{81, 3, 255},  // Diagnostic Report
-{82, 0, 255},  // Location Parameters
-{83, 2, 2},    // Nontransmitted BSSID Capability
-{84, 0, 255},  // SSID List
-{85, 1, 3},    // Multiple BSSID-Index
-{86, 1, 255},  // FMS Descriptor
-{87, 1, 255},  // FMS Request
-{88, 16, 255}, // FMS Response
-{89, 1, 3},    // QoS Traffic Capability
-{90, 3, 3},    // BSS Max Idle Period 
-{91, 4, 255},  // TFS Request
-{92, 4, 254},  // TFS Response
-{93, 4, 4},    // WNM Sleep Mode
-{94, 1, 1},    // TIM Broadcast Request
-{95, 1, 10},   // TIM Broadcast Response
-{96, 21, 21},  // Collocated Interference Report
-{97, 1, 255},  // Channel Usage
-{98, 1, 255},  // Time Zone
-{99, 1, 255},  // DMS Request
-{100, 1, 255}, // DMS Response
-{101, 18, 18}, // Link Identifier
-{102, 18, 18}, // Wakeup Schedule
-{104, 4, 4},   // Channel Switch Timing
-{105, 3, 3},   // PTI Control
-{106, 3, 3},   // TPU Buffer Status
-{107, 3, 11},  // Interworking
-{108, 0, 255}, // Advertisement Protocol
-{109, 1, 1},   // Expedited Bandwidth Request
-{110, 16, 58}, // QoS Map
-{111, 0, 255}, // Roaming Consortium
-{112, 8, 8},   // Emergency Alert Identifier
-{113, 7, 7},   // Mesh Configuration
-{114, 0, 32},  // Mesh ID
-{115, 1, 255}, // Mesh Link Metric Report
-{116, 14, 14}, // Congestion Notification
-{117, 3, 23},  // Mesh Peering Management
-{118, 6, 6},   // Mesh Channel Switch Parameters
-{119, 2, 2},   // Mesh Awake Window
-{120, 1, 253}, // Beacon Timing 
-{121, 6, 6},   // MCCAOP Setup Request
-{122, 2, 7},   // MCCAOP Setup Reply
-{123, 2, 255}, // MCCAOP Advertisement
-{124, 1, 7},   // MCCAOP Teardown
-{125, 15, 15}, // GANN
-{126, 21, 21}, // RANN
-{127, 1, 10},  // Extended Capabilities 
-{130, 37, 252},// PREQ 
-{131, 31, 37}, // PREP
-{132, 15, 249},// PERR 
-{137, 30, 255},// PXU 
-{138, 7, 7},   // PXUC
-{139, 76, 255},// Authenticated Mesh Peering Exchange 
-{140, 16, 16}, // MIC
-{141, 1, 255}, // Destination URI
-{142, 12, 255},// U-APSD Coexistence 
-{143, 8, 8},   // DMG Wakeup Schedule
-{144, 15, 255},// Extended Schedule
-{145, 2, 254}, // STA Availability
-{146, 15, 255},// DMG TSPEC
-{147, 6, 6},   // Next DMG ATI
-{148, 22, 22}, // DMG Capabilities
-{151, 10, 10}, // DMG Operation
-{152, 7, 7},   // DMG BSS Parameter Change
-{153, 5, 5},   // DMG Beam Refinement
-{154, 0, 255}, // Channel Measurement Feedback
-{157, 2, 2},   // Awake Window
-{158, 22, 255},// Multi-band
-{159, 1, 1},   // ADDBA Extension
-{160, 1, 255}, // Next PCP List
-{161, 13, 13}, // PCP Handover
-{162, 8, 8},   // DMG Link Margin
-{163, 4, 255}, // Switching Stream
-{164, 11, 11}, // Session Transition
-{165, 0, 255}, // Dynamic Tone Pairing Report
-{166, 2, 255}, // Cluster Report
-{167, 2, 2},   // Relay Capabilities
-{168, 8, 8},   // Relay Transfer Parameter Set
-{169, 1, 1},   // BeamLink Maintenance
-{170, 7, 255}, // Mutiple MAC Sublayers
-{171, 1, 255}, // U-PID
-{172, 5, 5},   // DMG Link Adaptation Acknowledgment
-{174, 6, 6},   // MCCAOP Advertisement Overview
-{175, 17, 17}, // Quiet Period Request
-{177, 10, 10}, // Quiet Period Response
-{181, 2, 255}, // QMF Policy
-{182, 11, 15}, // ECAPC Policy
-{183, 1, 1},   // Cluster Time Offset
-{184, 1, 1},   // Intra-Access Category Priority
-{185, 2, 255}, // SCS Descriptor
-{186, 21, 255},// QLoad Report
-{187, 1, 1},   // HCCA TXOP Update Count
-{188, 1, 255}, // Higher Layer Stream ID
-{189, 6, 6},   // GCR Group Address 
-{190, 3, 3},   // Antenna Sector ID Pattern
-{191, 12, 12}, // VHT Capabilities
-{192, 5, 5},   // VHT Operation
-{193, 6, 6},   // Extended BSS Load
-{194, 3, 3},   // Wide Bandwidth Channel Switch
-{195, 2, 5},   // Transmit Power Envelope
-{196, 0, 255}, // Channel Switch Wrapper
-{197, 2, 2},   // AID
-{198, 1, 7},   // Quiet Channel
-{199, 1, 1},   // Operating Mode Notification
-{200, 1, 33},  // UPSIM
-{201, 0, 255}, // Reduced Neighbor Report
-{202, 6, 6},   // TVHT Operation
-{204, 16, 16}, // Device Location
-{205, 1, 255}, // White Space Map
-{206, 9, 9},   // Fine Timing Measurement Parameters 
-{221, 1, 254}, // Vendor Specific
-{255, 1, 254}, // FTM synchronization Information, Extended Request, Estimated Service Parameters, Future Channel Guidance 
-{-1, 0, 0}
-};
+// 802.11ac
+static int ie_ranges2016[260][3] = {
+    {0, 0, 32},     // SSID
+    {1, 1, 8},      // Supported Rates and BSS Membership Selectors
+    {3, 1, 1},      // DSSS Parameter Set
+    {4, 6, 6},      // CF Parameter Set
+    {5, 4, 254},    // TIM
+    {6, 2, 2},      // IBSS Parameter Set
+    {7, 6, 254},    // Country
+    {10, 0, 254},   // Request
+    {11, 5, 5},     // BSS Load
+    {12, 18, 18},   // EDCA Parameter Set
+    {13, 55, 55},   // TSPEC
+    {14, 0, 255},   // TCLAS
+    {15, 14, 14},   // Schedule
+    {16, 1, 253},   // Challenge text
+    {32, 1, 1},     // Power Constraint
+    {33, 2, 2},     // Power Capability
+    {34, 0, 0},     // TPC Request
+    {35, 2, 2},     // TPC Report
+    {36, 2, 2},     // Supported Channels
+    {37, 3, 3},     // Channel Switch Announcement
+    {38, 3, 255},   // Measurement Request
+    {39, 3, 255},   // Measurement Report
+    {40, 6, 6},     // Quiet
+    {41, 9, 253},   // IBSS DFS
+    {42, 1, 1},     // ERP
+    {43, 4, 4},     // TS Delay
+    {44, 1, 1},     // TCLAS Processing
+    {45, 26, 26},   // HT Capabilities
+    {46, 1, 1},     // QoS Capability
+    {48, 34, 254},  // RSN
+    {50, 1, 255},   // Extended Supported Rates and BSS Membership Selectors
+    {51, 1, 255},   // AP Channel Report
+    {52, 13, 255},  // Neighbor Report
+    {53, 1, 1},     // RCPI
+    {54, 3, 3},     // Mobility Domain
+    {55, 82, 255},  // Fast BSS Transition
+    {56, 5, 5},     // Timeout Interval
+    {57, 4, 4},     // RIC Data (RDE)
+    {58, 20, 20},   // DSE Registered Location
+    {59, 2, 253},   // Supported Operating Classes
+    {60, 4, 4},     // Extended Channel Switch Announcement
+    {61, 22, 22},   // HT Operation
+    {62, 1, 1},     // Secondary Channel Offset
+    {63, 1, 1},     // BSS Average Access Delay
+    {64, 1, 1},     // Antenna
+    {65, 1, 1},     // RSNI
+    {66, 1, 255},   // Measurement Pilot Transmission
+    {67, 2, 26},    // BSS Available Admission Capacity
+    {68, 4, 4},     // BSS AC Access Delay
+    {69, 1, 16},    // Time Advertisement
+    {70, 5, 5},     // RM Enabled Capabilities
+    {71, 1, 255},   // Multiple BSSID
+    {72, 1, 1},     // 20/40 BSS Coexistence
+    {73, 1, 255},   // 20/40 BSS Intolerant Channel Report
+    {74, 14, 14},   // Overlapping BSS Scan Parameters
+    {75, 1, 255},   // RIC Descriptor
+    {76, 16, 16},   // Management MIC
+    {78, 3, 255},   // Event Request
+    {79, 3, 255},   // Event Report
+    {80, 4, 255},   // Diagnostic Request
+    {81, 3, 255},   // Diagnostic Report
+    {82, 0, 255},   // Location Parameters
+    {83, 2, 2},     // Nontransmitted BSSID Capability
+    {84, 0, 255},   // SSID List
+    {85, 1, 3},     // Multiple BSSID-Index
+    {86, 1, 255},   // FMS Descriptor
+    {87, 1, 255},   // FMS Request
+    {88, 16, 255},  // FMS Response
+    {89, 1, 3},     // QoS Traffic Capability
+    {90, 3, 3},     // BSS Max Idle Period
+    {91, 4, 255},   // TFS Request
+    {92, 4, 254},   // TFS Response
+    {93, 4, 4},     // WNM Sleep Mode
+    {94, 1, 1},     // TIM Broadcast Request
+    {95, 1, 10},    // TIM Broadcast Response
+    {96, 21, 21},   // Collocated Interference Report
+    {97, 1, 255},   // Channel Usage
+    {98, 1, 255},   // Time Zone
+    {99, 1, 255},   // DMS Request
+    {100, 1, 255},  // DMS Response
+    {101, 18, 18},  // Link Identifier
+    {102, 18, 18},  // Wakeup Schedule
+    {104, 4, 4},    // Channel Switch Timing
+    {105, 3, 3},    // PTI Control
+    {106, 3, 3},    // TPU Buffer Status
+    {107, 3, 11},   // Interworking
+    {108, 0, 255},  // Advertisement Protocol
+    {109, 1, 1},    // Expedited Bandwidth Request
+    {110, 16, 58},  // QoS Map
+    {111, 0, 255},  // Roaming Consortium
+    {112, 8, 8},    // Emergency Alert Identifier
+    {113, 7, 7},    // Mesh Configuration
+    {114, 0, 32},   // Mesh ID
+    {115, 1, 255},  // Mesh Link Metric Report
+    {116, 14, 14},  // Congestion Notification
+    {117, 3, 23},   // Mesh Peering Management
+    {118, 6, 6},    // Mesh Channel Switch Parameters
+    {119, 2, 2},    // Mesh Awake Window
+    {120, 1, 253},  // Beacon Timing
+    {121, 6, 6},    // MCCAOP Setup Request
+    {122, 2, 7},    // MCCAOP Setup Reply
+    {123, 2, 255},  // MCCAOP Advertisement
+    {124, 1, 7},    // MCCAOP Teardown
+    {125, 15, 15},  // GANN
+    {126, 21, 21},  // RANN
+    {127, 1, 10},   // Extended Capabilities
+    {130, 37, 252}, // PREQ
+    {131, 31, 37},  // PREP
+    {132, 15, 249}, // PERR
+    {137, 30, 255}, // PXU
+    {138, 7, 7},    // PXUC
+    {139, 76, 255}, // Authenticated Mesh Peering Exchange
+    {140, 16, 16},  // MIC
+    {141, 1, 255},  // Destination URI
+    {142, 12, 255}, // U-APSD Coexistence
+    {143, 8, 8},    // DMG Wakeup Schedule
+    {144, 15, 255}, // Extended Schedule
+    {145, 2, 254},  // STA Availability
+    {146, 15, 255}, // DMG TSPEC
+    {147, 6, 6},    // Next DMG ATI
+    {148, 22, 22},  // DMG Capabilities
+    {151, 10, 10},  // DMG Operation
+    {152, 7, 7},    // DMG BSS Parameter Change
+    {153, 5, 5},    // DMG Beam Refinement
+    {154, 0, 255},  // Channel Measurement Feedback
+    {157, 2, 2},    // Awake Window
+    {158, 22, 255}, // Multi-band
+    {159, 1, 1},    // ADDBA Extension
+    {160, 1, 255},  // Next PCP List
+    {161, 13, 13},  // PCP Handover
+    {162, 8, 8},    // DMG Link Margin
+    {163, 4, 255},  // Switching Stream
+    {164, 11, 11},  // Session Transition
+    {165, 0, 255},  // Dynamic Tone Pairing Report
+    {166, 2, 255},  // Cluster Report
+    {167, 2, 2},    // Relay Capabilities
+    {168, 8, 8},    // Relay Transfer Parameter Set
+    {169, 1, 1},    // BeamLink Maintenance
+    {170, 7, 255},  // Mutiple MAC Sublayers
+    {171, 1, 255},  // U-PID
+    {172, 5, 5},    // DMG Link Adaptation Acknowledgment
+    {174, 6, 6},    // MCCAOP Advertisement Overview
+    {175, 17, 17},  // Quiet Period Request
+    {177, 10, 10},  // Quiet Period Response
+    {181, 2, 255},  // QMF Policy
+    {182, 11, 15},  // ECAPC Policy
+    {183, 1, 1},    // Cluster Time Offset
+    {184, 1, 1},    // Intra-Access Category Priority
+    {185, 2, 255},  // SCS Descriptor
+    {186, 21, 255}, // QLoad Report
+    {187, 1, 1},    // HCCA TXOP Update Count
+    {188, 1, 255},  // Higher Layer Stream ID
+    {189, 6, 6},    // GCR Group Address
+    {190, 3, 3},    // Antenna Sector ID Pattern
+    {191, 12, 12},  // VHT Capabilities
+    {192, 5, 5},    // VHT Operation
+    {193, 6, 6},    // Extended BSS Load
+    {194, 3, 3},    // Wide Bandwidth Channel Switch
+    {195, 2, 5},    // Transmit Power Envelope
+    {196, 0, 255},  // Channel Switch Wrapper
+    {197, 2, 2},    // AID
+    {198, 1, 7},    // Quiet Channel
+    {199, 1, 1},    // Operating Mode Notification
+    {200, 1, 33},   // UPSIM
+    {201, 0, 255},  // Reduced Neighbor Report
+    {202, 6, 6},    // TVHT Operation
+    {204, 16, 16},  // Device Location
+    {205, 1, 255},  // White Space Map
+    {206, 9, 9},    // Fine Timing Measurement Parameters
+    {221, 1, 254},  // Vendor Specific
+    {255, 1, 254},  // FTM synchronization Information, Extended Request, Estimated Service Parameters, Future Channel Guidance
+    {-1, 0, 0}};
 
-//802.11ax
-static int ie_ranges2020[260][3]={
-{0, 0, 32},    // SSID
-{1, 1, 8},     // Supported Rates and BSS Membership Selectors
-{3, 1, 1},     // DSSS Parameter Set
-{4, 6, 6},     // CF Parameter Set
-{5, 4, 254},   // TIM
-{6, 2, 2},     // IBSS Parameter Set
-{7, 6, 254},   // Country
-{10, 0, 254},  // Request
-{11, 5, 5},    // BSS Load
-{12, 18, 18},  // EDCA Parameter Set
-{13, 55, 55},  // TSPEC
-{14, 0, 255},  // TCLAS
-{15, 14, 14},  // Schedule
-{16, 1, 253},  // Challenge text
-{32, 1, 1},    // Power Constraint
-{33, 2, 2},    // Power Capability
-{34, 0, 0},    // TPC Request
-{35, 2, 2},    // TPC Report
-{36, 2, 2},    // Supported Channels
-{37, 3, 3},    // Channel Switch Announcement
-{38, 3, 255},  // Measurement Request
-{39, 3, 255},  // Measurement Report
-{40, 6, 6},    // Quiet
-{41, 9, 253},  // IBSS DFS
-{42, 1, 1},    // ERP
-{43, 4, 4},    // TS Delay
-{44, 1, 1},    // TCLAS Processing
-{45, 26, 26},  // HT Capabilities
-{46, 1, 1},    // QoS Capability
-{48, 34, 254}, // RSN
-{50, 1, 255},  // Extended Supported Rates and BSS Membership Selectors
-{51, 1, 255},  // AP Channel Report
-{52, 13, 255}, // Neighbor Report
-{53, 1, 1},    // RCPI
-{54, 3, 3},    // Mobility Domain
-{55, 82, 255}, // Fast BSS Transition
-{56, 5, 5},    // Timeout Interval
-{57, 4, 4},    // RIC Data (RDE)
-{58, 20, 20},  // DSE Registered Location
-{59, 2, 253},  // Supported Operating Classes
-{60, 4, 4},    // Extended Channel Switch Announcement
-{61, 22, 22},  // HT Operation
-{62, 1, 1},    // Secondary Channel Offset
-{63, 1, 1},    // BSS Average Access Delay
-{64, 1, 1},    // Antenna
-{65, 1, 1},    // RSNI
-{66, 1, 255},  // Measurement Pilot Transmission
-{67, 2, 26},   // BSS Available Admission Capacity
-{68, 4, 4},    // BSS AC Access Delay
-{69, 1, 16},   // Time Advertisement
-{70, 5, 5},    // RM Enabled Capabilities
-{71, 1, 255},  // Multiple BSSID
-{72, 1, 1},    // 20/40 BSS Coexistence
-{73, 1, 255},  // 20/40 BSS Intolerant Channel Report
-{74, 14, 14},  // Overlapping BSS Scan Parameters
-{75, 1, 255},  // RIC Descriptor
-{76, 16, 16},  // Management MIC
-{78, 3, 255},  // Event Request
-{79, 3, 255},  // Event Report
-{80, 4, 255},  // Diagnostic Request
-{81, 3, 255},  // Diagnostic Report
-{82, 0, 255},  // Location Parameters
-{83, 2, 2},    // Nontransmitted BSSID Capability
-{84, 0, 255},  // SSID List
-{85, 1, 3},    // Multiple BSSID-Index
-{86, 1, 255},  // FMS Descriptor
-{87, 1, 255},  // FMS Request
-{88, 16, 255}, // FMS Response
-{89, 1, 3},    // QoS Traffic Capability
-{90, 3, 3},    // BSS Max Idle Period 
-{91, 4, 255},  // TFS Request
-{92, 4, 254},  // TFS Response
-{93, 4, 4},    // WNM Sleep Mode
-{94, 1, 1},    // TIM Broadcast Request21, 0, 255}, // Vendor Specific
-{95, 1, 10},   // TIM Broadcast Response
-{96, 21, 21},  // Collocated Interference Report
-{97, 1, 255},  // Channel Usage
-{98, 1, 255},  // Time Zone
-{99, 1, 255},  // DMS Request
-{100, 1, 255}, // DMS Response
-{101, 18, 18}, // Link Identifier
-{102, 18, 18}, // Wakeup Schedule
-{104, 4, 4},   // Channel Switch Timing
-{105, 3, 3},   // PTI Control
-{106, 3, 3},   // TPU Buffer Status
-{107, 3, 11},  // Interworking
-{108, 0, 255}, // Advertisement Protocol
-{109, 1, 1},   // Expedited Bandwidth Request
-{110, 16, 58}, // QoS Map
-{111, 0, 255}, // Roaming Consortium
-{112, 8, 8},   // Emergency Alert Identifier
-{113, 7, 7},   // Mesh Configuration
-{114, 0, 32},  // Mesh ID
-{115, 1, 255}, // Mesh Link Metric Report
-{116, 14, 14}, // Congestion Notification
-{117, 3, 23},  // Mesh Peering Management
-{118, 6, 6},   // Mesh Channel Switch Parameters
-{119, 2, 2},   // Mesh Awake Window
-{120, 1, 253}, // Beacon Timing 
-{121, 6, 6},   // MCCAOP Setup Request
-{122, 2, 7},   // MCCAOP Setup Reply
-{123, 2, 255}, // MCCAOP Advertisement
-{124, 1, 7},   // MCCAOP Teardown
-{125, 15, 15}, // GANN
-{126, 21, 21}, // RANN
-{127, 1, 10},  // Extended Capabilities 
-{130, 37, 252},// PREQ 
-{131, 31, 37}, // PREP
-{132, 15, 249},// PERR 
-{137, 30, 255},// PXU 
-{138, 7, 7},   // PXUC
-{139, 76, 255},// Authenticated Mesh Peering Exchange 
-{140, 16, 16}, // MIC
-{141, 1, 255}, // Destination URI
-{142, 12, 255},// U-APSD Coexistence 
-{143, 8, 8},   // DMG Wakeup Schedule
-{144, 15, 255},// Extended Schedule
-{145, 2, 254}, // STA Availability
-{146, 15, 255},// DMG TSPEC
-{147, 6, 6},   // Next DMG ATI
-{148, 22, 22}, // DMG Capabilities
-{151, 10, 10}, // DMG Operation
-{152, 7, 7},   // DMG BSS Parameter Change
-{153, 5, 5},   // DMG Beam Refinement
-{154, 0, 255}, // Channel Measurement Feedback
-{157, 2, 2},   // Awake Window
-{158, 22, 255},// Multi-band
-{159, 1, 1},   // ADDBA Extension
-{160, 1, 255}, // Next PCP List
-{161, 13, 13}, // PCP Handover
-{162, 8, 8},   // DMG Link Margin
-{163, 4, 255}, // Switching Stream
-{164, 11, 11}, // Session Transition
-{165, 0, 255}, // Dynamic Tone Pairing Report
-{166, 2, 255}, // Cluster Report
-{167, 2, 2},   // Relay Capabilities
-{168, 8, 8},   // Relay Transfer Parameter Set
-{169, 1, 1},   // BeamLink Maintenance
-{170, 7, 255}, // Mutiple MAC Sublayers
-{171, 1, 255}, // U-PID
-{172, 5, 5},   // DMG Link Adaptation Acknowledgment
-{174, 6, 6},   // MCCAOP Advertisement Overview
-{175, 17, 17}, // Quiet Period Request
-{177, 10, 10}, // Quiet Period Response
-{181, 2, 255}, // QMF Policy
-{182, 11, 15}, // ECAPC Policy
-{183, 1, 1},   // Cluster Time Offset
-{184, 1, 1},   // Intra-Access Category Priority
-{185, 2, 255}, // SCS Descriptor
-{186, 21, 255},// QLoad Report
-{187, 1, 1},   // HCCA TXOP Update Count
-{188, 1, 255}, // Higher Layer Stream ID
-{189, 6, 6},   // GCR Group Address 
-{190, 3, 3},   // Antenna Sector ID Pattern
-{191, 12, 12}, // VHT Capabilities
-{192, 5, 5},   // VHT Operation
-{193, 6, 6},   // Extended BSS Load
-{194, 3, 3},   // Wide Bandwidth Channel Switch
-{195, 2, 5},   // Transmit Power Envelope
-{196, 0, 255}, // Channel Switch Wrapper
-{197, 2, 2},   // AID
-{198, 1, 7},   // Quiet Channel
-{199, 1, 1},   // Operating Mode Notification
-{200, 1, 33},  // UPSIM
-{201, 0, 255}, // Reduced Neighbor Report
-{202, 6, 6},   // TVHT Operation
-{204, 16, 16}, // Device Location
-{205, 1, 255}, // White Space Map
-{206, 9, 9},   // Fine Timing Measurement Parameters
-{207, 1, 1},   // S1G Open-Loop Link Margin Index
-{208, 3, 12},  // RPS
-{209, 4, 8},   // Page Slice
-{210, 1, 16},  // AID Request
-{211, 5, 5},   // AID Response
-{212, 3, 255}, // S1G Sector Operation
-{213, 8, 8},   // S1G Beacon Compatibility
-{214, 2, 2},   // Short Beacon Interval
-{215, 1, 1},   // Change Sequence
-{216, 7, 28},  // TWT
-{217, 15, 15}, // S1G Capabilities   
-{220, 2, 4},   // Subchannel Selective Transmission
-{221, 1, 254}, // Vendor Specific
-{222, 2, 3},   // Authentication Control
-{223, 1, 1},   // TSF Timer Accuracy
-{224, 1, 7},   // S1G Relay
-{225, 7, 14},  // Reachable Address
-{226, 1, 9},   // S1G Relay Discovery
-{228, 8, 248}, // AID Announcement
-{229, 2, 7},   // PV1 Probe Response Option
-{230, 4, 4},   // EL Operation
-{231, 1, 254}, // Sectorized Group ID List
-{232, 6, 6},   // S1G Operation
-{233, 1, 18},  // Header Compression
-{234, 2, 2},   // SST Operation
-{235, 2, 2},   // MAD
-{236, 1, 2},   // S1G Relay Activation
-{237, 2, 254}, // CAG Number
-{239, 1, 1},   // AP-CSN
-{240, 2, 254}, // FILS Indication
-{241, 2, 4},   // DILS
-{242, 1, 254}, // Fragment
-{244, 1, 254}, // RSN Extension
-{255, 1, 254}, // Element ID Extension present
-{-1, 0, 0}
-};
+// 802.11ax
+static int ie_ranges2020[260][3] = {
+    {0, 0, 32},     // SSID
+    {1, 1, 8},      // Supported Rates and BSS Membership Selectors
+    {3, 1, 1},      // DSSS Parameter Set
+    {4, 6, 6},      // CF Parameter Set
+    {5, 4, 254},    // TIM
+    {6, 2, 2},      // IBSS Parameter Set
+    {7, 6, 254},    // Country
+    {10, 0, 254},   // Request
+    {11, 5, 5},     // BSS Load
+    {12, 18, 18},   // EDCA Parameter Set
+    {13, 55, 55},   // TSPEC
+    {14, 0, 255},   // TCLAS
+    {15, 14, 14},   // Schedule
+    {16, 1, 253},   // Challenge text
+    {32, 1, 1},     // Power Constraint
+    {33, 2, 2},     // Power Capability
+    {34, 0, 0},     // TPC Request
+    {35, 2, 2},     // TPC Report
+    {36, 2, 2},     // Supported Channels
+    {37, 3, 3},     // Channel Switch Announcement
+    {38, 3, 255},   // Measurement Request
+    {39, 3, 255},   // Measurement Report
+    {40, 6, 6},     // Quiet
+    {41, 9, 253},   // IBSS DFS
+    {42, 1, 1},     // ERP
+    {43, 4, 4},     // TS Delay
+    {44, 1, 1},     // TCLAS Processing
+    {45, 26, 26},   // HT Capabilities
+    {46, 1, 1},     // QoS Capability
+    {48, 34, 254},  // RSN
+    {50, 1, 255},   // Extended Supported Rates and BSS Membership Selectors
+    {51, 1, 255},   // AP Channel Report
+    {52, 13, 255},  // Neighbor Report
+    {53, 1, 1},     // RCPI
+    {54, 3, 3},     // Mobility Domain
+    {55, 82, 255},  // Fast BSS Transition
+    {56, 5, 5},     // Timeout Interval
+    {57, 4, 4},     // RIC Data (RDE)
+    {58, 20, 20},   // DSE Registered Location
+    {59, 2, 253},   // Supported Operating Classes
+    {60, 4, 4},     // Extended Channel Switch Announcement
+    {61, 22, 22},   // HT Operation
+    {62, 1, 1},     // Secondary Channel Offset
+    {63, 1, 1},     // BSS Average Access Delay
+    {64, 1, 1},     // Antenna
+    {65, 1, 1},     // RSNI
+    {66, 1, 255},   // Measurement Pilot Transmission
+    {67, 2, 26},    // BSS Available Admission Capacity
+    {68, 4, 4},     // BSS AC Access Delay
+    {69, 1, 16},    // Time Advertisement
+    {70, 5, 5},     // RM Enabled Capabilities
+    {71, 1, 255},   // Multiple BSSID
+    {72, 1, 1},     // 20/40 BSS Coexistence
+    {73, 1, 255},   // 20/40 BSS Intolerant Channel Report
+    {74, 14, 14},   // Overlapping BSS Scan Parameters
+    {75, 1, 255},   // RIC Descriptor
+    {76, 16, 16},   // Management MIC
+    {78, 3, 255},   // Event Request
+    {79, 3, 255},   // Event Report
+    {80, 4, 255},   // Diagnostic Request
+    {81, 3, 255},   // Diagnostic Report
+    {82, 0, 255},   // Location Parameters
+    {83, 2, 2},     // Nontransmitted BSSID Capability
+    {84, 0, 255},   // SSID List
+    {85, 1, 3},     // Multiple BSSID-Index
+    {86, 1, 255},   // FMS Descriptor
+    {87, 1, 255},   // FMS Request
+    {88, 16, 255},  // FMS Response
+    {89, 1, 3},     // QoS Traffic Capability
+    {90, 3, 3},     // BSS Max Idle Period
+    {91, 4, 255},   // TFS Request
+    {92, 4, 254},   // TFS Response
+    {93, 4, 4},     // WNM Sleep Mode
+    {94, 1, 1},     // TIM Broadcast Request21, 0, 255}, // Vendor Specific
+    {95, 1, 10},    // TIM Broadcast Response
+    {96, 21, 21},   // Collocated Interference Report
+    {97, 1, 255},   // Channel Usage
+    {98, 1, 255},   // Time Zone
+    {99, 1, 255},   // DMS Request
+    {100, 1, 255},  // DMS Response
+    {101, 18, 18},  // Link Identifier
+    {102, 18, 18},  // Wakeup Schedule
+    {104, 4, 4},    // Channel Switch Timing
+    {105, 3, 3},    // PTI Control
+    {106, 3, 3},    // TPU Buffer Status
+    {107, 3, 11},   // Interworking
+    {108, 0, 255},  // Advertisement Protocol
+    {109, 1, 1},    // Expedited Bandwidth Request
+    {110, 16, 58},  // QoS Map
+    {111, 0, 255},  // Roaming Consortium
+    {112, 8, 8},    // Emergency Alert Identifier
+    {113, 7, 7},    // Mesh Configuration
+    {114, 0, 32},   // Mesh ID
+    {115, 1, 255},  // Mesh Link Metric Report
+    {116, 14, 14},  // Congestion Notification
+    {117, 3, 23},   // Mesh Peering Management
+    {118, 6, 6},    // Mesh Channel Switch Parameters
+    {119, 2, 2},    // Mesh Awake Window
+    {120, 1, 253},  // Beacon Timing
+    {121, 6, 6},    // MCCAOP Setup Request
+    {122, 2, 7},    // MCCAOP Setup Reply
+    {123, 2, 255},  // MCCAOP Advertisement
+    {124, 1, 7},    // MCCAOP Teardown
+    {125, 15, 15},  // GANN
+    {126, 21, 21},  // RANN
+    {127, 1, 10},   // Extended Capabilities
+    {130, 37, 252}, // PREQ
+    {131, 31, 37},  // PREP
+    {132, 15, 249}, // PERR
+    {137, 30, 255}, // PXU
+    {138, 7, 7},    // PXUC
+    {139, 76, 255}, // Authenticated Mesh Peering Exchange
+    {140, 16, 16},  // MIC
+    {141, 1, 255},  // Destination URI
+    {142, 12, 255}, // U-APSD Coexistence
+    {143, 8, 8},    // DMG Wakeup Schedule
+    {144, 15, 255}, // Extended Schedule
+    {145, 2, 254},  // STA Availability
+    {146, 15, 255}, // DMG TSPEC
+    {147, 6, 6},    // Next DMG ATI
+    {148, 22, 22},  // DMG Capabilities
+    {151, 10, 10},  // DMG Operation
+    {152, 7, 7},    // DMG BSS Parameter Change
+    {153, 5, 5},    // DMG Beam Refinement
+    {154, 0, 255},  // Channel Measurement Feedback
+    {157, 2, 2},    // Awake Window
+    {158, 22, 255}, // Multi-band
+    {159, 1, 1},    // ADDBA Extension
+    {160, 1, 255},  // Next PCP List
+    {161, 13, 13},  // PCP Handover
+    {162, 8, 8},    // DMG Link Margin
+    {163, 4, 255},  // Switching Stream
+    {164, 11, 11},  // Session Transition
+    {165, 0, 255},  // Dynamic Tone Pairing Report
+    {166, 2, 255},  // Cluster Report
+    {167, 2, 2},    // Relay Capabilities
+    {168, 8, 8},    // Relay Transfer Parameter Set
+    {169, 1, 1},    // BeamLink Maintenance
+    {170, 7, 255},  // Mutiple MAC Sublayers
+    {171, 1, 255},  // U-PID
+    {172, 5, 5},    // DMG Link Adaptation Acknowledgment
+    {174, 6, 6},    // MCCAOP Advertisement Overview
+    {175, 17, 17},  // Quiet Period Request
+    {177, 10, 10},  // Quiet Period Response
+    {181, 2, 255},  // QMF Policy
+    {182, 11, 15},  // ECAPC Policy
+    {183, 1, 1},    // Cluster Time Offset
+    {184, 1, 1},    // Intra-Access Category Priority
+    {185, 2, 255},  // SCS Descriptor
+    {186, 21, 255}, // QLoad Report
+    {187, 1, 1},    // HCCA TXOP Update Count
+    {188, 1, 255},  // Higher Layer Stream ID
+    {189, 6, 6},    // GCR Group Address
+    {190, 3, 3},    // Antenna Sector ID Pattern
+    {191, 12, 12},  // VHT Capabilities
+    {192, 5, 5},    // VHT Operation
+    {193, 6, 6},    // Extended BSS Load
+    {194, 3, 3},    // Wide Bandwidth Channel Switch
+    {195, 2, 5},    // Transmit Power Envelope
+    {196, 0, 255},  // Channel Switch Wrapper
+    {197, 2, 2},    // AID
+    {198, 1, 7},    // Quiet Channel
+    {199, 1, 1},    // Operating Mode Notification
+    {200, 1, 33},   // UPSIM
+    {201, 0, 255},  // Reduced Neighbor Report
+    {202, 6, 6},    // TVHT Operation
+    {204, 16, 16},  // Device Location
+    {205, 1, 255},  // White Space Map
+    {206, 9, 9},    // Fine Timing Measurement Parameters
+    {207, 1, 1},    // S1G Open-Loop Link Margin Index
+    {208, 3, 12},   // RPS
+    {209, 4, 8},    // Page Slice
+    {210, 1, 16},   // AID Request
+    {211, 5, 5},    // AID Response
+    {212, 3, 255},  // S1G Sector Operation
+    {213, 8, 8},    // S1G Beacon Compatibility
+    {214, 2, 2},    // Short Beacon Interval
+    {215, 1, 1},    // Change Sequence
+    {216, 7, 28},   // TWT
+    {217, 15, 15},  // S1G Capabilities
+    {220, 2, 4},    // Subchannel Selective Transmission
+    {221, 1, 254},  // Vendor Specific
+    {222, 2, 3},    // Authentication Control
+    {223, 1, 1},    // TSF Timer Accuracy
+    {224, 1, 7},    // S1G Relay
+    {225, 7, 14},   // Reachable Address
+    {226, 1, 9},    // S1G Relay Discovery
+    {228, 8, 248},  // AID Announcement
+    {229, 2, 7},    // PV1 Probe Response Option
+    {230, 4, 4},    // EL Operation
+    {231, 1, 254},  // Sectorized Group ID List
+    {232, 6, 6},    // S1G Operation
+    {233, 1, 18},   // Header Compression
+    {234, 2, 2},    // SST Operation
+    {235, 2, 2},    // MAD
+    {236, 1, 2},    // S1G Relay Activation
+    {237, 2, 254},  // CAG Number
+    {239, 1, 1},    // AP-CSN
+    {240, 2, 254},  // FILS Indication
+    {241, 2, 4},    // DILS
+    {242, 1, 254},  // Fragment
+    {244, 1, 254},  // RSN Extension
+    {255, 1, 254},  // Element ID Extension present
+    {-1, 0, 0}};
 
 // Element ID Extension ID
-static int eie_ranges2020[260][3]={
-// 0 Reserved
-{1, 1, 1},     // Association Delay Info
-{2, 2, 2},     // FILS Request Parameters
-{3, 1, 254},   // FILS Key Confirmation
-{4, 8, 8},     // FILS Session
-{5, 12, 254},  // FILS HLP Container
-{6, 1, 21},    // FILS IP Address Assignment
-{7, 8, 254},   // Key Delivery
-{8, 1, 254},   // FILS Wrapped Data
-{9, 4, 4},     // FTM Synchronization Information
-{10, 1, 254},  // Extended Request
-{11, 3, 12},   // Estimated Service Parameters Inbound
-{12, 2, 254},  // FILS Public Key
-{13, 16, 16},  // FILS Nonce
-{14, 4, 254},  // Future Channel Guidance
-{15, 1, 254},  // Service Hint
-{16, 6, 254},  // Service Hash
-{17, 12, 12},  // CDMG Capabilities
-{18, 20, 20},  // Dynamic Bandwidth Control
-{19, 19, 254}, // CDMG Extended Schedule
-{20, 5, 254},  // SSW Report
-{21, 11, 11},    // Cluster Probe
-{22, 13, 22},    // Extended Cluster Report
-{23, 11, 11},    // Cluster Switch Announcement
-{24, 2, 2},    // Enhanced Beam Tracking
-{25, 11, 254},    // SPSH Report
-{26, 2, 2},    // Clustering Interference Assessment
-{27, 21, 21},    // CMMG Capabilities
-{28, 3, 3},    // CMMG Operation
-{29, 2, 2},    // CMMG Operating Mode Notification
-{30, 8, 8},    // CMMG Link Margin
-{31, 5, 5},    // CMMG Link Adaptation
-// 32 Reserved
-{33, 1, 254},  // Password identifier
-{34, 3, 3},  // GLK-GCR Parameter
-// 35-39 Reserved
-{40, 1, 254},  // GAS Extension
-// 41-43 Reserved
-{44, 1, 254},  // Vendor Specific Request Element
-// 45-51 Reserved
-{52, 3, 3},  // Max Channel Switch Time
-{53, 1, 5},  // Estimated Service Parameters Outbound
-{54, 3, 6},  // Operating Channel Information
-// 55 Reserved
-{56, 1, 254},  // Non-Inheritance
-// 57-87 Reserved
-{88, 7, 254},  // MSCS Descriptor element
-{89, 1, 254},  // TCLAS Mask
-{90, 4, 4},  // Supplemental Class 2 Capabilities
-{91, 8, 8},  // OCT Source
-{92, 1, 254},  // Rejected Groups
-{93, 1, 254},  // Anti-Clogging Token Container
-// 94-255 Reserved
-{-1, 0, 0}
-};
-
+static int eie_ranges2020[260][3] = {
+    // 0 Reserved
+    {1, 1, 1},     // Association Delay Info
+    {2, 2, 2},     // FILS Request Parameters
+    {3, 1, 254},   // FILS Key Confirmation
+    {4, 8, 8},     // FILS Session
+    {5, 12, 254},  // FILS HLP Container
+    {6, 1, 21},    // FILS IP Address Assignment
+    {7, 8, 254},   // Key Delivery
+    {8, 1, 254},   // FILS Wrapped Data
+    {9, 4, 4},     // FTM Synchronization Information
+    {10, 1, 254},  // Extended Request
+    {11, 3, 12},   // Estimated Service Parameters Inbound
+    {12, 2, 254},  // FILS Public Key
+    {13, 16, 16},  // FILS Nonce
+    {14, 4, 254},  // Future Channel Guidance
+    {15, 1, 254},  // Service Hint
+    {16, 6, 254},  // Service Hash
+    {17, 12, 12},  // CDMG Capabilities
+    {18, 20, 20},  // Dynamic Bandwidth Control
+    {19, 19, 254}, // CDMG Extended Schedule
+    {20, 5, 254},  // SSW Report
+    {21, 11, 11},  // Cluster Probe
+    {22, 13, 22},  // Extended Cluster Report
+    {23, 11, 11},  // Cluster Switch Announcement
+    {24, 2, 2},    // Enhanced Beam Tracking
+    {25, 11, 254}, // SPSH Report
+    {26, 2, 2},    // Clustering Interference Assessment
+    {27, 21, 21},  // CMMG Capabilities
+    {28, 3, 3},    // CMMG Operation
+    {29, 2, 2},    // CMMG Operating Mode Notification
+    {30, 8, 8},    // CMMG Link Margin
+    {31, 5, 5},    // CMMG Link Adaptation
+    // 32 Reserved
+    {33, 1, 254}, // Password identifier
+    {34, 3, 3},   // GLK-GCR Parameter
+    // 35-39 Reserved
+    {40, 1, 254}, // GAS Extension
+    // 41-43 Reserved
+    {44, 1, 254}, // Vendor Specific Request Element
+    // 45-51 Reserved
+    {52, 3, 3}, // Max Channel Switch Time
+    {53, 1, 5}, // Estimated Service Parameters Outbound
+    {54, 3, 6}, // Operating Channel Information
+    // 55 Reserved
+    {56, 1, 254}, // Non-Inheritance
+    // 57-87 Reserved
+    {88, 7, 254}, // MSCS Descriptor element
+    {89, 1, 254}, // TCLAS Mask
+    {90, 4, 4},   // Supplemental Class 2 Capabilities
+    {91, 8, 8},   // OCT Source
+    {92, 1, 254}, // Rejected Groups
+    {93, 1, 254}, // Anti-Clogging Token Container
+    // 94-255 Reserved
+    {-1, 0, 0}};
 
 typedef struct _default_ie
 {
     uint8_t len;
     char *ie;
-}default_ie;
+} default_ie;
 
 static default_ie default_ie_data[256] = {
-/* 0 ssid */ {12, "\x00\x0A\x77\x66\x5F\x74\x65\x73\x74\x69\x6E\x67"},
-/* 1 */ {10, "\x01\x08\x82\x84\x8b\x96\x12\x24\x48\x6c"}, 
-/* 2 */ {0, ""},
-/* 3 */ {3, "\x03\x01\x0b"},  // 11
-/* 4 */ {0, ""},
-/* 5 */ {6, "\x05\x04\x00\x01\x00\x18"},
-/* 6 */ {0, ""},
-/* 7 */ {0, ""},
-/* 8 */ {0, ""},
-/* 9 */ {0, ""},
-/* 10 */ {0, ""},
-/* 11 */ {7, "\x0b\x05\x04\x00\x33\x12\x7a"},
-/* 12 */ {0, ""},
-/* 13 */ {0, ""},
-/* 14 */ {0, ""},
-/* 15 */ {0, ""},
-/* 16 */ {128, "\xcc\x66\x33\x99\xcb\xd0\x42\xeb\x5c\x1e\xf1\x8a\xae\x73\x67\xc5\xd7\x46\xc8\xbe\xfa\xeb\xa4\x23\xe6\xc9\x4a\x57\x42\x16\xb6\xb0\x78\xc2\xeb\x52\x4b\x58\x3b\x20\x04\xda\x2c\x9f\x06\x35\xa9\xb2\x90\x7a\xea\x56\xb0\x80\xfd\x10\x86\xcc\x9a\xd6\xb6\xb7\xb9\xc8\xba\x16\xa7\x3d\xe8\x45\xd0\x83\xe3\x1e\x0a\x56\x4e\x77\xbe\x0b\xd0\xbf\x03\xe1\xf3\x9e\x0f\x7d\x11\x74\xa7\x3d\xe8\x41\x0f\xc3\xf3\x9c\x19\xc9\xb4\xa2\xef\x7a\xd6\x4f\x7f\x01\x0b\x5d\x77\x21\x0e\x8d\x90\x7f\x05\x2f\x7c\xe2\x13\x9c\xe7\x39\xcb\xd1\xb8\xc1"},
-/* 17 */ {0, ""},
-/* 18 */ {0, ""},
-/* 19 */ {0, ""},
-/* 20 */ {0, ""},
-/* 21 */ {0, ""},
-/* 22 */ {0, ""},
-/* 23 */ {0, ""},
-/* 24 */ {0, ""},
-/* 25 */ {0, ""},
-/* 26 */ {0, ""},
-/* 27 */ {0, ""},
-/* 28 */ {0, ""},
-/* 29 */ {0, ""},
-/* 30 */ {0, ""},
-/* 31 */ {0, ""},
-/* 32 */ {6, "\x32\x04\x30\x48\x60\x6c"},
-/* 33 */ {0, ""},
-/* 34 */ {0, ""},
-/* 35 */ {0, ""},
-/* 36 */ {0, ""},
-/* 37 */ {0, ""},
-/* 38 */ {0, ""},
-/* 39 */ {0, ""},
-/* 40 */ {0, ""},
-/* 41 */ {0, ""},
-/* 42 */ {3, "\x2a\x01\x00"},
-/* 43 */ {0, ""},
-/* 44 */ {0, ""},
-/* 45 */ {28, "\x2d\x1a\xef\x09\x17\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"},
-/* 46 */ {0, ""},
-/* 47 */ {0, ""},
-/* 48 */ {22, "\x30\x14\x01\x00\x00\x0f\xac\x04\x01\x00\x00\x0f\xac\x04\x01\x00\x00\x0f\xac\x02\x00\x00"},
-/* 49 */ {0, ""},
-/* 50 */ {6, "\x32\x04\x0c\x18\x30\x60"},
-/* 51 */ {0, ""},
-/* 52 */ {0, ""},
-/* 53 */ {0, ""},
-/* 54 */ {0, ""},
-/* 55 */ {0, ""},
-/* 56 */ {0, ""},
-/* 57 */ {0, ""},
-/* 58 */ {0, ""},
-/* 59 */ {0, ""},
-/* 60 */ {0, ""},
-/* 61 */ {24, "\x3d\x16\x30\x07\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"},
-/* 62 */ {0, ""},
-/* 63 */ {0, ""},
-/* 64 */ {0, ""},
-/* 65 */ {0, ""},
-/* 66 */ {0, ""},
-/* 67 */ {0, ""},
-/* 68 */ {0, ""},
-/* 69 */ {0, ""},
-/* 70 */ {0, ""},
-/* 71 */ {0, ""},
-/* 72 */ {0, ""},
-/* 73 */ {0, ""},
-/* 74 */ {0, ""},
-/* 75 */ {0, ""},
-/* 76 */ {0, ""},
-/* 77 */ {0, ""},
-/* 78 */ {0, ""},
-/* 79 */ {0, ""},
-/* 80 */ {0, ""},
-/* 81 */ {0, ""},
-/* 82 */ {0, ""},
-/* 83 */ {0, ""},
-/* 84 */ {0, ""},
-/* 85 */ {0, ""},
-/* 86 */ {0, ""},
-/* 87 */ {0, ""},
-/* 88 */ {0, ""},
-/* 89 */ {0, ""},
-/* 90 */ {0, ""},
-/* 91 */ {0, ""},
-/* 92 */ {0, ""},
-/* 93 */ {0, ""},
-/* 94 */ {0, ""},
-/* 95 */ {0, ""},
-/* 96 */ {0, ""},
-/* 97 */ {0, ""},
-/* 98 */ {0, ""},
-/* 99 */ {0, ""},
-/* 100 */ {0, ""},
-/* 101 */ {0, ""},
-/* 102 */ {0, ""},
-/* 103 */ {0, ""},
-/* 104 */ {0, ""},
-/* 105 */ {0, ""},
-/* 106 */ {0, ""},
-/* 107 */ {0, ""},
-/* 108 */ {0, ""},
-/* 109 */ {0, ""},
-/* 110 */ {0, ""},
-/* 111 */ {0, ""},
-/* 112 */ {0, ""},
-/* 113 */ {0, ""},
-/* 114 */ {0, ""},
-/* 115 */ {0, ""},
-/* 116 */ {0, ""},
-/* 117 */ {0, ""},
-/* 118 */ {0, ""},
-/* 119 */ {0, ""},
-/* 120 */ {0, ""},
-/* 121 */ {0, ""},
-/* 122 */ {0, ""},
-/* 123 */ {0, ""},
-/* 124 */ {0, ""},
-/* 125 */ {0, ""},
-/* 126 */ {0, ""},
-/* 127 */ {10, "\x7f\x08\x04\x00\x00\x00\x00\x00\x00\x40"},
-/* 128 */ {0, ""},
-/* 129 */ {0, ""},
-/* 130 */ {0, ""},
-/* 131 */ {0, ""},
-/* 132 */ {0, ""},
-/* 133 */ {0, ""},
-/* 134 */ {0, ""},
-/* 135 */ {0, ""},
-/* 136 */ {0, ""},
-/* 137 */ {0, ""},
-/* 138 */ {0, ""},
-/* 139 */ {0, ""},
-/* 140 */ {0, ""},
-/* 141 */ {0, ""},
-/* 142 */ {0, ""},
-/* 143 */ {0, ""},
-/* 144 */ {0, ""},
-/* 145 */ {0, ""},
-/* 146 */ {0, ""},
-/* 147 */ {0, ""},
-/* 148 */ {0, ""},
-/* 149 */ {0, ""},
-/* 150 */ {0, ""},
-/* 151 */ {0, ""},
-/* 152 */ {0, ""},
-/* 153 */ {0, ""},
-/* 154 */ {0, ""},
-/* 155 */ {0, ""},
-/* 156 */ {0, ""},
-/* 157 */ {0, ""},
-/* 158 */ {0, ""},
-/* 159 */ {0, ""},
-/* 160 */ {0, ""},
-/* 161 */ {0, ""},
-/* 162 */ {0, ""},
-/* 163 */ {0, ""},
-/* 164 */ {0, ""},
-/* 165 */ {0, ""},
-/* 166 */ {0, ""},
-/* 167 */ {0, ""},
-/* 168 */ {0, ""},
-/* 169 */ {0, ""},
-/* 170 */ {0, ""},
-/* 171 */ {0, ""},
-/* 172 */ {0, ""},
-/* 173 */ {0, ""},
-/* 174 */ {0, ""},
-/* 175 */ {0, ""},
-/* 176 */ {0, ""},
-/* 177 */ {0, ""},
-/* 178 */ {0, ""},
-/* 179 */ {0, ""},
-/* 180 */ {0, ""},
-/* 181 */ {0, ""},
-/* 182 */ {0, ""},
-/* 183 */ {0, ""},
-/* 184 */ {0, ""},
-/* 185 */ {0, ""},
-/* 186 */ {0, ""},
-/* 187 */ {0, ""},
-/* 188 */ {0, ""},
-/* 189 */ {0, ""},
-/* 190 */ {0, ""},
-/* 191 */ {0, ""},
-/* 192 */ {0, ""},
-/* 193 */ {0, ""},
-/* 194 */ {0, ""},
-/* 195 */ {0, ""},
-/* 196 */ {0, ""},
-/* 197 */ {0, ""},
-/* 198 */ {0, ""},
-/* 199 */ {0, ""},
-/* 200 */ {0, ""},
-/* 201 */ {0, ""},
-/* 202 */ {0, ""},
-/* 203 */ {0, ""},
-/* 204 */ {0, ""},
-/* 205 */ {0, ""},
-/* 206 */ {0, ""},
-/* 207 */ {0, ""},
-/* 208 */ {0, ""},
-/* 209 */ {0, ""},
-/* 210 */ {0, ""},
-/* 211 */ {0, ""},
-/* 212 */ {0, ""},
-/* 213 */ {0, ""},
-/* 214 */ {0, ""},
-/* 215 */ {0, ""},
-/* 216 */ {0, ""},
-/* 217 */ {0, ""},
-/* 218 */ {0, ""},
-/* 219 */ {0, ""},
-/* 220 */ {0, ""},
-/* 221 */ {9, "\xdd\x07\x00\x0c\x43\x03\x00\x00\x00"},
-/* 222 */ {0, ""},
-/* 223 */ {0, ""},
-/* 224 */ {0, ""},
-/* 225 */ {0, ""},
-/* 226 */ {0, ""},
-/* 227 */ {0, ""},
-/* 228 */ {0, ""},
-/* 229 */ {0, ""},
-/* 230 */ {0, ""},
-/* 231 */ {0, ""},
-/* 232 */ {0, ""},
-/* 233 */ {0, ""},
-/* 234 */ {0, ""},
-/* 235 */ {0, ""},
-/* 236 */ {0, ""},
-/* 237 */ {0, ""},
-/* 238 */ {0, ""},
-/* 239 */ {0, ""},
-/* 240 */ {0, ""},
-/* 241 */ {0, ""},
-/* 242 */ {0, ""},
-/* 243 */ {0, ""},
-/* 244 */ {0, ""},
-/* 245 */ {0, ""},
-/* 246 */ {0, ""},
-/* 247 */ {0, ""},
-/* 248 */ {0, ""},
-/* 249 */ {0, ""},
-/* 250 */ {0, ""},
-/* 251 */ {0, ""},
-/* 252 */ {0, ""},
-/* 253 */ {0, ""},
-/* 254 */ {0, ""},
-/* 255 */ {0, ""}
+    /* 0 ssid */ {12, "\x00\x0A\x77\x66\x5F\x74\x65\x73\x74\x69\x6E\x67"},
+    /* 1 */ {10, "\x01\x08\x82\x84\x8b\x96\x12\x24\x48\x6c"},
+    /* 2 */ {0, ""},
+    /* 3 */ {3, "\x03\x01\x0b"}, // 11
+    /* 4 */ {0, ""},
+    /* 5 */ {6, "\x05\x04\x00\x01\x00\x18"},
+    /* 6 */ {0, ""},
+    /* 7 */ {0, ""},
+    /* 8 */ {0, ""},
+    /* 9 */ {0, ""},
+    /* 10 */ {0, ""},
+    /* 11 */ {7, "\x0b\x05\x04\x00\x33\x12\x7a"},
+    /* 12 */ {0, ""},
+    /* 13 */ {0, ""},
+    /* 14 */ {0, ""},
+    /* 15 */ {0, ""},
+    /* 16 */ {128, "\xcc\x66\x33\x99\xcb\xd0\x42\xeb\x5c\x1e\xf1\x8a\xae\x73\x67\xc5\xd7\x46\xc8\xbe\xfa\xeb\xa4\x23\xe6\xc9\x4a\x57\x42\x16\xb6\xb0\x78\xc2\xeb\x52\x4b\x58\x3b\x20\x04\xda\x2c\x9f\x06\x35\xa9\xb2\x90\x7a\xea\x56\xb0\x80\xfd\x10\x86\xcc\x9a\xd6\xb6\xb7\xb9\xc8\xba\x16\xa7\x3d\xe8\x45\xd0\x83\xe3\x1e\x0a\x56\x4e\x77\xbe\x0b\xd0\xbf\x03\xe1\xf3\x9e\x0f\x7d\x11\x74\xa7\x3d\xe8\x41\x0f\xc3\xf3\x9c\x19\xc9\xb4\xa2\xef\x7a\xd6\x4f\x7f\x01\x0b\x5d\x77\x21\x0e\x8d\x90\x7f\x05\x2f\x7c\xe2\x13\x9c\xe7\x39\xcb\xd1\xb8\xc1"},
+    /* 17 */ {0, ""},
+    /* 18 */ {0, ""},
+    /* 19 */ {0, ""},
+    /* 20 */ {0, ""},
+    /* 21 */ {0, ""},
+    /* 22 */ {0, ""},
+    /* 23 */ {0, ""},
+    /* 24 */ {0, ""},
+    /* 25 */ {0, ""},
+    /* 26 */ {0, ""},
+    /* 27 */ {0, ""},
+    /* 28 */ {0, ""},
+    /* 29 */ {0, ""},
+    /* 30 */ {0, ""},
+    /* 31 */ {0, ""},
+    /* 32 */ {6, "\x32\x04\x30\x48\x60\x6c"},
+    /* 33 */ {0, ""},
+    /* 34 */ {0, ""},
+    /* 35 */ {0, ""},
+    /* 36 */ {0, ""},
+    /* 37 */ {0, ""},
+    /* 38 */ {0, ""},
+    /* 39 */ {0, ""},
+    /* 40 */ {0, ""},
+    /* 41 */ {0, ""},
+    /* 42 */ {3, "\x2a\x01\x00"},
+    /* 43 */ {0, ""},
+    /* 44 */ {0, ""},
+    /* 45 */ {28, "\x2d\x1a\xef\x09\x17\xff\xff\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"},
+    /* 46 */ {0, ""},
+    /* 47 */ {0, ""},
+    /* 48 */ {22, "\x30\x14\x01\x00\x00\x0f\xac\x04\x01\x00\x00\x0f\xac\x04\x01\x00\x00\x0f\xac\x02\x00\x00"},
+    /* 49 */ {0, ""},
+    /* 50 */ {6, "\x32\x04\x0c\x18\x30\x60"},
+    /* 51 */ {0, ""},
+    /* 52 */ {0, ""},
+    /* 53 */ {0, ""},
+    /* 54 */ {0, ""},
+    /* 55 */ {0, ""},
+    /* 56 */ {0, ""},
+    /* 57 */ {0, ""},
+    /* 58 */ {0, ""},
+    /* 59 */ {0, ""},
+    /* 60 */ {0, ""},
+    /* 61 */ {24, "\x3d\x16\x30\x07\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"},
+    /* 62 */ {0, ""},
+    /* 63 */ {0, ""},
+    /* 64 */ {0, ""},
+    /* 65 */ {0, ""},
+    /* 66 */ {0, ""},
+    /* 67 */ {0, ""},
+    /* 68 */ {0, ""},
+    /* 69 */ {0, ""},
+    /* 70 */ {0, ""},
+    /* 71 */ {0, ""},
+    /* 72 */ {0, ""},
+    /* 73 */ {0, ""},
+    /* 74 */ {0, ""},
+    /* 75 */ {0, ""},
+    /* 76 */ {0, ""},
+    /* 77 */ {0, ""},
+    /* 78 */ {0, ""},
+    /* 79 */ {0, ""},
+    /* 80 */ {0, ""},
+    /* 81 */ {0, ""},
+    /* 82 */ {0, ""},
+    /* 83 */ {0, ""},
+    /* 84 */ {0, ""},
+    /* 85 */ {0, ""},
+    /* 86 */ {0, ""},
+    /* 87 */ {0, ""},
+    /* 88 */ {0, ""},
+    /* 89 */ {0, ""},
+    /* 90 */ {0, ""},
+    /* 91 */ {0, ""},
+    /* 92 */ {0, ""},
+    /* 93 */ {0, ""},
+    /* 94 */ {0, ""},
+    /* 95 */ {0, ""},
+    /* 96 */ {0, ""},
+    /* 97 */ {0, ""},
+    /* 98 */ {0, ""},
+    /* 99 */ {0, ""},
+    /* 100 */ {0, ""},
+    /* 101 */ {0, ""},
+    /* 102 */ {0, ""},
+    /* 103 */ {0, ""},
+    /* 104 */ {0, ""},
+    /* 105 */ {0, ""},
+    /* 106 */ {0, ""},
+    /* 107 */ {0, ""},
+    /* 108 */ {0, ""},
+    /* 109 */ {0, ""},
+    /* 110 */ {0, ""},
+    /* 111 */ {0, ""},
+    /* 112 */ {0, ""},
+    /* 113 */ {0, ""},
+    /* 114 */ {0, ""},
+    /* 115 */ {0, ""},
+    /* 116 */ {0, ""},
+    /* 117 */ {0, ""},
+    /* 118 */ {0, ""},
+    /* 119 */ {0, ""},
+    /* 120 */ {0, ""},
+    /* 121 */ {0, ""},
+    /* 122 */ {0, ""},
+    /* 123 */ {0, ""},
+    /* 124 */ {0, ""},
+    /* 125 */ {0, ""},
+    /* 126 */ {0, ""},
+    /* 127 */ {10, "\x7f\x08\x04\x00\x00\x00\x00\x00\x00\x40"},
+    /* 128 */ {0, ""},
+    /* 129 */ {0, ""},
+    /* 130 */ {0, ""},
+    /* 131 */ {0, ""},
+    /* 132 */ {0, ""},
+    /* 133 */ {0, ""},
+    /* 134 */ {0, ""},
+    /* 135 */ {0, ""},
+    /* 136 */ {0, ""},
+    /* 137 */ {0, ""},
+    /* 138 */ {0, ""},
+    /* 139 */ {0, ""},
+    /* 140 */ {0, ""},
+    /* 141 */ {0, ""},
+    /* 142 */ {0, ""},
+    /* 143 */ {0, ""},
+    /* 144 */ {0, ""},
+    /* 145 */ {0, ""},
+    /* 146 */ {0, ""},
+    /* 147 */ {0, ""},
+    /* 148 */ {0, ""},
+    /* 149 */ {0, ""},
+    /* 150 */ {0, ""},
+    /* 151 */ {0, ""},
+    /* 152 */ {0, ""},
+    /* 153 */ {0, ""},
+    /* 154 */ {0, ""},
+    /* 155 */ {0, ""},
+    /* 156 */ {0, ""},
+    /* 157 */ {0, ""},
+    /* 158 */ {0, ""},
+    /* 159 */ {0, ""},
+    /* 160 */ {0, ""},
+    /* 161 */ {0, ""},
+    /* 162 */ {0, ""},
+    /* 163 */ {0, ""},
+    /* 164 */ {0, ""},
+    /* 165 */ {0, ""},
+    /* 166 */ {0, ""},
+    /* 167 */ {0, ""},
+    /* 168 */ {0, ""},
+    /* 169 */ {0, ""},
+    /* 170 */ {0, ""},
+    /* 171 */ {0, ""},
+    /* 172 */ {0, ""},
+    /* 173 */ {0, ""},
+    /* 174 */ {0, ""},
+    /* 175 */ {0, ""},
+    /* 176 */ {0, ""},
+    /* 177 */ {0, ""},
+    /* 178 */ {0, ""},
+    /* 179 */ {0, ""},
+    /* 180 */ {0, ""},
+    /* 181 */ {0, ""},
+    /* 182 */ {0, ""},
+    /* 183 */ {0, ""},
+    /* 184 */ {0, ""},
+    /* 185 */ {0, ""},
+    /* 186 */ {0, ""},
+    /* 187 */ {0, ""},
+    /* 188 */ {0, ""},
+    /* 189 */ {0, ""},
+    /* 190 */ {0, ""},
+    /* 191 */ {0, ""},
+    /* 192 */ {0, ""},
+    /* 193 */ {0, ""},
+    /* 194 */ {0, ""},
+    /* 195 */ {0, ""},
+    /* 196 */ {0, ""},
+    /* 197 */ {0, ""},
+    /* 198 */ {0, ""},
+    /* 199 */ {0, ""},
+    /* 200 */ {0, ""},
+    /* 201 */ {0, ""},
+    /* 202 */ {0, ""},
+    /* 203 */ {0, ""},
+    /* 204 */ {0, ""},
+    /* 205 */ {0, ""},
+    /* 206 */ {0, ""},
+    /* 207 */ {0, ""},
+    /* 208 */ {0, ""},
+    /* 209 */ {0, ""},
+    /* 210 */ {0, ""},
+    /* 211 */ {0, ""},
+    /* 212 */ {0, ""},
+    /* 213 */ {0, ""},
+    /* 214 */ {0, ""},
+    /* 215 */ {0, ""},
+    /* 216 */ {0, ""},
+    /* 217 */ {0, ""},
+    /* 218 */ {0, ""},
+    /* 219 */ {0, ""},
+    /* 220 */ {0, ""},
+    /* 221 */ {9, "\xdd\x07\x00\x0c\x43\x03\x00\x00\x00"},
+    /* 222 */ {0, ""},
+    /* 223 */ {0, ""},
+    /* 224 */ {0, ""},
+    /* 225 */ {0, ""},
+    /* 226 */ {0, ""},
+    /* 227 */ {0, ""},
+    /* 228 */ {0, ""},
+    /* 229 */ {0, ""},
+    /* 230 */ {0, ""},
+    /* 231 */ {0, ""},
+    /* 232 */ {0, ""},
+    /* 233 */ {0, ""},
+    /* 234 */ {0, ""},
+    /* 235 */ {0, ""},
+    /* 236 */ {0, ""},
+    /* 237 */ {0, ""},
+    /* 238 */ {0, ""},
+    /* 239 */ {0, ""},
+    /* 240 */ {0, ""},
+    /* 241 */ {0, ""},
+    /* 242 */ {0, ""},
+    /* 243 */ {0, ""},
+    /* 244 */ {0, ""},
+    /* 245 */ {0, ""},
+    /* 246 */ {0, ""},
+    /* 247 */ {0, ""},
+    /* 248 */ {0, ""},
+    /* 249 */ {0, ""},
+    /* 250 */ {0, ""},
+    /* 251 */ {0, ""},
+    /* 252 */ {0, ""},
+    /* 253 */ {0, ""},
+    /* 254 */ {0, ""},
+    /* 255 */ {0, ""}
 
 };
 
 volatile IEEE_80211_VERSION g_current_version = IEEE_80211_UNKNOWN;
-
-static struct ie_creator ies_creator[256];
 
 int add_attribute_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi, uint8_t id)
 {
@@ -921,42 +912,44 @@ int add_attribute_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie
     int rlen = 0;
 
     atlv.type = id;
-    srandom(time(NULL)+pkt->len);
-    atlv.length = random() %  255;
+    srandom(time(NULL) + pkt->len);
+    atlv.length = random() % 255;
 
     srandom(time(NULL) + atlv.length);
-    value_type = random() % (FUZZING_VALUE_END-1) + 1;
-    rlen = atlv.length;//random() % 256;
-    
+    value_type = random() % (FUZZING_VALUE_END - 1) + 1;
+    rlen = atlv.length; // random() % 256;
+
     generate_random_data(atlv.value, rlen, value_type);
 
     memcpy(pkt->data + pkt->len, &atlv, 3);
     memcpy(pkt->data + pkt->len + 3, atlv.value, rlen);
-    if(vsi) vsi->length += (rlen + 3);
-	pkt->len += (rlen + 3);
+    if (vsi)
+        vsi->length += (rlen + 3);
+    pkt->len += (rlen + 3);
 
     return (rlen + 3);
 }
 
-int add_data_element_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi,  uint16_t id)
+int add_data_element_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie *vsi, uint16_t id)
 {
     struct data_element_tlv detlv = {0};
     FUZZING_VALUE_TYPE value_type;
     int rlen = 0;
 
     detlv.type = id;
-    srandom(time(NULL)+pkt->len);
+    srandom(time(NULL) + pkt->len);
     detlv.length = random() % 255;
 
     srandom(time(NULL) + detlv.length);
-    value_type = random() % (FUZZING_VALUE_END-1) + 1;
-    rlen = detlv.length;//random() % 256;
+    value_type = random() % (FUZZING_VALUE_END - 1) + 1;
+    rlen = detlv.length; // random() % 256;
     generate_random_data(detlv.value, rlen, value_type);
 
     memcpy(pkt->data + pkt->len, &detlv, 4);
     memcpy(pkt->data + pkt->len + 4, &detlv, rlen);
-    if(vsi) vsi->length += (rlen + 4);
-	pkt->len += (rlen + 4);
+    if (vsi)
+        vsi->length += (rlen + 4);
+    pkt->len += (rlen + 4);
 
     return (rlen + 4);
 }
@@ -965,19 +958,19 @@ void add_ie_data(struct packet *pkt, uint8_t id, FUZZING_TYPE fuzzing_type, uint
 {
     struct ie_data iedata = {0};
 
-    srandom(time(NULL)+pkt->len);
-    iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2020, id, fuzzing_type, random() % (FUZZING_VALUE_END-1) + 1, specific_data, specific_data_len);
+    srandom(time(NULL) + pkt->len);
+    iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2020, id, fuzzing_type, random() % (FUZZING_VALUE_END - 1) + 1, specific_data, specific_data_len);
     memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
-	pkt->len += iedata.length;
+    pkt->len += iedata.length;
 }
 
 void add_default_ie_data(struct packet *pkt, uint8_t id)
 {
-    if(!pkt) return;
+    if (!pkt)
+        return;
 
     memcpy(pkt->data + pkt->len, default_ie_data[id].ie, default_ie_data[id].len);
-	pkt->len += default_ie_data[id].len;
-
+    pkt->len += default_ie_data[id].len;
 }
 
 struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version, uint8_t id, FUZZING_TYPE fuzzing_type, FUZZING_VALUE_TYPE value_type, uint8_t *specific_data, int specific_data_len)
@@ -989,26 +982,27 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
     int rlen = 0;
 
     ie_cd.id = id;
-    if(ieee80211_version == IEEE_80211_1999)
+    if (ieee80211_version == IEEE_80211_1999)
     {
         min_len = ie_ranges1999[id][1];
         max_len = ie_ranges1999[id][2];
-    }else if(ieee80211_version == IEEE_80211_2007)
+    }
+    else if (ieee80211_version == IEEE_80211_2007)
     {
         min_len = ie_ranges2007[id][1];
         max_len = ie_ranges2007[id][2];
     }
-    else if(ieee80211_version == IEEE_80211_2012)
+    else if (ieee80211_version == IEEE_80211_2012)
     {
         min_len = ie_ranges2012[id][1];
         max_len = ie_ranges2012[id][2];
     }
-    else if(ieee80211_version == IEEE_80211_2016)
+    else if (ieee80211_version == IEEE_80211_2016)
     {
         min_len = ie_ranges2016[id][1];
         max_len = ie_ranges2016[id][2];
     }
-    else if(ieee80211_version == IEEE_80211_2020)
+    else if (ieee80211_version == IEEE_80211_2020)
     {
         min_len = ie_ranges2020[id][1];
         max_len = ie_ranges2020[id][2];
@@ -1018,20 +1012,20 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
         min_len = ie_ranges2020[id][1];
         max_len = ie_ranges2020[id][2];
     }
-    
-    switch(fuzzing_type)
+
+    switch (fuzzing_type)
     {
     case NOT_PRESENT:
         break;
     case REPEATED:
-        srandom(time(NULL)+swch);
+        srandom(time(NULL) + swch);
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case ALL_BITS_ZERO:
         ie_cd.length = 0x00;
         break;
     case MIN_SUB_1:
-        if(min_len > 0)
+        if (min_len > 0)
             ie_cd.length = min_len - 1;
         else
             ie_cd.length = min_len;
@@ -1043,14 +1037,14 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
         ie_cd.length = min_len + 1;
         break;
     case RANDOM_VALUE:
-        srandom(time(NULL)+swch);
+        srandom(time(NULL) + swch);
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case SPECIFIC_VALUE:
         ie_cd.length = specific_data_len;
         break;
     case MAX_SUB_1:
-        if(max_len > 0)
+        if (max_len > 0)
             ie_cd.length = max_len - 1;
         else
             ie_cd.length = max_len;
@@ -1059,7 +1053,7 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
         ie_cd.length = max_len;
         break;
     case MAX_ADD_1:
-        if(max_len < 255)
+        if (max_len < 255)
             ie_cd.length = max_len + 1;
         else
             ie_cd.length = max_len;
@@ -1072,23 +1066,22 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
     }
 
     swch++;
-    if(swch >= 5) swch = 1;
+    if (swch >= 5)
+        swch = 1;
 
-    if(fuzzing_type != SPECIFIC_VALUE)
+    if (fuzzing_type != SPECIFIC_VALUE)
     {
-        if(fuzzing_type != RANDOM_VALUE)
+        if (fuzzing_type != RANDOM_VALUE)
         {
             srandom(time(NULL));
             rlen = random() % 256;
             generate_random_data(ie_cd.data, rlen, value_type);
         }
-        else 
+        else
             generate_random_data(ie_cd.data, ie_cd.length, value_type);
-
     }
-        
 
-    if(fuzzing_type == REPEATED)
+    if (fuzzing_type == REPEATED)
     {
         ie_d.length = (2 + ie_cd.length) * 2;
         memcpy(ie_d.data, &ie_cd.id, 1);
@@ -1101,7 +1094,7 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
     }
     else
     {
-        if(fuzzing_type == RANDOM_VALUE)
+        if (fuzzing_type == RANDOM_VALUE)
         {
             ie_d.length = 2 + rlen;
             memcpy(ie_d.data, &ie_cd.id, 1);
@@ -1113,7 +1106,7 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
             ie_d.length = 2 + ie_cd.length;
             memcpy(ie_d.data, &ie_cd.id, 1);
             memcpy(ie_d.data + 1, &ie_cd.length, 1);
-            if(fuzzing_type == SPECIFIC_VALUE)
+            if (fuzzing_type == SPECIFIC_VALUE)
             {
                 memcpy(ie_d.data + 2, specific_data, ie_cd.length);
             }
@@ -1122,23 +1115,21 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
                 memcpy(ie_d.data + 2, ie_cd.data, ie_cd.length);
             }
         }
-
-        
     }
 
-    //dumphex(ie_cd.data, ie_cd.length);
+    // dumphex(ie_cd.data, ie_cd.length);
     fuzz_logger_log(FUZZ_LOG_DEBUG, "get_ie_data_by_fuzzing_type -> id: %d, iedata.length = %d, fuzzing_type: %d, fuzzing_value_type: %d", id, ie_d.length, fuzzing_type, value_type);
 
     return ie_d;
 }
 
-struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version, 
-							uint8_t id, 
-							uint8_t ex_id,
-							FUZZING_TYPE fuzzing_type, 
-							FUZZING_VALUE_TYPE value_type, 
-							uint8_t *specific_data, 
-							int specific_data_len)
+struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
+                                              uint8_t id,
+                                              uint8_t ex_id,
+                                              FUZZING_TYPE fuzzing_type,
+                                              FUZZING_VALUE_TYPE value_type,
+                                              uint8_t *specific_data,
+                                              int specific_data_len)
 {
     struct ie_data ie_d = {0};
     struct ie_common_data ie_cd = {0};
@@ -1147,28 +1138,29 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
     int rlen = 0;
 
     ie_cd.id = id;
-    if(id != 255)
+    if (id != 255)
     {
-        if(ieee80211_version == IEEE_80211_1999)
+        if (ieee80211_version == IEEE_80211_1999)
         {
             min_len = ie_ranges1999[id][1];
             max_len = ie_ranges1999[id][2];
-        }else if(ieee80211_version == IEEE_80211_2007)
+        }
+        else if (ieee80211_version == IEEE_80211_2007)
         {
             min_len = ie_ranges2007[id][1];
             max_len = ie_ranges2007[id][2];
         }
-        else if(ieee80211_version == IEEE_80211_2012)
+        else if (ieee80211_version == IEEE_80211_2012)
         {
             min_len = ie_ranges2012[id][1];
             max_len = ie_ranges2012[id][2];
         }
-        else if(ieee80211_version == IEEE_80211_2016)
+        else if (ieee80211_version == IEEE_80211_2016)
         {
             min_len = ie_ranges2016[id][1];
             max_len = ie_ranges2016[id][2];
         }
-        else if(ieee80211_version == IEEE_80211_2020)
+        else if (ieee80211_version == IEEE_80211_2020)
         {
             min_len = ie_ranges2020[id][1];
             max_len = ie_ranges2020[id][2];
@@ -1185,20 +1177,19 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
         max_len = eie_ranges2020[id][2];
     }
 
-    
-    switch(fuzzing_type)
+    switch (fuzzing_type)
     {
     case NOT_PRESENT:
         break;
     case REPEATED:
-        srandom(time(NULL)+swch);
+        srandom(time(NULL) + swch);
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case ALL_BITS_ZERO:
         ie_cd.length = 0x00;
         break;
     case MIN_SUB_1:
-        if(min_len > 0)
+        if (min_len > 0)
             ie_cd.length = min_len - 1;
         else
             ie_cd.length = min_len;
@@ -1210,14 +1201,14 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
         ie_cd.length = min_len + 1;
         break;
     case RANDOM_VALUE:
-        srandom(time(NULL)+swch);
+        srandom(time(NULL) + swch);
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case SPECIFIC_VALUE:
         ie_cd.length = specific_data_len;
         break;
     case MAX_SUB_1:
-        if(max_len > 0)
+        if (max_len > 0)
             ie_cd.length = max_len - 1;
         else
             ie_cd.length = max_len;
@@ -1226,7 +1217,7 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
         ie_cd.length = max_len;
         break;
     case MAX_ADD_1:
-        if(max_len < 255)
+        if (max_len < 255)
             ie_cd.length = max_len + 1;
         else
             ie_cd.length = max_len;
@@ -1239,24 +1230,24 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
     }
 
     swch++;
-    if(swch >= 5) swch = 1;
+    if (swch >= 5)
+        swch = 1;
 
-    if(fuzzing_type != SPECIFIC_VALUE)
+    if (fuzzing_type != SPECIFIC_VALUE)
     {
-        if(fuzzing_type != RANDOM_VALUE)
+        if (fuzzing_type != RANDOM_VALUE)
         {
             srandom(time(NULL));
             rlen = random() % 256;
             generate_random_data(ie_cd.data, rlen, value_type);
         }
-        else 
+        else
             generate_random_data(ie_cd.data, ie_cd.length, value_type);
-
     }
 
-    if(fuzzing_type == REPEATED)
+    if (fuzzing_type == REPEATED)
     {
-        if(id != 255)
+        if (id != 255)
         {
             ie_d.length = (2 + ie_cd.length) * 2;
             memcpy(ie_d.data, &ie_cd.id, 1);
@@ -1266,7 +1257,9 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
             memcpy(ie_d.data + 2 + ie_d.length, &ie_cd.id, 1);
             memcpy(ie_d.data + 2 + ie_d.length + 1, &ie_cd.length, 1);
             memcpy(ie_d.data + 2 + ie_d.length + 2, ie_cd.data, ie_cd.length);
-        }else{
+        }
+        else
+        {
             ie_d.length = (3 + ie_cd.length) * 2;
             memcpy(ie_d.data, &ie_cd.id, 1);
             memcpy(ie_d.data + 1, &ie_cd.length, 1);
@@ -1281,15 +1274,14 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
     }
     else
     {
-        if(fuzzing_type == RANDOM_VALUE)
+        if (fuzzing_type == RANDOM_VALUE)
         {
-            if(id != 255)
+            if (id != 255)
             {
                 ie_d.length = 2 + rlen;
                 memcpy(ie_d.data, &ie_cd.id, 1);
                 memcpy(ie_d.data + 1, &ie_cd.length, 1);
                 memcpy(ie_d.data + 2, ie_cd.data, rlen);
-
             }
             else
             {
@@ -1302,12 +1294,12 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
         }
         else
         {
-            if(id != 255)
+            if (id != 255)
             {
                 ie_d.length = 2 + ie_cd.length;
                 memcpy(ie_d.data, &ie_cd.id, 1);
                 memcpy(ie_d.data + 1, &ie_cd.length, 1);
-                if(fuzzing_type == SPECIFIC_VALUE)
+                if (fuzzing_type == SPECIFIC_VALUE)
                 {
                     memcpy(ie_d.data + 2, specific_data, ie_cd.length);
                 }
@@ -1322,7 +1314,7 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
                 memcpy(ie_d.data, &ie_cd.id, 1);
                 memcpy(ie_d.data + 1, &ie_cd.length, 1);
                 memcpy(ie_d.data + 2, &ex_id, 1);
-                if(fuzzing_type == SPECIFIC_VALUE)
+                if (fuzzing_type == SPECIFIC_VALUE)
                 {
                     memcpy(ie_d.data + 3, specific_data, ie_cd.length);
                 }
@@ -1334,47 +1326,48 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
         }
     }
 
-    //dumphex(ie_cd.data, ie_cd.length);
+    // dumphex(ie_cd.data, ie_cd.length);
     fuzz_logger_log(FUZZ_LOG_DEBUG, "get_ie_data_by_fuzzing_type -> id: %d, iedata.length = %d, fuzzing_type: %d, fuzzing_value_type: %d", id, ie_d.length, fuzzing_type, value_type);
 
     return ie_d;
-    
 }
 
-void create_frame_fuzzing_ie(struct packet *pkt, 
-					char *frame_name,
-					uint8_t frame_ies[],
-					int *ieee_ver, 
-					int *ieee_id, 
-					uint8_t frame_ies_ext[],
-					int *ies_ext_id,
-	 				FUZZING_TYPE *fuzzing_step, 
-					FUZZING_VALUE_TYPE *fuzzing_value_step)
+void create_frame_fuzzing_ie(struct packet *pkt,
+                             char *frame_name,
+                             uint8_t frame_ies[],
+                             int *ieee_ver,
+                             int *ieee_id,
+                             uint8_t frame_ies_ext[],
+                             int *ies_ext_id,
+                             FUZZING_TYPE *fuzzing_step,
+                             FUZZING_VALUE_TYPE *fuzzing_value_step)
 {
-	struct ie_data iedata = {0};
+    struct ie_data iedata = {0};
 
-    if(frame_ies[0] == 0xff)
+    if (frame_ies[0] == 0xff)
+    {
         return;
+    }
 
-	if( *ieee_ver == 1)
-	{
-		*ieee_ver = 0;
-		*ieee_id = 0;
+    if (*ieee_ver == 1)
+    {
+        *ieee_ver = 0;
+        *ieee_id = 0;
         *ies_ext_id = 0;
 
-		*fuzzing_step = NOT_PRESENT;
-		*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
-	}
+        *fuzzing_step = NOT_PRESENT;
+        *fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+    }
 
-    if(frame_ies && ieee_id && 0 == get_ie_status(frame_ies[*ieee_id], 0)) // disable
+    if (frame_ies && ieee_id && 0 == get_ie_status(frame_ies[*ieee_id], 0)) // disable
     {
         *ieee_id += 1;
-		*fuzzing_step = NOT_PRESENT;
+        *fuzzing_step = NOT_PRESENT;
         return;
     }
     else
     {
-        if(frame_ies_ext && ies_ext_id && 0 == get_ie_status(frame_ies_ext[*ies_ext_id], 0))
+        if (frame_ies_ext && ies_ext_id && 0 == get_ie_status(frame_ies_ext[*ies_ext_id], 0))
         {
             *ies_ext_id += 1;
             *fuzzing_step = NOT_PRESENT;
@@ -1382,11 +1375,11 @@ void create_frame_fuzzing_ie(struct packet *pkt,
         }
     }
 
-	if(*ieee_ver == 0 && frame_ies[0] != 0xff)
-	{
-        if(frame_ies[*ieee_id] == 255)
+    if (*ieee_ver == 0 && frame_ies[0] != 0xff)
+    {
+        if (frame_ies[*ieee_id] == 255)
         {
-            if(frame_ies_ext && frame_ies_ext[0] != 0xff)
+            if (frame_ies_ext && frame_ies_ext[0] != 0xff)
             {
                 fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211) ==> ie extension(%d-%d) step: %d-%d", frame_name, frame_ies[*ieee_id], frame_ies_ext[*ies_ext_id], *fuzzing_step, *fuzzing_value_step);
                 fuzzing_opt.current_ie = frame_ies[*ieee_id];
@@ -1412,376 +1405,381 @@ void create_frame_fuzzing_ie(struct packet *pkt,
             pkt->len += iedata.length;
         }
 
+        if (*fuzzing_value_step + 1 == FUZZING_VALUE_END)
+        {
+            *fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 
-		if(*fuzzing_value_step + 1 == FUZZING_VALUE_END)
-		{
-			*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+            if (*fuzzing_step + 1 == FUZZING_END)
+            {
+                *fuzzing_step = NOT_PRESENT;
 
-			if(*fuzzing_step + 1 == FUZZING_END)
-			{
-				*fuzzing_step = NOT_PRESENT;
-
-                if(frame_ies_ext[*ies_ext_id + 1] != 0){
+                if (frame_ies_ext[*ies_ext_id + 1] != 0)
+                {
                     *ies_ext_id += 1;
                 }
                 else
                 {
-                    *ieee_id +=1;
+                    *ieee_id += 1;
                     *ies_ext_id = 0;
                 }
-                
-			}
-			else
-			{
-				*fuzzing_step += 1;
-			}
+            }
+            else
+            {
+                *fuzzing_step += 1;
+            }
 
-			if(frame_ies[*ieee_id] == 0 && *ieee_id != 0) // array end
-			{
-				*ieee_ver = 1;
-			}
-		}
-		else
-		{
-			*fuzzing_value_step += 1;
-		}
-	}      
-    
+            if (frame_ies[*ieee_id] == 0 && *ieee_id != 0) // array end
+            {
+                *ieee_ver = 1;
+            }
+        }
+        else
+        {
+            *fuzzing_value_step += 1;
+        }
+    }
 }
 
-
-void create_frame_ies(struct packet *pkt, 
-					char *frame_name,
-					uint8_t frame_ie_ieee1999[], 
-					uint8_t frame_ie_ieee2007[], 
-					uint8_t frame_ie_ieee2012[], 
-					uint8_t frame_ie_ieee2016[],
-					int *ieee1999, 
-					int *ieee1999_id, 
-					int *ieee2007, 
-					int *ieee2007_id, 
-					int *ieee2012, 
-					int *ieee2012_id, 
-					int *ieee2016, 
-					int *ieee2016_id,
-	 				FUZZING_TYPE *fuzzing_step, 
-					FUZZING_VALUE_TYPE *fuzzing_value_step)
+void create_frame_ies(struct packet *pkt,
+                      char *frame_name,
+                      uint8_t frame_ie_ieee1999[],
+                      uint8_t frame_ie_ieee2007[],
+                      uint8_t frame_ie_ieee2012[],
+                      uint8_t frame_ie_ieee2016[],
+                      int *ieee1999,
+                      int *ieee1999_id,
+                      int *ieee2007,
+                      int *ieee2007_id,
+                      int *ieee2012,
+                      int *ieee2012_id,
+                      int *ieee2016,
+                      int *ieee2016_id,
+                      FUZZING_TYPE *fuzzing_step,
+                      FUZZING_VALUE_TYPE *fuzzing_value_step)
 {
-	struct ie_data iedata = {0};
+    struct ie_data iedata = {0};
 
-    if(frame_ie_ieee1999[0] == 0xff)
+    if (frame_ie_ieee1999[0] == 0xff)
+    {
         *ieee1999 = 1;
-    if(frame_ie_ieee2007[0] == 0xff)
+    }
+    if (frame_ie_ieee2007[0] == 0xff)
+    {
         *ieee2007 = 1;
-    if(frame_ie_ieee2012[0] == 0xff)
+    }
+    if (frame_ie_ieee2012[0] == 0xff)
+    {
         *ieee2012 = 1;
-    if(frame_ie_ieee2016[0] == 0xff)
+    }
+    if (frame_ie_ieee2016[0] == 0xff)
+    {
         *ieee2016 = 1;
+    }
 
-	if(*ieee1999 == 1 && *ieee2007 == 1 && *ieee2012 == 1 && *ieee2016 == 1)
-	{
-		*ieee1999 = 0;
-		*ieee1999_id = 0;
+    if (*ieee1999 == 1 && *ieee2007 == 1 && *ieee2012 == 1 && *ieee2016 == 1)
+    {
+        *ieee1999 = 0;
+        *ieee1999_id = 0;
 
-		*ieee2007 = 0;
-		*ieee2007_id = 0;
+        *ieee2007 = 0;
+        *ieee2007_id = 0;
 
-		*ieee2012 = 0;
-		*ieee2012_id = 0;
+        *ieee2012 = 0;
+        *ieee2012_id = 0;
 
-		*ieee2016 = 0;
-		*ieee2016_id = 0;
+        *ieee2016 = 0;
+        *ieee2016_id = 0;
 
-		*fuzzing_step = NOT_PRESENT;
-		*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+        *fuzzing_step = NOT_PRESENT;
+        *fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+    }
 
-	}
+    if (*ieee1999 == 0 && frame_ie_ieee1999[0] != 0xff)
+    {
+        fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee1999[*ieee1999_id], *fuzzing_step, *fuzzing_value_step);
 
-	if(*ieee1999 == 0 && frame_ie_ieee1999[0] != 0xff)
-	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee1999[*ieee1999_id], *fuzzing_step, *fuzzing_value_step);
-
-		iedata = get_ie_data_by_fuzzing_type(IEEE_80211_1999, frame_ie_ieee1999[*ieee1999_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
+        iedata = get_ie_data_by_fuzzing_type(IEEE_80211_1999, frame_ie_ieee1999[*ieee1999_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
         memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
-		pkt->len += iedata.length;
+        pkt->len += iedata.length;
 
-		if(*fuzzing_value_step + 1 == FUZZING_VALUE_END)
-		{
-			*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+        if (*fuzzing_value_step + 1 == FUZZING_VALUE_END)
+        {
+            *fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 
-			if(*fuzzing_step + 1 == FUZZING_END)
-			{
-				*ieee1999_id += 1;
-				*fuzzing_step = NOT_PRESENT;
-			}
-			else
-			{
-				*fuzzing_step += 1;
-			}
+            if (*fuzzing_step + 1 == FUZZING_END)
+            {
+                *ieee1999_id += 1;
+                *fuzzing_step = NOT_PRESENT;
+            }
+            else
+            {
+                *fuzzing_step += 1;
+            }
 
-			if(frame_ie_ieee1999[*ieee1999_id] == 0 && *ieee1999_id != 0) // array end
-			{
-				*ieee1999 = 1;
-			}
-		}
-		else
-		{
-			*fuzzing_value_step += 1;
-		}
-	}
-	else if(*ieee2007 == 0 && frame_ie_ieee2007[0] != 0xff)
-	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee2007[*ieee2007_id], *fuzzing_step, *fuzzing_value_step);
+            if (frame_ie_ieee1999[*ieee1999_id] == 0 && *ieee1999_id != 0) // array end
+            {
+                *ieee1999 = 1;
+            }
+        }
+        else
+        {
+            *fuzzing_value_step += 1;
+        }
+    }
+    else if (*ieee2007 == 0 && frame_ie_ieee2007[0] != 0xff)
+    {
+        fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee2007[*ieee2007_id], *fuzzing_step, *fuzzing_value_step);
 
-		iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2007, frame_ie_ieee2007[*ieee2007_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
+        iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2007, frame_ie_ieee2007[*ieee2007_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
         memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
-		pkt->len += iedata.length;
-		
-		if(*fuzzing_value_step + 1 == FUZZING_VALUE_END)
-		{
-			*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+        pkt->len += iedata.length;
 
-			if(*fuzzing_step + 1 == FUZZING_END)
-			{
-				*ieee2007_id += 1;
-				*fuzzing_step = NOT_PRESENT;
-			}
-			else
-			{
-				*fuzzing_step += 1;
-			}
+        if (*fuzzing_value_step + 1 == FUZZING_VALUE_END)
+        {
+            *fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 
-			if(frame_ie_ieee2007[*ieee2007_id] == 0 && *ieee2007_id != 0) // array end
-			{
-				*ieee2007 = 1;
-			}
-		}
-		else
-		{
-			*fuzzing_value_step += 1;
-		}
-	}
-	else if(*ieee2012 == 0 && frame_ie_ieee2012[0] != 0xff)
-	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee2012[*ieee2012_id], *fuzzing_step, *fuzzing_value_step);
+            if (*fuzzing_step + 1 == FUZZING_END)
+            {
+                *ieee2007_id += 1;
+                *fuzzing_step = NOT_PRESENT;
+            }
+            else
+            {
+                *fuzzing_step += 1;
+            }
 
-		iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2012, frame_ie_ieee2012[*ieee2012_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
+            if (frame_ie_ieee2007[*ieee2007_id] == 0 && *ieee2007_id != 0) // array end
+            {
+                *ieee2007 = 1;
+            }
+        }
+        else
+        {
+            *fuzzing_value_step += 1;
+        }
+    }
+    else if (*ieee2012 == 0 && frame_ie_ieee2012[0] != 0xff)
+    {
+        fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee2012[*ieee2012_id], *fuzzing_step, *fuzzing_value_step);
+
+        iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2012, frame_ie_ieee2012[*ieee2012_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
         memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
-		pkt->len += iedata.length;
+        pkt->len += iedata.length;
 
-		if(*fuzzing_value_step + 1 == FUZZING_VALUE_END)
-		{
-			*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+        if (*fuzzing_value_step + 1 == FUZZING_VALUE_END)
+        {
+            *fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 
-			if(*fuzzing_step + 1 == FUZZING_END)
-			{
-				*ieee2012_id += 1;
-				*fuzzing_step = NOT_PRESENT;
-			}
-			else
-			{
-				*fuzzing_step += 1;
-			}
+            if (*fuzzing_step + 1 == FUZZING_END)
+            {
+                *ieee2012_id += 1;
+                *fuzzing_step = NOT_PRESENT;
+            }
+            else
+            {
+                *fuzzing_step += 1;
+            }
 
-			if(frame_ie_ieee2012[*ieee2012_id] == 0 && *ieee2012_id != 0) // array end
-			{
-				*ieee2012 = 1;
-			}
-		}
-		else
-		{
-			*fuzzing_value_step += 1;
-		}
-	}
-	else if(*ieee2016 == 0 && frame_ie_ieee2016[0] != 0xff)
-	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee2016[*ieee2016_id], *fuzzing_step, *fuzzing_value_step);
+            if (frame_ie_ieee2012[*ieee2012_id] == 0 && *ieee2012_id != 0) // array end
+            {
+                *ieee2012 = 1;
+            }
+        }
+        else
+        {
+            *fuzzing_value_step += 1;
+        }
+    }
+    else if (*ieee2016 == 0 && frame_ie_ieee2016[0] != 0xff)
+    {
+        fuzz_logger_log(FUZZ_LOG_DEBUG, "%s testing(ieee80211-) ==> ie(%d) step: %d-%d", frame_name, frame_ie_ieee2016[*ieee2016_id], *fuzzing_step, *fuzzing_value_step);
 
-		iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2016, frame_ie_ieee2016[*ieee2016_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
+        iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2016, frame_ie_ieee2016[*ieee2016_id], *fuzzing_step, *fuzzing_value_step, NULL, 0);
         memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
-		pkt->len += iedata.length;
+        pkt->len += iedata.length;
 
-		if(*fuzzing_value_step + 1 == FUZZING_VALUE_END)
-		{
-			*fuzzing_value_step = VALUE_ALL_BITS_ZERO;
+        if (*fuzzing_value_step + 1 == FUZZING_VALUE_END)
+        {
+            *fuzzing_value_step = VALUE_ALL_BITS_ZERO;
 
-			if(*fuzzing_step + 1 == FUZZING_END)
-			{
-				*ieee2016_id += 1;
-				*fuzzing_step = NOT_PRESENT;
-			}
-			else
-			{
-				*fuzzing_step += 1;
-			}
+            if (*fuzzing_step + 1 == FUZZING_END)
+            {
+                *ieee2016_id += 1;
+                *fuzzing_step = NOT_PRESENT;
+            }
+            else
+            {
+                *fuzzing_step += 1;
+            }
 
-			if(frame_ie_ieee2016[*ieee2016_id] == 0 && *ieee2016_id != 0) // array end
-			{
-				*ieee2016 = 1;
-			}
-		}
-		else
-		{
-			*fuzzing_value_step += 1;
-		}
-	}    
+            if (frame_ie_ieee2016[*ieee2016_id] == 0 && *ieee2016_id != 0) // array end
+            {
+                *ieee2016 = 1;
+            }
+        }
+        else
+        {
+            *fuzzing_value_step += 1;
+        }
+    }
 }
 
-void create_radom_ie(struct packet *pkt, 
-                    IEEE_80211_VERSION ieee80211_version,
-					int ieee_ie_id)
+void create_radom_ie(struct packet *pkt,
+                     IEEE_80211_VERSION ieee80211_version,
+                     int ieee_ie_id)
 {
     struct ie_data iedata = {0};
     int fuzzing_step = 0;
-    int fuzzing_value_step =  0;
+    int fuzzing_value_step = 0;
 
     srandom(time(NULL));
-    fuzzing_step = random() % (FUZZING_END -1)  + 1;
+    fuzzing_step = random() % (FUZZING_END - 1) + 1;
 
-    srandom(time(NULL)+ieee_ie_id);
-    fuzzing_value_step = random() % (FUZZING_VALUE_END -1) + 1;
+    srandom(time(NULL) + ieee_ie_id);
+    fuzzing_value_step = random() % (FUZZING_VALUE_END - 1) + 1;
 
     iedata = get_ie_data_by_fuzzing_type(ieee80211_version, ieee_ie_id, fuzzing_step, fuzzing_value_step, NULL, 0);
     memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
     pkt->len += iedata.length;
 }
 
-void create_frame_fuzzing_ies(struct packet *pkt, 
-					char *frame_name,
-					uint8_t frame_ie_ieee1999[], 
-					uint8_t frame_ie_ieee2007[], 
-					uint8_t frame_ie_ieee2012[], 
-					uint8_t frame_ie_ieee2016[],
-					int *ieee1999, 
-					int *ieee1999_id, 
-					int *ieee2007, 
-					int *ieee2007_id, 
-					int *ieee2012, 
-					int *ieee2012_id, 
-					int *ieee2016, 
-					int *ieee2016_id,
-	 				FUZZING_TYPE *fuzzing_step, 
-					FUZZING_VALUE_TYPE *fuzzing_value_step)
+void create_frame_fuzzing_ies(struct packet *pkt,
+                              char *frame_name,
+                              uint8_t frame_ie_ieee1999[],
+                              uint8_t frame_ie_ieee2007[],
+                              uint8_t frame_ie_ieee2012[],
+                              uint8_t frame_ie_ieee2016[],
+                              int *ieee1999,
+                              int *ieee1999_id,
+                              int *ieee2007,
+                              int *ieee2007_id,
+                              int *ieee2012,
+                              int *ieee2012_id,
+                              int *ieee2016,
+                              int *ieee2016_id,
+                              FUZZING_TYPE *fuzzing_step,
+                              FUZZING_VALUE_TYPE *fuzzing_value_step)
 {
     int ie_array_size;
     int ie_cnt = 0;
     int i;
-    int ieee_id;
     int max_ies = 5;
 
-    create_frame_ies(pkt, 
-            frame_name, 
-            frame_ie_ieee1999, 
-            frame_ie_ieee2007, 
-            frame_ie_ieee2012, 
-            frame_ie_ieee2016, 
-            ieee1999, 
-            ieee1999_id, 
-            ieee2007, 
-            ieee2007_id, 
-            ieee2012, 
-            ieee2012_id, 
-            ieee2016, 
-            ieee2016_id, 
-            fuzzing_step, 
-            fuzzing_value_step);
+    create_frame_ies(pkt,
+                     frame_name,
+                     frame_ie_ieee1999,
+                     frame_ie_ieee2007,
+                     frame_ie_ieee2012,
+                     frame_ie_ieee2016,
+                     ieee1999,
+                     ieee1999_id,
+                     ieee2007,
+                     ieee2007_id,
+                     ieee2012,
+                     ieee2012_id,
+                     ieee2016,
+                     ieee2016_id,
+                     fuzzing_step,
+                     fuzzing_value_step);
 
     return;
 
-    if(*ieee1999 == 0 && frame_ie_ieee1999[0] != 0xff)
-	{
-        ie_array_size = sizeof(frame_ie_ieee1999)/sizeof(frame_ie_ieee1999[0]);
+    if (*ieee1999 == 0 && frame_ie_ieee1999[0] != 0xff)
+    {
+        ie_array_size = sizeof(frame_ie_ieee1999) / sizeof(frame_ie_ieee1999[0]);
         ie_cnt = 1;
-		for(i=1; i< ie_array_size; i++)
+        for (i = 1; i < ie_array_size; i++)
         {
-            if(frame_ie_ieee1999[i] == 0)
+            if (frame_ie_ieee1999[i] == 0)
                 break;
-            
+
             ie_cnt++;
         }
 
-        for(i=0; i< max_ies; i++)
+        for (i = 0; i < max_ies; i++)
         {
             srandom(time(NULL) + i);
             create_radom_ie(pkt, IEEE_80211_1999, frame_ie_ieee1999[random() % ie_cnt]);
         }
-	}
-	else if(*ieee2007 == 0 && frame_ie_ieee2007[0] != 0xff)
-	{
-        ie_array_size = sizeof(frame_ie_ieee2007)/sizeof(frame_ie_ieee2007[0]);
+    }
+    else if (*ieee2007 == 0 && frame_ie_ieee2007[0] != 0xff)
+    {
+        ie_array_size = sizeof(frame_ie_ieee2007) / sizeof(frame_ie_ieee2007[0]);
         ie_cnt = 1;
-		for(i=1; i< ie_array_size; i++)
+        for (i = 1; i < ie_array_size; i++)
         {
-            if(frame_ie_ieee2007[i] == 0)
+            if (frame_ie_ieee2007[i] == 0)
                 break;
-            
+
             ie_cnt++;
         }
 
-        for(i=0; i< max_ies; i++)
+        for (i = 0; i < max_ies; i++)
         {
             srandom(time(NULL) + i);
             create_radom_ie(pkt, IEEE_80211_2007, frame_ie_ieee2007[random() % ie_cnt]);
         }
-	}
-	else if(*ieee2012 == 0 && frame_ie_ieee2012[0] != 0xff)
-	{
-        ie_array_size = sizeof(frame_ie_ieee2012)/sizeof(frame_ie_ieee2012[0]);
+    }
+    else if (*ieee2012 == 0 && frame_ie_ieee2012[0] != 0xff)
+    {
+        ie_array_size = sizeof(frame_ie_ieee2012) / sizeof(frame_ie_ieee2012[0]);
         ie_cnt = 1;
-		for(i=1; i< ie_array_size; i++)
+        for (i = 1; i < ie_array_size; i++)
         {
-            if(frame_ie_ieee2012[i] == 0)
+            if (frame_ie_ieee2012[i] == 0)
                 break;
-            
+
             ie_cnt++;
         }
 
-        for(i=0; i< max_ies; i++)
+        for (i = 0; i < max_ies; i++)
         {
             srandom(time(NULL) + i);
             create_radom_ie(pkt, IEEE_80211_2012, frame_ie_ieee2012[random() % ie_cnt]);
         }
-	}
-	else if(*ieee2016 == 0 && frame_ie_ieee2016[0] != 0xff)
-	{
-        ie_array_size = sizeof(frame_ie_ieee2016)/sizeof(frame_ie_ieee2016[0]);
+    }
+    else if (*ieee2016 == 0 && frame_ie_ieee2016[0] != 0xff)
+    {
+        ie_array_size = sizeof(frame_ie_ieee2016) / sizeof(frame_ie_ieee2016[0]);
         ie_cnt = 1;
-		for(i=1; i< ie_array_size; i++)
+        for (i = 1; i < ie_array_size; i++)
         {
-            if(frame_ie_ieee2016[i] == 0)
+            if (frame_ie_ieee2016[i] == 0)
                 break;
-            
+
             ie_cnt++;
         }
 
-        for(i=0; i< max_ies; i++)
+        for (i = 0; i < max_ies; i++)
         {
             srandom(time(NULL) + i);
             create_radom_ie(pkt, IEEE_80211_2016, frame_ie_ieee2016[random() % ie_cnt]);
         }
-	}    
+    }
 }
 
 uint8_t get_ie_status(uint8_t ie_type, uint8_t is_ext)
 {
-    int i=0;
+    int i = 0;
 
-    if(is_ext == 0)
+    if (is_ext == 0)
     {
-        for(i=0; i<255;i++)
+        for (i = 0; i < 255; i++)
         {
-            if(fuzzing_opt.ies_status[i].type == ie_type)
+            if (fuzzing_opt.ies_status[i].type == ie_type)
                 return fuzzing_opt.ies_status[i].enabled;
         }
     }
     else
     {
-        for(i=0; i<255;i++)
+        for (i = 0; i < 255; i++)
         {
-            if(fuzzing_opt.ext_ies_status[i].type == ie_type)
+            if (fuzzing_opt.ext_ies_status[i].type == ie_type)
                 return fuzzing_opt.ext_ies_status[i].enabled;
         }
     }
+
+    return 0;
 }
 
 void init_ie_creator()
@@ -2553,5 +2551,4 @@ void init_ie_creator()
 
     ies_creator[255].id = 255;
     ies_creator[255].pf_ie_creator = ie_255_creator;*/
-
 }

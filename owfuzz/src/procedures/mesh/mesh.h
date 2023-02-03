@@ -5,7 +5,8 @@
 #include "../awdl/wire.h"
 
 // Spanning Tree Protocol
-struct spanning_tree_protocol{
+struct spanning_tree_protocol
+{
     uint16_t identifier;
     uint8_t version_identifier;
     uint8_t bpdu_type;
@@ -20,22 +21,15 @@ struct spanning_tree_protocol{
     uint16_t max_age;
     uint16_t hello_time;
     uint16_t forward_delay;
-}__attribute__((packed));
+} __attribute__((packed));
 
 // discovery, beacon/probe_response
 void parse_beacon(struct packet *pkt);
 
-// peering, 
-
+// peering,
 
 // security
 
-
-
-
 void handle_mesh(struct packet *pkt, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct ether_addr tmac, fuzzing_option *fuzzing_opt);
-
-
-
 
 #endif

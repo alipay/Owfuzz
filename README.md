@@ -46,28 +46,7 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 	- -h Help.
 
 ## Building
-
-- Install dependencies (Kali/Ubuntu)
-```
-sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
-```
-
-- Compiling
-```
-make
-```
-
-## Start in [openwifi](https://github.com/open-sdr/openwifi#quick-start)
-- Copy owfuzz and openwifi_env.sh to openwifi with password **openwifi**.
-  ```
-  scp -r owfuzz openwifi_env.sh root@192.168.10.122:~/
-  ```
-
-- Login to the board from your PC (PC Ethernet should have IP 192.168.10.1) with password **openwifi**.
-  ```
-  ssh root@192.168.10.122
-  ```
-
+### Kali/Ubuntu
 - Install dependencies
 ```
 sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
@@ -78,26 +57,48 @@ sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
 make
 ```
 
+### OpenWiFi
+- Copy owfuzz and openwifi_owfuzz.sh to openwifi with password **openwifi**.
+```
+scp -r owfuzz openwifi_owfuzz.sh root@192.168.10.122:~/
+```
+
+- Login to the board from your PC (PC Ethernet should have IP 192.168.10.1) with password **openwifi**.
+```
+ssh root@192.168.10.122
+```
+
+- Install dependencies
+```
+sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
+```
+
+- Compiling
+```
+cd ~/owfuzz
+make
+```
+
 - Init openwifi env
-  ```
-  ./openwifi_env.sh
-  ```
+```
+./openwifi_owfuzz.sh
+```
 
 ## Example
 
 - Fuzzing Client
 ```
-sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [sta-ip]
+sudo ./src/owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [sta-ip]
 ```
 
 - Fuzzing AP
 ```
-sudo ./owfuzz -i wlan0 -m sta -c [channel] -t [ap-mac] -b [ap-mac] -s [sta-mac] -T 2 -A WPA3 -S [ssid-name] -I [ap-ip]
+sudo ./src/owfuzz -i wlan0 -m sta -c [channel] -t [ap-mac] -b [ap-mac] -s [sta-mac] -T 2 -A WPA3 -S [ssid-name] -I [ap-ip]
 ```
 
 - Interactivity fuzzing
 ```
-sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 1 -A WPA2_PSK_AES
+sudo ./src/owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 1 -A WPA2_PSK_AES
 ```
 
 ## Discovered vulnerabilities

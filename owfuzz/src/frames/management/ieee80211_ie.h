@@ -1,32 +1,32 @@
 /**************************************************************************
-* Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
-* *
-* This file is part of owfuzz.
-* *
-* Owfuzz is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* *
-* Owfuzz is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* *
-* You should have received a copy of the GNU General Public License
-* along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
-****************************************************************************/
+ * Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
+ * *
+ * This file is part of owfuzz.
+ * *
+ * Owfuzz is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * *
+ * Owfuzz is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * *
+ * You should have received a copy of the GNU General Public License
+ * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 #ifndef IEEE80211_IE_H
 #define IEEE80211_IE_H
 #include <inttypes.h>
 
 // IEEE Std 802.11-2020
-#define IE_0_SSID 0   
+#define IE_0_SSID 0
 #define IE_1_SUPPORTED_RATES_AND_BSS_MEMBERSHIP_SELECTORS 1
 #define IE_2_RESERVED 2
 #define IE_3_DSSS_PARAMETER_SET 3
-#define IE_4_CF_PARAMETER_SET 4  // Reserved
+#define IE_4_CF_PARAMETER_SET 4 // Reserved
 #define IE_5_TIM 5
 #define IE_6_IBSS_PARAMETER_SET 6
 #define IE_7_COUNTRY 7
@@ -376,7 +376,6 @@
 #define IE_EXT_93_ANTI_CLOGGING_TOKEN_CONTAINER 93
 // 94-255 Reserved
 
-
 typedef enum _FUZZING_TYPE
 {
 	NOT_PRESENT = 1,
@@ -391,10 +390,9 @@ typedef enum _FUZZING_TYPE
 	MAX_ADD_1,
 	ALL_BITS_ONE,
 	SPECIFIC_VALUE,
-	//LEN_256,
+	// LEN_256,
 	FUZZING_END
-}FUZZING_TYPE;
-
+} FUZZING_TYPE;
 
 typedef enum _FUZZING_VALUE_TYPE
 {
@@ -403,9 +401,9 @@ typedef enum _FUZZING_VALUE_TYPE
 	VALUE__ALL_BITS_ONE,
 	VALUE_A,
 	FUZZING_VALUE_END
-}FUZZING_VALUE_TYPE;
+} FUZZING_VALUE_TYPE;
 
-#define IE_MAX_LENGTH ((255+2)*2) + 100 
+#define IE_MAX_LENGTH ((255 + 2) * 2) + 100
 
 struct ie_common_data
 {
@@ -413,16 +411,14 @@ struct ie_common_data
 	uint8_t length;
 	uint8_t data[255];
 
-}__attribute__((packed));
-
+} __attribute__((packed));
 
 struct ie_data
 {
 	uint16_t length;
 	uint8_t data[1024];
-	
-}__attribute__((packed));
 
+} __attribute__((packed));
 
 struct vendor_specific_ie
 {
@@ -430,35 +426,35 @@ struct vendor_specific_ie
 	uint8_t length;
 	uint8_t oui[3];
 	uint8_t oui_type;
-	//uint8_t data[];
-}__attribute__((packed));
+	// uint8_t data[];
+} __attribute__((packed));
 
 // attribute
 struct attribete_tlv_hdr
 {
 	uint8_t type;
-	uint16_t length;	
-}__attribute__((packed));
+	uint16_t length;
+} __attribute__((packed));
 
 struct attribute_tlv
 {
 	uint8_t type;
 	uint16_t length;
 	uint8_t value[255];
-}__attribute__((packed));
+} __attribute__((packed));
 
 // data element
 struct data_element_tlv
 {
 	uint16_t type;
 	uint16_t length;
-	uint8_t value[1024]; // 	
-}__attribute__((packed));
+	uint8_t value[1024]; //
+} __attribute__((packed));
 
 struct data_element_tlv_hdr
 {
 	uint16_t type;
-	uint16_t length;	
-}__attribute__((packed));
+	uint16_t length;
+} __attribute__((packed));
 
 #endif

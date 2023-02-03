@@ -1,21 +1,21 @@
 /**************************************************************************
-* Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
-* *
-* This file is part of owfuzz.
-* *
-* Owfuzz is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* *
-* Owfuzz is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* *
-* You should have received a copy of the GNU General Public License
-* along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
-****************************************************************************/
+ * Copyright (C) 2020-2021 by Hongjian Cao <haimohk@gmail.com>
+ * *
+ * This file is part of owfuzz.
+ * *
+ * Owfuzz is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * *
+ * Owfuzz is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * *
+ * You should have received a copy of the GNU General Public License
+ * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
+ ****************************************************************************/
 
 #ifndef FRAME_H
 #define FRAME_H
@@ -54,7 +54,6 @@
 #include "control/rts.h"
 #include "control/vht_ndp_announcement.h"
 
-
 // data
 #include "data/d_cf_ack.h"
 #include "data/d_cf_poll.h"
@@ -83,8 +82,8 @@ int check_alive_by_disassoc(struct packet *pkt);
 int check_alive_by_pkts(struct ether_addr smac);
 
 void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len);
-void hex_to_ascii_hex(unsigned char *phex, unsigned char *pascii, unsigned int len);
-int str_to_hex(unsigned char *pascii, unsigned char *phex, unsigned int len);
+void hex_to_ascii_hex(unsigned char *phex, char *pascii, unsigned int len);
+int str_to_hex(char *pascii, unsigned char *phex, unsigned int len);
 void log_pkt(int log_level, struct packet *pkt);
 void save_fuzzing_state();
 void load_fuzzing_state();
