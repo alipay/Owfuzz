@@ -21,6 +21,7 @@
 #include "ies_creator.h"
 #include "../80211_packet_common.h"
 
+extern unsigned int seed;
 extern fuzzing_option fuzzing_opt;
 
 // 802.11a/b
@@ -912,10 +913,16 @@ int add_attribute_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific_ie
     int rlen = 0;
 
     atlv.type = id;
-    srandom(time(NULL) + pkt->len);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + pkt->len);
+    }
     atlv.length = random() % 255;
 
-    srandom(time(NULL) + atlv.length);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + atlv.length);
+    }
     value_type = random() % (FUZZING_VALUE_END - 1) + 1;
     rlen = atlv.length; // random() % 256;
 
@@ -937,10 +944,16 @@ int add_data_element_tlv_fuzzing_data(struct packet *pkt, struct vendor_specific
     int rlen = 0;
 
     detlv.type = id;
-    srandom(time(NULL) + pkt->len);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + pkt->len);
+    }
     detlv.length = random() % 255;
 
-    srandom(time(NULL) + detlv.length);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + detlv.length);
+    }
     value_type = random() % (FUZZING_VALUE_END - 1) + 1;
     rlen = detlv.length; // random() % 256;
     generate_random_data(detlv.value, rlen, value_type);
@@ -958,7 +971,10 @@ void add_ie_data(struct packet *pkt, uint8_t id, FUZZING_TYPE fuzzing_type, uint
 {
     struct ie_data iedata = {0};
 
-    srandom(time(NULL) + pkt->len);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + pkt->len);
+    }
     iedata = get_ie_data_by_fuzzing_type(IEEE_80211_2020, id, fuzzing_type, random() % (FUZZING_VALUE_END - 1) + 1, specific_data, specific_data_len);
     memcpy(pkt->data + pkt->len, iedata.data, iedata.length);
     pkt->len += iedata.length;
@@ -1018,7 +1034,10 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
     case NOT_PRESENT:
         break;
     case REPEATED:
-        srandom(time(NULL) + swch);
+        if (0 == seed)
+        {
+            srandom(time(NULL) + swch);
+        }
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case ALL_BITS_ZERO:
@@ -1037,7 +1056,10 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
         ie_cd.length = min_len + 1;
         break;
     case RANDOM_VALUE:
-        srandom(time(NULL) + swch);
+        if (0 == seed)
+        {
+            srandom(time(NULL) + swch);
+        }
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case SPECIFIC_VALUE:
@@ -1073,7 +1095,10 @@ struct ie_data get_ie_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_version,
     {
         if (fuzzing_type != RANDOM_VALUE)
         {
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             rlen = random() % 256;
             generate_random_data(ie_cd.data, rlen, value_type);
         }
@@ -1182,7 +1207,10 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
     case NOT_PRESENT:
         break;
     case REPEATED:
-        srandom(time(NULL) + swch);
+        if (0 == seed)
+        {
+            srandom(time(NULL) + swch);
+        }
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case ALL_BITS_ZERO:
@@ -1201,7 +1229,10 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
         ie_cd.length = min_len + 1;
         break;
     case RANDOM_VALUE:
-        srandom(time(NULL) + swch);
+        if (0 == seed)
+        {
+            srandom(time(NULL) + swch);
+        }
         ie_cd.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case SPECIFIC_VALUE:
@@ -1237,7 +1268,10 @@ struct ie_data get_ie_ex_data_by_fuzzing_type(IEEE_80211_VERSION ieee80211_versi
     {
         if (fuzzing_type != RANDOM_VALUE)
         {
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             rlen = random() % 256;
             generate_random_data(ie_cd.data, rlen, value_type);
         }
@@ -1632,10 +1666,16 @@ void create_radom_ie(struct packet *pkt,
     int fuzzing_step = 0;
     int fuzzing_value_step = 0;
 
-    srandom(time(NULL));
+    if (0 == seed)
+    {
+        srandom(time(NULL));
+    }
     fuzzing_step = random() % (FUZZING_END - 1) + 1;
 
-    srandom(time(NULL) + ieee_ie_id);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + ieee_ie_id);
+    }
     fuzzing_value_step = random() % (FUZZING_VALUE_END - 1) + 1;
 
     iedata = get_ie_data_by_fuzzing_type(ieee80211_version, ieee_ie_id, fuzzing_step, fuzzing_value_step, NULL, 0);
@@ -1698,7 +1738,10 @@ void create_frame_fuzzing_ies(struct packet *pkt,
 
         for (i = 0; i < max_ies; i++)
         {
-            srandom(time(NULL) + i);
+            if (0 == seed)
+            {
+                srandom(time(NULL) + i);
+            }
             create_radom_ie(pkt, IEEE_80211_1999, frame_ie_ieee1999[random() % ie_cnt]);
         }
     }
@@ -1716,7 +1759,10 @@ void create_frame_fuzzing_ies(struct packet *pkt,
 
         for (i = 0; i < max_ies; i++)
         {
-            srandom(time(NULL) + i);
+            if (0 == seed)
+            {
+                srandom(time(NULL) + i);
+            }
             create_radom_ie(pkt, IEEE_80211_2007, frame_ie_ieee2007[random() % ie_cnt]);
         }
     }
@@ -1734,7 +1780,10 @@ void create_frame_fuzzing_ies(struct packet *pkt,
 
         for (i = 0; i < max_ies; i++)
         {
-            srandom(time(NULL) + i);
+            if (0 == seed)
+            {
+                srandom(time(NULL) + i);
+            }
             create_radom_ie(pkt, IEEE_80211_2012, frame_ie_ieee2012[random() % ie_cnt]);
         }
     }
@@ -1752,7 +1801,10 @@ void create_frame_fuzzing_ies(struct packet *pkt,
 
         for (i = 0; i < max_ies; i++)
         {
-            srandom(time(NULL) + i);
+            if (0 == seed)
+            {
+                srandom(time(NULL) + i);
+            }
             create_radom_ie(pkt, IEEE_80211_2016, frame_ie_ieee2016[random() % ie_cnt]);
         }
     }

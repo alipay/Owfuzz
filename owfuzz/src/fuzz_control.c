@@ -42,6 +42,7 @@ struct packet *bad_frame = NULL;
 
 #define MITM_ACTION_ECSA "\xD0\x00\x3A\x01\x0C\x7A\x15\x87\x3E\x49\x04\xD9\xF5\x26\xFF\xC0\x04\xD9\xF5\x26\xFF\xC0\x90\x50\x04\x04\x01\x51\x01\x03"
 
+unsigned int seed = 0;
 fuzzing_option fuzzing_opt = {0};
 
 struct ow_queue owq;
@@ -754,7 +755,10 @@ void frame_fuzzing()
 	struct packet fuzz_pkt = {0};
 	uint32_t frame_idx = 0;
 
-	srandom(time(NULL));
+	if (0 == seed)
+	{
+		srandom(time(NULL));
+	}
 	frame_idx = random() % fuzzing_opt.owfuzz_frames_cnt;
 
 	memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
@@ -767,7 +771,8 @@ void p2p_frame_fuzzing()
 	struct packet fuzz_pkt = {0};
 	uint32_t frame_idx = 0;
 
-	srandom(time(NULL));
+	if (seed)
+		== 0 { srandom(time(NULL)); }
 	frame_idx = random() % (sizeof(p2p_frames) / sizeof(p2p_frames[0]));
 
 	memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));

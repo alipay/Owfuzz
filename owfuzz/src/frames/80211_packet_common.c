@@ -117,7 +117,10 @@ void create_ieee_hdr(struct packet *pkt, uint8_t type, char dsflags, uint16_t du
 
   hdr->type = type;
 
-  srandom(time(NULL) + pkt->len);
+  if (0 == seed)
+  {
+    srandom(time(NULL) + pkt->len);
+  }
 
   if ((hdr->type & 0x0F) == DATA_FRAME)
   {

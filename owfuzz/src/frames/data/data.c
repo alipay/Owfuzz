@@ -23,6 +23,7 @@
 #include "common/eapol_common.h"
 #include "eap_common/eap_defs.h"
 
+extern unsigned int seed;
 extern fuzzing_option fuzzing_opt;
 
 struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt)
@@ -89,7 +90,10 @@ struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struc
                     }
                     else
                     {
-                        srandom(time(NULL));
+                        if (0 == seed)
+                        {
+                            srandom(time(NULL));
+                        }
                         dlen = random() % 1024;
                         generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
                         data.len += dlen;
@@ -119,15 +123,24 @@ struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struc
 
                     ieee8021x_hdr->version = random() % 0xFF;
                     ieee8021x_hdr->type = random() % 0xFF; // type
-                    srandom(time(NULL));
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL));
+                    }
                     ieee8021x_hdr->length = htons(random() % 512);
                     memcpy(data.data + data.len, ieee8021x_hdr, sizeof(struct ieee802_1x_hdr));
                     data.len += sizeof(struct ieee802_1x_hdr);
 
-                    srandom(time(NULL) + ieee8021x_hdr->length);
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL) + ieee8021x_hdr->length);
+                    }
                     eaphdr->code = random() % 6 + 1;
                     // eaphdr->identifier = 0x00;
-                    srandom(time(NULL) + eaphdr->code);
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL) + eaphdr->code);
+                    }
                     eaphdr->length = htons(random() % 512);
                     memcpy(data.data + data.len, eaphdr, sizeof(struct eap_hdr));
                     data.len += sizeof(struct eap_hdr);
@@ -136,7 +149,10 @@ struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struc
                     data.data[data.len] = eap_type;
                     data.len += 1;
                     // type data
-                    srandom(time(NULL) + eap_type);
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL) + eap_type);
+                    }
                     dlen = random() % 1024;
                     generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
                     data.len += dlen;
@@ -170,21 +186,30 @@ struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struc
             data.len += sizeof(wp);
 
             hdr_new->flags |= 0x40;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;
         }
         else if (fuzzing_opt.auth_type == OPEN_WEP)
         {
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;
         }
         else
         {
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;
@@ -215,14 +240,20 @@ struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struc
 
             ieee8021xdhr.version = 0x02;
             ieee8021xdhr.type = 0x00;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             ieee8021xdhr.length = htons(5);
             memcpy(data.data + data.len, &ieee8021xdhr, sizeof(struct ieee802_1x_hdr));
             data.len += sizeof(struct ieee802_1x_hdr);
 
             eap.code = EAP_CODE_REQUEST;
             eap.identifier = random() % 0xFF;
-            srandom(time(NULL) + eap.identifier);
+            if (0 == seed)
+            {
+                srandom(time(NULL) + eap.identifier);
+            }
             eap.length = htons(5);
             memcpy(data.data + data.len, &eap, sizeof(struct eap_hdr));
             data.len += sizeof(struct eap_hdr);
@@ -241,7 +272,10 @@ struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struc
 
                 hdr_new->flags |= 0x40;
             }
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;

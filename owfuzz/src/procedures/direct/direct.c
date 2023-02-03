@@ -28,6 +28,7 @@
 #define VENDOR_SPECIFIC_P2P (uint8_t *)"\x50\x6f\x9a\x09\x02\x02\x00\x25\x00\x0d\x1b\x00\x66\xf6\x5c\x49\x1e\xb4\x01\x88\x00\x0a\x00\x50\xf2\x04\x00\x05\x00\x10\x11\x00\x06\x4e\x45\x58\x20\x33\x54"
 #define VENDOR_SPECIFIC_P2P_LEN 39
 
+extern unsigned int seed;
 extern fuzzing_option fuzzing_opt;
 
 static FUZZING_TYPE g_fuzzing_type = ALL_BITS_ZERO;
@@ -126,7 +127,10 @@ struct ie_data get_p2p_attribute_by_fuzzing_type(uint8_t id,
         att.length = min_len + 1;
         break;
     case RANDOM_VALUE:
-        srandom(time(NULL) + swch);
+        if (0 == seed)
+        {
+            srandom(time(NULL) + swch);
+        }
         att.length = min_len + (random() % (max_len - min_len + 1));
         break;
     case SPECIFIC_VALUE:
@@ -160,7 +164,10 @@ struct ie_data get_p2p_attribute_by_fuzzing_type(uint8_t id,
 
     if (fuzzing_type != RANDOM_VALUE)
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         rlen = random() % 256;
         generate_random_data(att.value, rlen, value_type);
     }
@@ -224,7 +231,7 @@ void p2p_ie_fuzzing(struct packet *pkt, char *frame_name, uint8_t p2p_attrs[])
     memcpy(pkt->data + pkt->len, &p2pie, sizeof(p2pie));
     pkt->len += sizeof(p2pie);
 
-    srandom(time(NULL));
+    if (0 == seed) { srandom(time(NULL)); }
     add_attribute_tlv_fuzzing_data(pkt, p, p2p_attrs[random() % sizeof(p2p_attrs)/sizeof(p2p_attrs[0])]);*/
 
     while (!(p2p_attrs[attr_id] == 0 && attr_id != 0))
@@ -264,7 +271,10 @@ void wps_ie_fuzzing(struct packet *pkt, char *frame_name)
     memcpy(pkt->data + pkt->len, &wpsie, sizeof(wpsie));
     pkt->len += sizeof(wpsie);
 
-    srandom(time(NULL));
+    if (0 == seed)
+    {
+        srandom(time(NULL));
+    }
     add_data_element_tlv_fuzzing_data(pkt, (struct vendor_specific_ie *)p, data_element_type[random() % (sizeof(data_element_type) / sizeof(data_element_type[0]))]);
 
     /*for(i=0; i< sizeof(data_element_type)/sizeof(data_element_type[0]); i++)
@@ -294,7 +304,10 @@ struct packet create_p2p_beacon(struct ether_addr bssid, struct ether_addr smac,
     internal_timestamp += 0x400 * DEFAULT_BEACON_INTERVAL;
     bf->timestamp = htole64(internal_timestamp);
     bf->interval = htole16(DEFAULT_BEACON_INTERVAL);
-    srandom(time(NULL));
+    if (0 == seed)
+    {
+        srandom(time(NULL));
+    }
     bf->capabilities = random() % 0xffff;
     if (adhoc)
     {
@@ -523,7 +536,10 @@ struct packet create_p2p_probe_response(struct ether_addr bssid, struct ether_ad
 
     bf = (struct beacon_fixed *)(pkt.data + pkt.len);
 
-    srandom(time(NULL));
+    if (0 == seed)
+    {
+        srandom(time(NULL));
+    }
     internal_timestamp += random();
     bf->timestamp = htole64(internal_timestamp);
     bf->interval = htole16(DEFAULT_BEACON_INTERVAL);
@@ -766,7 +782,10 @@ struct packet create_p2p_action_provision_discovery_request(struct ether_addr bs
 
     // WPS ie
     vs_ie_wps.id = IE_221_VENDOR_SPECIFIC;
-    srandom(time(NULL) + pkt.len);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + pkt.len);
+    }
     vs_ie_wps.length = 4 + random() % 252;
     vs_ie_wps.oui[0] = 0x00;
     vs_ie_wps.oui[1] = 0x50;
@@ -1513,7 +1532,10 @@ struct packet create_p2p_action(struct ether_addr bssid, struct ether_addr smac,
                                      P2P_DEVICE_DISCOVERABILITY_REQUEST, P2P_DEVICE_DISCOVERABILITY_RESPONSE,
                                      P2P_PROVISION_DISCOVERY_REQUEST, P2P_PROVISION_DISCOVERY_RESPONSE};
 
-    srandom(time(NULL));
+    if (0 == seed)
+    {
+        srandom(time(NULL));
+    }
     switch (random() % (sizeof(action_types) / sizeof(action_types[0])))
     {
     case P2P_GO_NEGOTIATION_REQUEST:

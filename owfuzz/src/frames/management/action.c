@@ -233,7 +233,10 @@ struct packet create_action(struct ether_addr bssid, struct ether_addr smac, str
     }
 
     // TODO:
-    srandom(time(NULL) + af->category_code);
+    if (0 == seed)
+    {
+        srandom(time(NULL) + af->category_code);
+    }
     rlen = random() % (0xff + 1);
     generate_random_data(action.data + action.len, rlen, VALUE_RANDOM);
     action.len += rlen;

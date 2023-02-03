@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <time.h>
 
+extern unsigned int seed;
 extern fuzzing_option fuzzing_opt;
 
 uint8_t authentication_ie_ieee1999[10] = {16, 0};
@@ -194,7 +195,10 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
                 generate_random_data(wp->init_vector, sizeof(wp->init_vector), VALUE_RANDOM);
                 wp->key_index = 0;
                 authentication.len += sizeof(struct wep_param);
-                srandom(time(NULL));
+                if (0 == seed)
+                {
+                    srandom(time(NULL));
+                }
                 rlen = random() % 256;
                 generate_random_data(authentication.data + authentication.len, rlen, VALUE_RANDOM);
                 authentication.len += rlen;
@@ -248,7 +252,10 @@ struct packet create_authentication(struct ether_addr bssid, struct ether_addr s
             {
                 sae_commit = (struct SAE_Commit *)(authentication.data + authentication.len);
                 sae_commit->message_type = 0x01;
-                srandom(time(NULL));
+                if (0 == seed)
+                {
+                    srandom(time(NULL));
+                }
                 sae_commit->group_id = random() % (0xFFFF + 1);
                 generate_random_data(sae_commit->scalar, sizeof(sae_commit->scalar), VALUE_RANDOM);
                 generate_random_data(sae_commit->finite_field_element, sizeof(sae_commit->finite_field_element), VALUE_RANDOM);

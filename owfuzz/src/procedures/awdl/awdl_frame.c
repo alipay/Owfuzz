@@ -130,7 +130,10 @@ struct packet create_action_awdl(struct ether_addr bssid, struct ether_addr smac
 	i = 0;
 	do
 	{
-		srandom(time(NULL) + i);
+		if (0 == seed)
+		{
+			srandom(time(NULL) + i);
+		}
 		i = random() % (sizeof(awdl_ies) / sizeof(awdl_ies[0]));
 		add_attribute_tlv_fuzzing_data(&pkt, NULL, awdl_ies[i]);
 
