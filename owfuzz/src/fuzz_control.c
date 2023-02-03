@@ -2912,6 +2912,7 @@ int fuzzing(int argc, char *argv[])
 		fuzz_logger_log(FUZZ_LOG_INFO, "Seed: srandom(NULL)...");
 	} else {
 		fuzz_logger_log(FUZZ_LOG_INFO, "Seed: %ld", seed);
+		srandom(seed);
 	}
 
 	/*if(0 != init(interface, channel))
