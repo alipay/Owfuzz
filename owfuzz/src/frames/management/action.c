@@ -21,6 +21,8 @@
 #include "ies_creator.h"
 #include "common/ieee802_11_defs.h"
 
+extern unsigned long seed;
+
 uint8_t action_ie_ieee1999[10] = {0xff, 0};
 uint8_t action_ie_ieee2007[10] = {221, 0};
 uint8_t action_ie_ieee2012[10] = {221, 76, 0};

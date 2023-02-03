@@ -167,8 +167,9 @@ void usage_help(char *name)
 		   "\t   Log level, 8:DEBUG, 7:INFO, 6:NOTICE, 5:WARN, 4:ERR, 3:CRIT, 2:ALERT, 1:EMERG, 0:STDERR\n"
 		   "\t-f [log file]\n"
 		   "\t   Log file path\n"
-		   "\t-h\n"
-		   "\t   Help.\n",
+		   "\t-r [seed value]\n"
+		   "\t   Set the seed value for srandom, if not provided, srandom(time(NULL)..) will be used\n"
+		   "\t-h Help.\n",
 		   TEST_FRAME, TEST_INTERACTIVE, TEST_POC, TEST_INTERACTIVE, TEST_FRAME, TEST_INTERACTIVE_FRAME);
 }
 
@@ -771,8 +772,10 @@ void p2p_frame_fuzzing()
 	struct packet fuzz_pkt = {0};
 	uint32_t frame_idx = 0;
 
-	if (seed)
-		== 0 { srandom(time(NULL)); }
+	if (seed == 0)
+	{
+		srandom(time(NULL));
+	}
 	frame_idx = random() % (sizeof(p2p_frames) / sizeof(p2p_frames[0]));
 
 	memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
@@ -2582,6 +2585,7 @@ int fuzzing(int argc, char *argv[])
 	char *ap_bssid_str = NULL;
 	struct ether_addr ap_bssid;
 	char *channel_str = NULL;
+	char *seed_str = NULL;
 	char *target_ip = NULL;
 	int channel = 0;
 	int tid;
@@ -2713,11 +2717,24 @@ int fuzzing(int argc, char *argv[])
 			case 'f':
 				file_log_path = strdup(optarg);
 				strncpy(fuzzing_opt.log_file, file_log_path, sizeof(fuzzing_opt.log_file) - 1);
+			case 'r':
+				seed_str = strdup(optarg);
+				sscanf(seed_str, "%lu", &seed);
+				break;
 			default:
 				fuzz_logger_log(FUZZ_LOG_ERR, "Unknow option %c!", c);
 				usage_help(argv[0]);
 				return -1;
 			}
+		}
+
+		if (seed != 0)
+		{
+			// Use a provided seed number
+			fuzz_logger_log(FUZZ_LOG_INFO, "Seed value: %lu", seed);
+			srandom(seed);
+		} else {
+			fuzz_logger_log(FUZZ_LOG_INFO, "No seed value provided, using time(NULL)...");
 		}
 
 		if (interface == NULL)
@@ -2817,6 +2834,7 @@ int fuzzing(int argc, char *argv[])
 	}
 	else
 	{
+		fuzz_logger_log(FUZZ_LOG_INFO, "No command line parameters have been provided, loading configuration file: %s", "owfuzz.cfg");
 		owfuzz_config_get_fuzzing_option(&fuzzing_opt);
 		owfuzz_config_get_interfaces(&fuzzing_opt);
 	}
@@ -2862,7 +2880,7 @@ int fuzzing(int argc, char *argv[])
 	}
 
 	fuzz_logger_log(FUZZ_LOG_INFO, "Fuzzing mode: %s", fuzzing_opt.mode);
-	fuzz_logger_log(FUZZ_LOG_INFO, "Target mac: %02X:%02X:%02X:%02X:%02X:%02X",
+	fuzz_logger_log(FUZZ_LOG_INFO, "Target MAC: %02X:%02X:%02X:%02X:%02X:%02X",
 					fuzzing_opt.target_addr.ether_addr_octet[0],
 					fuzzing_opt.target_addr.ether_addr_octet[1],
 					fuzzing_opt.target_addr.ether_addr_octet[2],
@@ -2870,7 +2888,7 @@ int fuzzing(int argc, char *argv[])
 					fuzzing_opt.target_addr.ether_addr_octet[4],
 					fuzzing_opt.target_addr.ether_addr_octet[5]);
 
-	fuzz_logger_log(FUZZ_LOG_INFO, "Source mac: %02X:%02X:%02X:%02X:%02X:%02X",
+	fuzz_logger_log(FUZZ_LOG_INFO, "Source MAC: %02X:%02X:%02X:%02X:%02X:%02X",
 					fuzzing_opt.source_addr.ether_addr_octet[0],
 					fuzzing_opt.source_addr.ether_addr_octet[1],
 					fuzzing_opt.source_addr.ether_addr_octet[2],
@@ -2889,6 +2907,12 @@ int fuzzing(int argc, char *argv[])
 	fuzz_logger_log(FUZZ_LOG_INFO, "Fuzzing target's SSID: %s", fuzzing_opt.target_ssid);
 	fuzz_logger_log(FUZZ_LOG_INFO, "auth_type: %d", fuzzing_opt.auth_type);
 	fuzz_logger_log(FUZZ_LOG_INFO, "test_type: %d", fuzzing_opt.test_type);
+
+	if (seed == 0) {
+		fuzz_logger_log(FUZZ_LOG_INFO, "Seed: srandom(NULL)...");
+	} else {
+		fuzz_logger_log(FUZZ_LOG_INFO, "Seed: %ld", seed);
+	}
 
 	/*if(0 != init(interface, channel))
 	{

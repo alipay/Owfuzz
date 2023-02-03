@@ -28,7 +28,7 @@
 #define VENDOR_SPECIFIC_P2P (uint8_t *)"\x50\x6f\x9a\x09\x02\x02\x00\x25\x00\x0d\x1b\x00\x66\xf6\x5c\x49\x1e\xb4\x01\x88\x00\x0a\x00\x50\xf2\x04\x00\x05\x00\x10\x11\x00\x06\x4e\x45\x58\x20\x33\x54"
 #define VENDOR_SPECIFIC_P2P_LEN 39
 
-extern unsigned int seed;
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 static FUZZING_TYPE g_fuzzing_type = ALL_BITS_ZERO;

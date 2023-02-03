@@ -20,6 +20,8 @@
 #include "log.h"
 #include "../../linux_wifi/control/kismet_wifi_control.h"
 
+extern unsigned long seed;
+
 FILE *owfuzz_config_open(char *cfg_file)
 {
     char owfuzz_cfg_path[256] = {0};
@@ -29,12 +31,12 @@ FILE *owfuzz_config_open(char *cfg_file)
     if (readlink("/proc/self/exe", owfuzz_cfg_path, sizeof(owfuzz_cfg_path)) > 0)
     {
         ptr = strrchr(owfuzz_cfg_path, '/');
-        if (ptr)
+        if (NULL != ptr)
         {
             ptr[1] = '\0';
             strcat(owfuzz_cfg_path, "owfuzz.cfg");
 
-            if (cfg_file == NULL)
+            if (NULL == cfg_file)
             {
                 fp1 = fopen(owfuzz_cfg_path, "r");
             }
@@ -868,7 +870,6 @@ int owfuzz_config_get_fuzzing_option(fuzzing_option *fo)
                     }
                     else if (!strcmp(option_name, "auth_type"))
                     {
-
                         if (strcmp(option_value, "OPEN_NONE") == 0)
                         {
                             fo->auth_type = OPEN_NONE;
@@ -930,6 +931,10 @@ int owfuzz_config_get_fuzzing_option(fuzzing_option *fo)
                     else if (!strcmp(option_name, "log_file"))
                     {
                         strncpy(fo->log_file, option_value, sizeof(fo->log_file) - 1);
+                    }
+                    else if (!strcmp(option_name, "seed"))
+                    {
+                        sscanf(option_value, "%lu", &seed);
                     }
                 }
             }

@@ -23,7 +23,7 @@
 #include "ies_creator.h"
 #include "../../procedures/awdl/wire.h"
 
-extern unsigned int seed;
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 uint8_t beacon_ie_ieee1999[10] = {0, 1, 2, 3, 4, 6, 5, 0};

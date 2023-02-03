@@ -23,7 +23,7 @@
 #include "common/eapol_common.h"
 #include "eap_common/eap_defs.h"
 
-extern unsigned int seed;
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 struct packet create_data(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt)

@@ -22,6 +22,7 @@
 #include <time.h>
 #include "80211_packet_common.h"
 
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 static uint16_t seqno = 0;

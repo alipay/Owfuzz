@@ -21,7 +21,7 @@
 #include "ies_creator.h"
 #include "../80211_packet_common.h"
 
-extern unsigned int seed;
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 // 802.11a/b

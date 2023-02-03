@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <time.h>
 
-extern unsigned int seed;
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 uint8_t authentication_ie_ieee1999[10] = {16, 0};
