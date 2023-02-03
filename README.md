@@ -47,27 +47,26 @@ Owfuzz can also use a wireless network card that supports monitor mode and frame
 
 ## Building
 
-### Kali/Ubuntu
- - Install dependencies
+- Install dependencies (Kali/Ubuntu)
 ```
 sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
 ```
 
- - Compiling
+- Compiling
 ```
 make
 ```
 
-### OpenWiFi
-- Copy owfuzz and openwifi_owfuzz.sh to openwifi with password **openwifi**.
-```
-scp -r owfuzz openwifi_owfuzz.sh root@192.168.10.122:~/
-```
+## Start in [openwifi](https://github.com/open-sdr/openwifi#quick-start)
+- Copy owfuzz and openwifi_env.sh to openwifi with password **openwifi**.
+  ```
+  scp -r owfuzz openwifi_env.sh root@192.168.10.122:~/
+  ```
 
 - Login to the board from your PC (PC Ethernet should have IP 192.168.10.1) with password **openwifi**.
-```
-ssh root@192.168.10.122
-```
+  ```
+  ssh root@192.168.10.122
+  ```
 
 - Install dependencies
 ```
@@ -76,31 +75,29 @@ sudo apt-get install pkg-config libnl-3-dev libnl-genl-3-dev libpcap-dev
 
 - Compiling
 ```
-cd ~/owfuzz
 make
 ```
 
 - Init openwifi env
-```
-./openwifi_owfuzz.sh
-```
+  ```
+  ./openwifi_env.sh
+  ```
 
-## Examples
+## Example
 
 - Fuzzing Client
 ```
-cd ~/owfuzz
-sudo ./src/owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [sta-ip]
+sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [sta-ip]
 ```
 
 - Fuzzing AP
 ```
-sudo ./src/owfuzz -i wlan0 -m sta -c [channel] -t [ap-mac] -b [ap-mac] -s [sta-mac] -T 2 -A WPA3 -S [ssid-name] -I [ap-ip]
+sudo ./owfuzz -i wlan0 -m sta -c [channel] -t [ap-mac] -b [ap-mac] -s [sta-mac] -T 2 -A WPA3 -S [ssid-name] -I [ap-ip]
 ```
 
 - Interactivity fuzzing
 ```
-sudo ./src/owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 1 -A WPA2_PSK_AES
+sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [sta-mac] -b [ap-mac] -s [ap-mac] -T 1 -A WPA2_PSK_AES
 ```
 
 ## Discovered vulnerabilities
