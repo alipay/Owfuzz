@@ -446,7 +446,7 @@ void generate_random_data(uint8_t *data, uint32_t length, FUZZING_VALUE_TYPE val
     {
       *(data + i) = 0x00;
     }
-    else if (value_type == VALUE__ALL_BITS_ONE)
+    else if (value_type == VALUE_ALL_BITS_ONE)
     {
       *(data + i) = 0xFF;
     }
