@@ -42,7 +42,7 @@ struct packet *bad_frame = NULL;
 
 #define MITM_ACTION_ECSA "\xD0\x00\x3A\x01\x0C\x7A\x15\x87\x3E\x49\x04\xD9\xF5\x26\xFF\xC0\x04\xD9\xF5\x26\xFF\xC0\x90\x50\x04\x04\x01\x51\x01\x03"
 
-unsigned int seed = 0;
+unsigned long seed = 0;
 fuzzing_option fuzzing_opt = {0};
 
 struct ow_queue owq;
@@ -2594,6 +2594,7 @@ int fuzzing(int argc, char *argv[])
 	char *file_log_path = NULL;
 	pthread_t fthread;
 
+	// Set all the fields of the structure to 0
 	memset(&fuzzing_opt, 0, sizeof(fuzzing_opt));
 
 	if (argc > 1)

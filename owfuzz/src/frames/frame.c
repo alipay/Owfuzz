@@ -267,13 +267,16 @@ unsigned short calc_chksum(unsigned short *buff, int len)
 	return (unsigned short)(~sum);
 }
 
+/*
+	Prepare the ICMP packet to be sent via the socket
+*/
 int pack_icmp(uint8_t *buff, int seq)
 {
 	int packsize = 0;
 	struct icmphdr *icmp_h = NULL;
 	struct timeval *tval = NULL;
 
-	icmp_h = (struct icmp *)buff;
+	icmp_h = (struct icmphdr *)buff;
 	icmp_h->type = ICMP_ECHO;
 	icmp_h->code = 0;
 	icmp_h->checksum = 0;
@@ -302,6 +305,9 @@ void tv_sub(struct timeval *out, struct timeval *in)
 	out->tv_sec -= in->tv_sec;
 }
 
+/*
+	Breakdown the ICMP response
+*/
 int unpack_icmp(uint8_t *buff, int len, struct timeval tvrecv)
 {
 	int iphdrlen = 0;
@@ -333,6 +339,11 @@ int unpack_icmp(uint8_t *buff, int len, struct timeval tvrecv)
 	return 0;
 }
 
+/*
+	Create a 'ping' socket
+	This function tries to create the socket that will be later used, returns -1 if fails
+	Set the value of 'ping_sockfd' to the created socket
+*/
 int init_ping_sock()
 {
 	int sockfd;
@@ -340,9 +351,15 @@ int init_ping_sock()
 	int size = 1024;
 	struct timeval tv_timeout = {0};
 
+	if (0 != fuzzing_opt.ping_sockfd) {
+		// If socket was previously openned, close it
+		close(fuzzing_opt.ping_sockfd);
+		fuzzing_opt.ping_sockfd = 0;
+	}
+
 	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
 	{
-		fuzz_logger_log(FUZZ_LOG_INFO, "socket initialization error, errno: %d", errno);
+		fuzz_logger_log(FUZZ_LOG_INFO, "socket initialization error, errno = %d", errno);
 		return -1;
 	}
 
@@ -356,6 +373,12 @@ int init_ping_sock()
 	if (inaddr == INADDR_NONE)
 	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "Unable to resolve Target's IP address");
+
+		// Don't leave behind values
+		fuzzing_opt.ping_dst_addr.sin_family = 0;
+		fuzzing_opt.ping_dst_addr.sin_addr.s_addr = 0;
+		fuzzing_opt.ping_sockfd = 0;
+
 		return -1;
 	}
 
@@ -367,10 +390,16 @@ int init_ping_sock()
 	return 0;
 }
 
+/*
+	Perform an ICMP ping to the target IP address
+	Returns 0 - target is unreachable (no ICMP reply)
+			1 - target is reachable (got ICMP reply)
+	Tries every 5s to send an ICMP echo packet
+*/
 int check_alive_by_ping()
 {
-	uint8_t sendpacket[PING_PACKET_SIZE];
-	uint8_t recvpacket[PING_PACKET_SIZE];
+	uint8_t sendpacket[PING_PACKET_SIZE] = {0};
+	uint8_t recvpacket[PING_PACKET_SIZE] = {0};
 	int nsend = 0, nreceived = 0;
 	struct sockaddr_in from = {0};
 	struct timeval tvrecv = {0};
@@ -382,6 +411,7 @@ int check_alive_by_ping()
 
 	if (fuzzing_opt.ping_sockfd <= 0)
 	{
+		// Socket is not open or invalid
 		return 0;
 	}
 
@@ -391,7 +421,7 @@ int check_alive_by_ping()
 		packetsize = pack_icmp(sendpacket, seq++);
 		if (sendto(fuzzing_opt.ping_sockfd, sendpacket, packetsize, 0, (struct sockaddr *)&fuzzing_opt.ping_dst_addr, sizeof(fuzzing_opt.ping_dst_addr)) <= 0)
 		{
-			fuzz_logger_log(FUZZ_LOG_INFO, "sendto error");
+			fuzz_logger_log(FUZZ_LOG_INFO, "sendto error, errno = %d", errno);
 			continue;
 		}
 
@@ -404,7 +434,7 @@ int check_alive_by_ping()
 		fromlen = sizeof(from);
 		if ((n = recvfrom(fuzzing_opt.ping_sockfd, recvpacket, sizeof(recvpacket), 0, (struct sockaddr *)&from, &fromlen)) <= 0)
 		{
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom error, n = %d", n);
+			fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom error, n = %d, errno = %d", n, errno);
 			// exit(-1);
 		}
 		else
@@ -418,7 +448,7 @@ int check_alive_by_ping()
 			}
 			else
 			{
-				fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom , not ereply"); // not ECHO_REPLY
+				fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom didn't return ICMP reply"); // not ECHO_REPLY
 			}
 		}
 
