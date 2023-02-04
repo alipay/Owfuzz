@@ -1073,6 +1073,9 @@ int owfuzz_config_get_ext_ies_status(fuzzing_option *fo)
     return 0;
 }
 
+/*
+    Call the 'iw' and 'add' command
+*/
 int owfuzz_add_virtual_interface(char *iface, char *vif, char *type)
 {
     char exec_cmd[256] = {0};
@@ -1083,6 +1086,9 @@ int owfuzz_add_virtual_interface(char *iface, char *vif, char *type)
     return system(exec_cmd);
 }
 
+/*
+    Call the 'iw' command and 'del'
+*/
 int owfuzz_del_virtual_interface(char *vif)
 {
     char exec_cmd[256] = {0};
@@ -1093,6 +1099,9 @@ int owfuzz_del_virtual_interface(char *vif)
     return system(exec_cmd);
 }
 
+/*
+    Call the 'macchanger' command
+*/
 int owfuzz_change_interface_mac(char *iface, char *mac)
 {
     char exec_cmd[256] = {0};
