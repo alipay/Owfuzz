@@ -74,7 +74,10 @@ struct packet create_action(struct ether_addr bssid, struct ether_addr smac, str
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         af->category_code = action_category[random() % (sizeof(action_category) / sizeof(action_category[0]))];
     }
 
@@ -288,7 +291,10 @@ void handle_action_spectrum(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -328,7 +334,10 @@ void handle_action_qos(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -368,7 +377,10 @@ void handle_action_dls(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -400,7 +412,10 @@ void handle_action_block_ack(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -469,7 +484,10 @@ void handle_action_public(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -567,7 +585,10 @@ void handle_action_radio_measurement(struct packet *pkt, struct packet *recv_pkt
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -606,7 +627,10 @@ void handle_action_ft(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -645,7 +669,10 @@ void handle_action_ht(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -686,7 +713,10 @@ void handle_action_sa_query(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -743,7 +773,10 @@ void handle_action_protected_dual(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -852,7 +885,10 @@ void handle_action_wnm(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -936,7 +972,10 @@ void handle_action_unprotected_wnm(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -976,7 +1015,10 @@ void handle_action_tdls(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1034,7 +1076,10 @@ void handle_action_mesh(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1082,7 +1127,10 @@ void handle_action_multihop(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1114,7 +1162,10 @@ void handle_action_self_protected(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1172,7 +1223,10 @@ void handle_action_dmg(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1241,7 +1295,10 @@ void handle_action_wmm(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 }
@@ -1265,7 +1322,10 @@ void handle_action_fst(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1303,7 +1363,10 @@ void handle_action_robust_av_streaming(struct packet *pkt, struct packet *recv_p
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1335,7 +1398,10 @@ void handle_action_unprotected_dmg(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1367,7 +1433,10 @@ void handle_action_vht(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 
@@ -1398,7 +1467,10 @@ void handle_action_fils(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 }
@@ -1417,7 +1489,10 @@ void handle_action_vendor_specific_protected(struct packet *pkt, struct packet *
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 }
@@ -1435,7 +1510,10 @@ void handle_action_vendor_specific(struct packet *pkt, struct packet *recv_pkt)
     }
     else
     {
-        srandom(time(NULL));
+        if (0 == seed)
+        {
+            srandom(time(NULL));
+        }
         *((uint8_t *)&m_action->u.action.category + 1) = action_codes[random() % (sizeof(action_codes) / sizeof(action_codes[0]))];
     }
 }
