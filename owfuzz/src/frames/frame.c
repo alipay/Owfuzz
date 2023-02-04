@@ -342,7 +342,7 @@ int init_ping_sock()
 
 	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
 	{
-		fuzz_logger_log(FUZZ_LOG_INFO, "init socket error");
+		fuzz_logger_log(FUZZ_LOG_INFO, "socket initialization error, errno: %d", errno);
 		return -1;
 	}
 
@@ -355,16 +355,14 @@ int init_ping_sock()
 	inaddr = inet_addr(fuzzing_opt.target_ip);
 	if (inaddr == INADDR_NONE)
 	{
-		fuzz_logger_log(FUZZ_LOG_INFO, "Target's IP is error");
+		fuzz_logger_log(FUZZ_LOG_INFO, "Unable to resolve Target's IP address");
 		return -1;
 	}
-	else
-	{
-		fuzzing_opt.ping_dst_addr.sin_family = AF_INET;
-		fuzzing_opt.ping_dst_addr.sin_addr.s_addr = inaddr;
 
-		fuzzing_opt.ping_sockfd = sockfd;
-	}
+	fuzzing_opt.ping_dst_addr.sin_family = AF_INET;
+	fuzzing_opt.ping_dst_addr.sin_addr.s_addr = inaddr;
+
+	fuzzing_opt.ping_sockfd = sockfd;
 
 	return 0;
 }
