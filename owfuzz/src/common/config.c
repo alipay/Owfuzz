@@ -22,6 +22,9 @@
 
 extern unsigned long seed;
 
+/*
+    Open a provided 'cfg_file', if none is provided, use 'owfuzz.cfg'
+*/
 FILE *owfuzz_config_open(char *cfg_file)
 {
     char owfuzz_cfg_path[256] = {0};
