@@ -772,7 +772,7 @@ void p2p_frame_fuzzing()
 	struct packet fuzz_pkt = {0};
 	uint32_t frame_idx = 0;
 
-	if (seed == 0)
+	if (0 == seed)
 	{
 		srandom(time(NULL));
 	}
@@ -2205,10 +2205,12 @@ void *start_fuzzing(void *param)
 				handle_mesh(&pkt, bssid, smac, dmac, tmac, fuzzing_opt);
 			}
 
-			if ((memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0 && memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0) ||
-				(memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 && memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0))
+			if ((memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0 &&
+				 memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0) ||
+				(memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 &&
+				 memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0))
 			{
-				if (fuzzing_opt->sniff_frames == 0)
+				if (0 == fuzzing_opt->sniff_frames)
 				{
 					if (!check_alive_by_deauth(&pkt))
 					{
@@ -2734,7 +2736,9 @@ int fuzzing(int argc, char *argv[])
 			// Use a provided seed number
 			fuzz_logger_log(FUZZ_LOG_INFO, "Seed value: %lu", seed);
 			srandom(seed);
-		} else {
+		}
+		else
+		{
 			fuzz_logger_log(FUZZ_LOG_INFO, "No seed value provided, using time(NULL)...");
 		}
 
@@ -2909,9 +2913,12 @@ int fuzzing(int argc, char *argv[])
 	fuzz_logger_log(FUZZ_LOG_INFO, "auth_type: %d", fuzzing_opt.auth_type);
 	fuzz_logger_log(FUZZ_LOG_INFO, "test_type: %d", fuzzing_opt.test_type);
 
-	if (seed == 0) {
+	if (0 == seed)
+	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "Seed: srandom(NULL)...");
-	} else {
+	}
+	else
+	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "Seed: %ld", seed);
 		srandom(seed);
 	}
@@ -3040,7 +3047,7 @@ void print_status(struct packet *pkt)
 
 	printf("\tFuzzing Frame Count: %u\t\t\tPoC Count: \033[22;31m%u\033[22;39m\n", fuzzing_opt.fuzz_pkt_num, fuzzing_opt.fuzz_exp_pkt_cnt);
 
-	if (pkt)
+	if (NULL != pkt)
 	{
 		if (!check_alive_by_deauth(pkt))
 		{
