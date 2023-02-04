@@ -1673,7 +1673,7 @@ void *start_fuzzing(void *param)
 			// frame_array_size = sizeof(ap_frames)/sizeof(ap_frames[0]);
 			// fuzz_frames = ap_frames;
 			fuzz_logger_log(FUZZ_LOG_DEBUG, "Getting AP frames");
-			owfuzz_config_get_ap_frames(owfuzz_frames, &frame_array_size);
+			owfuzz_config_get_ap_frames(NULL, owfuzz_frames, &frame_array_size);
 			fuzz_frames = owfuzz_frames;
 		}
 		else if (FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode)
@@ -1682,7 +1682,7 @@ void *start_fuzzing(void *param)
 			// frame_array_size = sizeof(sta_frames)/sizeof(sta_frames[0]);
 			// fuzz_frames = sta_frames;
 			fuzz_logger_log(FUZZ_LOG_DEBUG, "Getting STA frames");
-			owfuzz_config_get_sta_frames(owfuzz_frames, &frame_array_size);
+			owfuzz_config_get_sta_frames(NULL, owfuzz_frames, &frame_array_size);
 			fuzz_frames = owfuzz_frames;
 		}
 		else if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
@@ -1696,8 +1696,8 @@ void *start_fuzzing(void *param)
 		fuzz_logger_log(FUZZ_LOG_DEBUG, "fuzzing frames count: %d", frame_array_size);
 	}
 
-	owfuzz_config_get_ies_status(fuzzing_opt);
-	owfuzz_config_get_ext_ies_status(fuzzing_opt);
+	owfuzz_config_get_ies_status(NULL, fuzzing_opt);
+	owfuzz_config_get_ext_ies_status(NULL, fuzzing_opt);
 
 	if (fuzzing_opt->test_type == TEST_FRAME)
 	{
@@ -1765,8 +1765,8 @@ void *start_fuzzing(void *param)
 						if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P)
 						{
 							fuzzing_opt->p2p_frame_test = 0;
-							owfuzz_config_get_channels(fuzzing_opt);
-							owfuzz_config_get_macs(fuzzing_opt);
+							owfuzz_config_get_channels(NULL, fuzzing_opt);
+							owfuzz_config_get_macs(NULL, fuzzing_opt);
 							kismet_set_channel(fuzzing_opt->ois[fuzzing_opt->p2p_operating_interface_id].osdep_iface_out, fuzzing_opt->ois[fuzzing_opt->p2p_operating_interface_id].channel, szerr);
 							fuzzing_opt->target_alive = 1;
 						}
@@ -2122,8 +2122,8 @@ void *start_fuzzing(void *param)
 					if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P)
 					{
 						fuzzing_opt->p2p_frame_test = 0;
-						owfuzz_config_get_channels(fuzzing_opt);
-						owfuzz_config_get_macs(fuzzing_opt);
+						owfuzz_config_get_channels(NULL, fuzzing_opt);
+						owfuzz_config_get_macs(NULL, fuzzing_opt);
 						kismet_set_channel(fuzzing_opt->ois[fuzzing_opt->p2p_operating_interface_id].osdep_iface_out, fuzzing_opt->ois[fuzzing_opt->p2p_operating_interface_id].channel, szerr);
 						fuzzing_opt->target_alive = 1;
 					}
@@ -2840,8 +2840,8 @@ int fuzzing(int argc, char *argv[])
 	else
 	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "No command line parameters have been provided, loading configuration file: %s", "owfuzz.cfg");
-		owfuzz_config_get_fuzzing_option(&fuzzing_opt);
-		owfuzz_config_get_interfaces(&fuzzing_opt);
+		owfuzz_config_get_fuzzing_option(NULL, &fuzzing_opt);
+		owfuzz_config_get_interfaces(NULL, &fuzzing_opt);
 	}
 
 	if (fuzzing_opt.fuzz_work_mode != FUZZ_WORK_MODE_STA &&

@@ -58,7 +58,7 @@ FILE *owfuzz_config_open(char *cfg_file)
 /*
     Pull from the owfuzz.cfg file the [sta-frames] settings
 */
-int owfuzz_config_get_sta_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
+int owfuzz_config_get_sta_frames(char *cfg_file, uint8_t *owfuzz_frames, uint32_t *frame_cnt)
 {
     FILE *fp1;
     char buf[256] = {0};
@@ -66,10 +66,10 @@ int owfuzz_config_get_sta_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
     int rc = 0, onoff;
     int frm_idx = 0;
 
-    fp1 = owfuzz_config_open(NULL);
+    fp1 = owfuzz_config_open(cfg_file);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
@@ -316,7 +316,7 @@ int owfuzz_config_get_sta_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
 /*
     Pull from the owfuzz.cfg file the [ap-frames] settings
 */
-int owfuzz_config_get_ap_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
+int owfuzz_config_get_ap_frames(char *cfg_file, uint8_t *owfuzz_frames, uint32_t *frame_cnt)
 {
     FILE *fp1;
     char buf[256] = {0};
@@ -327,7 +327,7 @@ int owfuzz_config_get_ap_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
     fp1 = owfuzz_config_open(NULL);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
@@ -568,7 +568,7 @@ int owfuzz_config_get_ap_frames(uint8_t *owfuzz_frames, uint32_t *frame_cnt)
     return 0;
 }
 
-int owfuzz_config_get_interfaces(fuzzing_option *fo)
+int owfuzz_config_get_interfaces(char *cfg_file, fuzzing_option *fo)
 {
     FILE *fp1;
     char buf[256] = {0};
@@ -578,7 +578,7 @@ int owfuzz_config_get_interfaces(fuzzing_option *fo)
     fp1 = owfuzz_config_open(NULL);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
@@ -626,7 +626,7 @@ int owfuzz_config_get_interfaces(fuzzing_option *fo)
     return 0;
 }
 
-int owfuzz_config_get_channels(fuzzing_option *fo)
+int owfuzz_config_get_channels(char *cfg_file, fuzzing_option *fo)
 {
     FILE *fp1;
     char buf[256] = {0};
@@ -634,10 +634,10 @@ int owfuzz_config_get_channels(fuzzing_option *fo)
     int rc = 0;
     int cnt = 0;
 
-    fp1 = owfuzz_config_open(NULL);
+    fp1 = owfuzz_config_open(cfg_file);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
@@ -684,7 +684,7 @@ int owfuzz_config_get_channels(fuzzing_option *fo)
     return 0;
 }
 
-int owfuzz_config_get_macs(fuzzing_option *fo)
+int owfuzz_config_get_macs(char *cfg_file, fuzzing_option *fo)
 {
     FILE *fp1;
     char buf[512] = {0};
@@ -692,10 +692,10 @@ int owfuzz_config_get_macs(fuzzing_option *fo)
     char option_value[256] = {0};
     int rc = 0;
 
-    fp1 = owfuzz_config_open(NULL);
+    fp1 = owfuzz_config_open(cfg_file);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
@@ -755,7 +755,7 @@ int owfuzz_config_get_macs(fuzzing_option *fo)
     return 0;
 }
 
-int owfuzz_config_get_fuzzing_option(fuzzing_option *fo)
+int owfuzz_config_get_fuzzing_option(char *cfg_file, fuzzing_option *fo)
 {
     FILE *fp1;
     char buf[512] = {0};
@@ -763,10 +763,10 @@ int owfuzz_config_get_fuzzing_option(fuzzing_option *fo)
     char option_value[256] = {0};
     int rc = 0;
 
-    fp1 = owfuzz_config_open(NULL);
+    fp1 = owfuzz_config_open(cfg_file);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
@@ -950,7 +950,7 @@ int owfuzz_config_get_fuzzing_option(fuzzing_option *fo)
     return 0;
 }
 
-int owfuzz_config_get_ies_status(fuzzing_option *fo)
+int owfuzz_config_get_ies_status(char *cfg_file, fuzzing_option *fo)
 {
     FILE *fp1;
     char buf[256] = {0};
@@ -958,10 +958,10 @@ int owfuzz_config_get_ies_status(fuzzing_option *fo)
     int rc = 0, onoff;
     int ie_idx = 0;
 
-    fp1 = owfuzz_config_open(NULL);
+    fp1 = owfuzz_config_open(cfg_file);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
@@ -1013,7 +1013,7 @@ int owfuzz_config_get_ies_status(fuzzing_option *fo)
     return 0;
 }
 
-int owfuzz_config_get_ext_ies_status(fuzzing_option *fo)
+int owfuzz_config_get_ext_ies_status(char *cfg_file, fuzzing_option *fo)
 {
     FILE *fp1;
     char buf[256] = {0};
@@ -1021,10 +1021,10 @@ int owfuzz_config_get_ext_ies_status(fuzzing_option *fo)
     int rc = 0, onoff;
     int ie_idx = 0;
 
-    fp1 = owfuzz_config_open(NULL);
+    fp1 = owfuzz_config_open(cfg_file);
     if (fp1 == NULL)
     {
-        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open 'owfuzz.cfg'.");
+        fuzz_logger_log(FUZZ_LOG_ERR, "Failed to open '%s'.", NULL == cfg_file ? "owfuzz.cfg" : cfg_file);
         return -1;
     }
 
