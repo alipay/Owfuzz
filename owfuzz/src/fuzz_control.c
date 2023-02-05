@@ -442,7 +442,7 @@ void sniff_ies(struct packet *pkt)
 			}
 		}
 
-		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] idx: %d, frame: 0x%02X (%s)", __FILE__, __LINE__, idx, hdr->type, return_frame_name(hdr->type));
+		fuzz_logger_log(FUZZ_LOG_INFO, "\n[%s:%d] idx: %d, frame: 0x%02X (%s)", __FILE__, __LINE__, idx, hdr->type, return_frame_name(hdr->type));
 
 		if (idx < MAX_SFS_COUNT && fuzzing_opt.sfs[idx].bset == 0)
 		{
@@ -658,6 +658,7 @@ int oi_init(struct osdep_instance *oi)
 
 	strncpy(oi->osdep_iface_in, oi->osdep_iface_out, sizeof(oi->osdep_iface_in) - 1);
 
+	fuzz_logger_log(FUZZ_LOG_INFO, "kismet_interface_down on: %s", oi->osdep_iface_out);
 	res = kismet_interface_down(oi->osdep_iface_out, szerr);
 	if (-1 == res)
 	{
@@ -666,6 +667,7 @@ int oi_init(struct osdep_instance *oi)
 	}
 	sleep(0.5);
 
+	fuzz_logger_log(FUZZ_LOG_INFO, "kismet_set_mode (6) on: %s", oi->osdep_iface_out);
 	res = kismet_set_mode(oi->osdep_iface_out, szerr, 6);
 	if (-1 == res)
 	{
@@ -673,6 +675,7 @@ int oi_init(struct osdep_instance *oi)
 		return -1;
 	}
 
+	fuzz_logger_log(FUZZ_LOG_INFO, "kismet_interface_up on: %s", oi->osdep_iface_out);
 	res = kismet_interface_up(oi->osdep_iface_out, szerr);
 	if (-1 == res)
 	{
@@ -681,6 +684,7 @@ int oi_init(struct osdep_instance *oi)
 	}
 	sleep(0.5);
 
+	fuzz_logger_log(FUZZ_LOG_INFO, "kismet_set_channel (%d) on: %s", oi->channel, oi->osdep_iface_out);
 	res = kismet_set_channel(oi->osdep_iface_out, oi->channel, szerr);
 	if (-1 == res)
 	{
@@ -688,6 +692,7 @@ int oi_init(struct osdep_instance *oi)
 		return -1;
 	}
 
+	fuzz_logger_log(FUZZ_LOG_INFO, "kismet_get_mode on: %s", oi->osdep_iface_out);
 	res = kismet_get_mode(oi->osdep_iface_out, szerr, &mode);
 	if (-1 == res)
 	{
@@ -696,6 +701,7 @@ int oi_init(struct osdep_instance *oi)
 	}
 	channel = kismet_get_channel(oi->osdep_iface_out, szerr);
 
+	fuzz_logger_log(FUZZ_LOG_INFO, "current mode: %d and channel: %d", mode, channel);
 	if (6 != mode || channel != oi->channel)
 	{
 		fuzz_logger_log(FUZZ_LOG_ERR, "init_oi failed, interface: %s, mode: %d, channel: %d (expected: %d)\n", oi->osdep_iface_out, mode, channel, oi->channel);
@@ -1837,7 +1843,7 @@ void *start_fuzzing(void *param)
 	struct packet pkt = {0};
 	struct ieee_hdr *hdr = NULL;
 	uint8_t dsflags = 0;
-	char frame_name[64];
+	const char *frame_name = NULL;
 
 	struct ether_addr smac = {0};
 	struct ether_addr dmac = {0};
@@ -1929,7 +1935,9 @@ void *start_fuzzing(void *param)
 		memset(&smac, 0, 6);
 		memset(&dmac, 0, 6);
 		memset(&bssid, 0, 6);
-		memset(frame_name, 0, sizeof(frame_name));
+
+		frame_name = NULL;
+		//memset(frame_name, 0, sizeof(frame_name));
 
 		gettimeofday(&tv, NULL);
 		// current_time = tv.tv_sec;
@@ -1954,6 +1962,7 @@ void *start_fuzzing(void *param)
 		pkt = read_packet_ex();
 		if (0 == pkt.len)
 		{
+			printf("pkt.len == 0\r");
 			if (FUZZ_WORK_MODE_MITM != fuzzing_opt->fuzz_work_mode)
 			{
 				// fuzz_logger_log(FUZZ_LOG_INFO, "fuzzing_opt->sniff_frames: %d", fuzzing_opt->sniff_frames);
@@ -2133,188 +2142,8 @@ void *start_fuzzing(void *param)
 			}
 		}
 
-		switch (hdr->type)
-		{
-		// management   addr1,addr2,addr3
-		case IEEE80211_TYPE_ASSOCRES: // AP
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_ASSOCRES");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_ASSOCRES");
-			break;
-		case IEEE80211_TYPE_REASSOCRES:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_REASSOCRES");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_REASSOCRES");
-			break;
-		case IEEE80211_TYPE_PROBERES:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_PROBERES");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_PROBERES");
-			break;
-		case IEEE80211_TYPE_TIMADVERT:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_TIMADVERT");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_TIMADVERT");
-			break;
-		case IEEE80211_TYPE_BEACON:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_BEACON");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_BEACON");
-			break;
-		case IEEE80211_TYPE_ATIM:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_ATIM");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_ATIM");
-			break;
-		case IEEE80211_TYPE_DISASSOC:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_DISASSOC");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_DISASSOC");
-			break;
-		case IEEE80211_TYPE_DEAUTH:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_DEAUTH");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_DEAUTH");
-			break;
-		case IEEE80211_TYPE_ACTION:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_ACTION");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_ACTION");
-			break;
-		case IEEE80211_TYPE_ACTIONNOACK:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_ACTIONNOACK");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_ACTIONNOACK");
-			break;
-		case IEEE80211_TYPE_ASSOCREQ: // STA
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_ASSOCREQ");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_ASSOCREQ");
-			break;
-		case IEEE80211_TYPE_REASSOCREQ:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_REASSOCREQ");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_REASSOCREQ");
-			break;
-		case IEEE80211_TYPE_PROBEREQ:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_PROBEREQ");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_PROBEREQ");
-			break;
-		case IEEE80211_TYPE_AUTH:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(management)IEEE80211_TYPE_AUTH");
-			strcpy(frame_name, "(management)IEEE80211_TYPE_AUTH");
-			break;
-
-		// control addr1,(addr2)
-		case IEEE80211_TYPE_BEAMFORMING:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_BEAMFORMING");
-			strcpy(frame_name, ">(control)IEEE80211_TYPE_BEAMFORMING");
-			break;
-		case IEEE80211_TYPE_VHT:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_VHT");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_VHT");
-			break;
-		case IEEE80211_TYPE_CTRLFRMEXT:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_CTRLFRMEXT");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_CTRLFRMEXT");
-			break;
-		case IEEE80211_TYPE_CTRLWRAP:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_CTRLWRAP");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_CTRLWRAP");
-			break;
-		case IEEE80211_TYPE_BLOCKACKREQ:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_BLOCKACKREQ");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_BLOCKACKREQ");
-			break;
-		case IEEE80211_TYPE_BLOCKACK:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_BLOCKACK");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_BLOCKACK");
-			break;
-		case IEEE80211_TYPE_PSPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_PSPOLL");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_PSPOLL");
-			break;
-		case IEEE80211_TYPE_RTS:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_RTS");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_RTS");
-			break;
-		case IEEE80211_TYPE_CTS:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_CTS");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_CTS");
-			break;
-		case IEEE80211_TYPE_ACK:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_ACK");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_ACK");
-			break;
-		case IEEE80211_TYPE_CFEND:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_CFEND");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_CFEND");
-			break;
-		case IEEE80211_TYPE_CFENDACK:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(control)IEEE80211_TYPE_CFENDACK");
-			strcpy(frame_name, "(control)IEEE80211_TYPE_CFENDACK");
-			break;
-
-		// data addr1,addr2,addr3,(addr4)
-		case IEEE80211_TYPE_DATA:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_DATA");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_DATA");
-			break;
-		case IEEE80211_TYPE_DATACFACK:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_DATACFACK");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_DATACFACK");
-			break;
-		case IEEE80211_TYPE_DATACFPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_DATACFPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_DATACFPOLL");
-			break;
-		case IEEE80211_TYPE_DATACFACKPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_DATACFACKPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_DATACFACKPOLL");
-			break;
-		case IEEE80211_TYPE_NULL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_NULL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_NULL");
-			break;
-		case IEEE80211_TYPE_CFACK:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_CFACK");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_CFACK");
-			break;
-		case IEEE80211_TYPE_CFPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_CFPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_CFPOLL");
-			break;
-		case IEEE80211_TYPE_CFACKPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_CFACKPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_CFACKPOLL");
-			break;
-		case IEEE80211_TYPE_QOSDATA:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_QOSDATA");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_QOSDATA");
-			break;
-		case IEEE80211_TYPE_QOSDATACFACK:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_QOSDATACFACK");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_QOSDATACFACK");
-			break;
-		case IEEE80211_TYPE_QOSDATACFPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_QOSDATACFPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_QOSDATACFPOLL");
-			break;
-		case IEEE80211_TYPE_QOSDATACFACKPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_QOSDATACFACKPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_QOSDATACFACKPOLL");
-			break;
-		case IEEE80211_TYPE_QOSNULL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_QOSNULL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_QOSNULL");
-			break;
-		case IEEE80211_TYPE_QOSCFPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_QOSCFPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_QOSCFPOLL");
-			break;
-		case IEEE80211_TYPE_QOSCFACKPOLL:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(data)IEEE80211_TYPE_QOSCFACKPOLL");
-			strcpy(frame_name, "(data)IEEE80211_TYPE_QOSCFACKPOLL");
-			break;
-
-		// extension
-		case IEEE80211_TYPE_DMGBEACON:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->(extension)IEEE80211_TYPE_DMGBEACON");
-			strcpy(frame_name, "(extension)IEEE80211_TYPE_DMGBEACON");
-			break;
-		default:
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->unknown frame!!!");
-			strcpy(frame_name, "unknown frame");
-			break;
-		}
+		frame_name = return_frame_name(hdr->type);
+		fuzz_logger_log(FUZZ_LOG_DEBUG, "recv-->%s", frame_name);
 
 		if (FUZZ_WORK_MODE_MITM != fuzzing_opt->fuzz_work_mode)
 		{
