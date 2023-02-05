@@ -208,7 +208,8 @@ typedef struct _fuzzing_option
   time_t last_recv_pkt_time;
   uint8_t target_alive;
 
-  uint8_t test_type;
+  // uint8_t test_type;
+  enum TEST_TYPE test_type;
 
   uint32_t fuzz_pkt_num;
   uint32_t fuzz_exp_pkt_cnt;
