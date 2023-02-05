@@ -442,7 +442,7 @@ void sniff_ies(struct packet *pkt)
 			}
 		}
 
-		// printf("bbbb: %d, frame:0x%02X\n", idx, hdr->type);
+		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] idx: %d, frame: 0x%02X (%s)", __FILE__, __LINE__, idx, hdr->type, return_frame_name(hdr->type));
 
 		if (idx < MAX_SFS_COUNT && fuzzing_opt.sfs[idx].bset == 0)
 		{
@@ -462,7 +462,7 @@ void sniff_ies(struct packet *pkt)
 				tlv_type = 0;
 				tlv_value = NULL;
 				nread = read_tlv8(&abuf, offset, &tlv_type, &tlv_len, (const unsigned char **)&tlv_value);
-				fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] type: %d, len: %d", __FILE__, __LINE__, tlv_type, tlv_len);
+				fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] type: %d (%s), len: %d", __FILE__, __LINE__, tlv_type, IE_NAME[tlv_type], tlv_len);
 				if (nread)
 				{
 					fuzzing_opt.sfs[idx].sies[ie_idx].id = tlv_type;
@@ -1682,6 +1682,154 @@ void handle_mitm(struct packet *pkt, struct ether_addr bssid, struct ether_addr 
 }
 
 /*
+	Returns the frame name (based on type)
+*/
+const char *return_frame_name(uint8_t type)
+{
+	switch (type)
+	{
+	// management   addr1,addr2,addr3
+	case IEEE80211_TYPE_ASSOCRES: // AP
+		return "(management)IEEE80211_TYPE_ASSOCRES";
+		break;
+	case IEEE80211_TYPE_REASSOCRES:
+		return "(management)IEEE80211_TYPE_REASSOCRES";
+		break;
+	case IEEE80211_TYPE_PROBERES:
+		return "(management)IEEE80211_TYPE_PROBERES";
+		break;
+	case IEEE80211_TYPE_TIMADVERT:
+		return "(management)IEEE80211_TYPE_TIMADVERT";
+		break;
+	case IEEE80211_TYPE_BEACON:
+		return "(management)IEEE80211_TYPE_BEACON";
+		break;
+	case IEEE80211_TYPE_ATIM:
+		return "(management)IEEE80211_TYPE_ATIM";
+		break;
+	case IEEE80211_TYPE_DISASSOC:
+		return "(management)IEEE80211_TYPE_DISASSOC";
+		break;
+	case IEEE80211_TYPE_DEAUTH:
+		return "(management)IEEE80211_TYPE_DEAUTH";
+		break;
+	case IEEE80211_TYPE_ACTION:
+		return "(management)IEEE80211_TYPE_ACTION";
+		break;
+	case IEEE80211_TYPE_ACTIONNOACK:
+		return "(management)IEEE80211_TYPE_ACTIONNOACK";
+		break;
+	case IEEE80211_TYPE_ASSOCREQ: // STA
+		return "(management)IEEE80211_TYPE_ASSOCREQ";
+		break;
+	case IEEE80211_TYPE_REASSOCREQ:
+		return "(management)IEEE80211_TYPE_REASSOCREQ";
+		break;
+	case IEEE80211_TYPE_PROBEREQ:
+		return "(management)IEEE80211_TYPE_PROBEREQ";
+		break;
+	case IEEE80211_TYPE_AUTH:
+		return "(management)IEEE80211_TYPE_AUTH";
+		break;
+
+	// control addr1,(addr2)
+	case IEEE80211_TYPE_BEAMFORMING:
+		return ">(control)IEEE80211_TYPE_BEAMFORMING";
+		break;
+	case IEEE80211_TYPE_VHT:
+		return "(control)IEEE80211_TYPE_VHT";
+		break;
+	case IEEE80211_TYPE_CTRLFRMEXT:
+		return "(control)IEEE80211_TYPE_CTRLFRMEXT";
+		break;
+	case IEEE80211_TYPE_CTRLWRAP:
+		return "(control)IEEE80211_TYPE_CTRLWRAP";
+		break;
+	case IEEE80211_TYPE_BLOCKACKREQ:
+		return "(control)IEEE80211_TYPE_BLOCKACKREQ";
+		break;
+	case IEEE80211_TYPE_BLOCKACK:
+		return "(control)IEEE80211_TYPE_BLOCKACK";
+		break;
+	case IEEE80211_TYPE_PSPOLL:
+		return "(control)IEEE80211_TYPE_PSPOLL";
+		break;
+	case IEEE80211_TYPE_RTS:
+		return "(control)IEEE80211_TYPE_RTS";
+		break;
+	case IEEE80211_TYPE_CTS:
+		return "(control)IEEE80211_TYPE_CTS";
+		break;
+	case IEEE80211_TYPE_ACK:
+		return "(control)IEEE80211_TYPE_ACK";
+		break;
+	case IEEE80211_TYPE_CFEND:
+		return "(control)IEEE80211_TYPE_CFEND";
+		break;
+	case IEEE80211_TYPE_CFENDACK:
+		return "(control)IEEE80211_TYPE_CFENDACK";
+		break;
+
+	// data addr1,addr2,addr3,(addr4)
+	case IEEE80211_TYPE_DATA:
+		return "(data)IEEE80211_TYPE_DATA";
+		break;
+	case IEEE80211_TYPE_DATACFACK:
+		return "(data)IEEE80211_TYPE_DATACFACK";
+		break;
+	case IEEE80211_TYPE_DATACFPOLL:
+		return "(data)IEEE80211_TYPE_DATACFPOLL";
+		break;
+	case IEEE80211_TYPE_DATACFACKPOLL:
+		return "(data)IEEE80211_TYPE_DATACFACKPOLL";
+		break;
+	case IEEE80211_TYPE_NULL:
+		return "(data)IEEE80211_TYPE_NULL";
+		break;
+	case IEEE80211_TYPE_CFACK:
+		return "(data)IEEE80211_TYPE_CFACK";
+		break;
+	case IEEE80211_TYPE_CFPOLL:
+		return "(data)IEEE80211_TYPE_CFPOLL";
+		break;
+	case IEEE80211_TYPE_CFACKPOLL:
+		return "(data)IEEE80211_TYPE_CFACKPOLL";
+		break;
+	case IEEE80211_TYPE_QOSDATA:
+		return "(data)IEEE80211_TYPE_QOSDATA";
+		break;
+	case IEEE80211_TYPE_QOSDATACFACK:
+		return "(data)IEEE80211_TYPE_QOSDATACFACK";
+		break;
+	case IEEE80211_TYPE_QOSDATACFPOLL:
+		return "(data)IEEE80211_TYPE_QOSDATACFPOLL";
+		break;
+	case IEEE80211_TYPE_QOSDATACFACKPOLL:
+		return "(data)IEEE80211_TYPE_QOSDATACFACKPOLL";
+		break;
+	case IEEE80211_TYPE_QOSNULL:
+		return "(data)IEEE80211_TYPE_QOSNULL";
+		break;
+	case IEEE80211_TYPE_QOSCFPOLL:
+		return "(data)IEEE80211_TYPE_QOSCFPOLL";
+		break;
+	case IEEE80211_TYPE_QOSCFACKPOLL:
+		return "(data)IEEE80211_TYPE_QOSCFACKPOLL";
+		break;
+
+	// extension
+	case IEEE80211_TYPE_DMGBEACON:
+		return "(extension)IEEE80211_TYPE_DMGBEACON";
+		break;
+	default:
+		return "unknown frame";
+		break;
+	}
+
+	return "unknown";
+}
+
+/*
 	Main funzzing fuction
 */
 void *start_fuzzing(void *param)
@@ -2298,7 +2446,9 @@ void *start_fuzzing(void *param)
 
 					fuzz_logger_log(FUZZ_LOG_INFO, "\nStart fuzzing ...");
 					sleep(10);
-				} else {
+				}
+				else
+				{
 					// We don't use fuzz_logger_log because we want it to stay on the same line
 					printf("Need more packets...\r");
 				}
