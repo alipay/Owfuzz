@@ -180,6 +180,9 @@ int osdep_send_packet_ex(struct osdep_instance* oi, struct packet *pkt)
 	return 0;
 }
 
+/*
+	Read a packet from the WiFi interface
+*/
 struct packet osdep_read_packet_ex(struct osdep_instance* oi)
 {
 	struct wif *wi = oi->_wi_in; /* XXX */
