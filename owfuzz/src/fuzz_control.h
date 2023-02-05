@@ -30,7 +30,7 @@ struct packet read_packet_ex();
 int send_packet_ex(struct packet *pkt);
 
 int fuzzing(int argc, char *argv[]);
-void load_payloads();
+int load_payloads();
 void save_exp_payload(struct packet *pkt);
 void save_packet(struct packet *pkt);
 void print_status(struct packet *pkt);
