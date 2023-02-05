@@ -50,7 +50,7 @@ FILE *owfuzz_config_open(char *cfg_file)
         }
     }
 
-    fuzz_logger_log(FUZZ_LOG_DEBUG, "owfuzz.cfg: %s\n", owfuzz_cfg_path);
+    fuzz_logger_log(FUZZ_LOG_DEBUG, "owfuzz.cfg: %s", owfuzz_cfg_path);
 
     return fp1;
 }
@@ -568,6 +568,9 @@ int owfuzz_config_get_ap_frames(char *cfg_file, uint8_t *owfuzz_frames, uint32_t
     return 0;
 }
 
+/*
+    Pull the [interfaces] information from the owfuzz.cfg file
+*/
 int owfuzz_config_get_interfaces(char *cfg_file, fuzzing_option *fo)
 {
     FILE *fp1;
@@ -672,7 +675,7 @@ int owfuzz_config_get_channels(char *cfg_file, fuzzing_option *fo)
             {
                 memset(iface, 0, sizeof(iface));
                 sscanf(buf, "%[^=]=%hhd", iface, &fo->ois[cnt].channel);
-                fuzz_logger_log(FUZZ_LOG_DEBUG, "interface: %s, channel: %d\n", iface, fo->ois[cnt].channel);
+                fuzz_logger_log(FUZZ_LOG_DEBUG, "interface: %s, channel: %d", iface, fo->ois[cnt].channel);
                 cnt++;
             }
         }
