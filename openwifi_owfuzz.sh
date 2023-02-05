@@ -13,9 +13,8 @@
 
 nic_name=sdr0
 
-
-killall hostapd
-killall webfsd
+pidof hostapd && killall hostapd
+pidof webfsd && killall webfsd
 
 cd ~/openwifi
 
