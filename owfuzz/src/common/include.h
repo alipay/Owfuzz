@@ -45,11 +45,26 @@
 #define AWDL_MODE "awdl"
 #define MESH_MODE "mesh"
 
-#define TEST_UNKNOWN -1
-#define TEST_POC 0
-#define TEST_INTERACTIVE 1
-#define TEST_FRAME 2
-#define TEST_INTERACTIVE_FRAME 3
+// #define TEST_UNKNOWN -1
+// #define TEST_POC 0
+// #define TEST_INTERACTIVE 1
+// #define TEST_FRAME 2
+// #define TEST_INTERACTIVE_FRAME 3
+
+enum TEST_TYPE {
+	TEST_POC = 0,
+	TEST_INTERACTIVE = 1,
+	TEST_FRAME = 2,
+	TEST_INTERACTIVE_FRAME = 3
+};
+
+static const char *TEST_TYPE_NAME[] =
+{
+	"TEST_POC",
+	"TEST_INTERACTIVE",
+	"TEST_FRAME",
+	"TEST_INTERACTIVE_FRAME"
+};
 
 #define FUZZ_WORK_MODE_AP 0
 #define FUZZ_WORK_MODE_STA 1
@@ -84,6 +99,21 @@ enum AP_AUTH_TYPE
 	WPA2_PSK_TKIP_AES,
 	EAP_8021X,
 	WPA3
+};
+
+static const char *AP_AUTH_TYPE_NAME[] =
+{
+	"OPEN_NONE",
+	"OPEN_WEP",
+	"SHARE_WEP",
+	"WPA_PSK_TKIP",
+	"WPA_PSK_AES",
+	"WPA_PSK_TKIP_AES",
+	"WPA2_PSK_TKIP",
+	"WPA2_PSK_AES",
+	"WPA2_PSK_TKIP_AES",
+	"EAP_8021X",
+	"WPA3"
 };
 
 /**
