@@ -22,6 +22,7 @@
 #include <time.h>
 #include "80211_packet_common.h"
 
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 static uint16_t seqno = 0;
@@ -117,7 +118,10 @@ void create_ieee_hdr(struct packet *pkt, uint8_t type, char dsflags, uint16_t du
 
   hdr->type = type;
 
-  srandom(time(NULL) + pkt->len);
+  if (0 == seed)
+  {
+    srandom(time(NULL) + pkt->len);
+  }
 
   if ((hdr->type & 0x0F) == DATA_FRAME)
   {
@@ -513,16 +517,26 @@ void print_interaction_status(struct ether_addr bssid, struct ether_addr smac, s
   {
     if (recv_frame != NULL && strlen(recv_frame) > 0)
     {
-      fuzz_logger_log(FUZZ_LOG_INFO, "[%02X:%02X:%02X:%02X:%02X:%02X]\t\t ----> \t\t%s\t\t ----> \t\t[%02X:%02X:%02X:%02X:%02X:%02X]", smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2],
-                      smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5], recv_frame, dmac.ether_addr_octet[0], dmac.ether_addr_octet[1], dmac.ether_addr_octet[2],
-                      dmac.ether_addr_octet[3], dmac.ether_addr_octet[4], dmac.ether_addr_octet[5]);
+      fuzz_logger_log(
+          FUZZ_LOG_INFO,
+          "[%02X:%02X:%02X:%02X:%02X:%02X]\t\t ----> \t\t%s\t\t ----> \t\t[%02X:%02X:%02X:%02X:%02X:%02X]",
+          smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2],
+          smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5],
+          recv_frame,
+          dmac.ether_addr_octet[0], dmac.ether_addr_octet[1], dmac.ether_addr_octet[2],
+          dmac.ether_addr_octet[3], dmac.ether_addr_octet[4], dmac.ether_addr_octet[5]);
     }
 
     if (response_frame != NULL && strlen(response_frame) > 0)
     {
-      fuzz_logger_log(FUZZ_LOG_INFO, "[%02X:%02X:%02X:%02X:%02X:%02X]\t\t ----> \t\t%s\t\t ----> \t\t[%02X:%02X:%02X:%02X:%02X:%02X]", dmac.ether_addr_octet[0], dmac.ether_addr_octet[1], dmac.ether_addr_octet[2],
-                      dmac.ether_addr_octet[3], dmac.ether_addr_octet[4], dmac.ether_addr_octet[5], response_frame, smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2],
-                      smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
+      fuzz_logger_log(
+          FUZZ_LOG_INFO,
+          "[%02X:%02X:%02X:%02X:%02X:%02X]\t\t ----> \t\t%s\t\t ----> \t\t[%02X:%02X:%02X:%02X:%02X:%02X]",
+          dmac.ether_addr_octet[0], dmac.ether_addr_octet[1], dmac.ether_addr_octet[2],
+          dmac.ether_addr_octet[3], dmac.ether_addr_octet[4], dmac.ether_addr_octet[5],
+          response_frame,
+          smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2],
+          smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5]);
     }
   }
 }

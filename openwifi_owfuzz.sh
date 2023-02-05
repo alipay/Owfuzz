@@ -1,26 +1,31 @@
 #!/bin/bash
 
-#if [ $# -ne 2 ]
-#  then
-#    echo "Please input NIC_name ch_number as input parameter!"
-#    exit
-#fi
+# if [ $# -ne 2 ]
+#   then
+#     echo "Please input NIC_name ch_number as input parameter!"
+#     exit
+# fi
 
-#nic_name=$1
-#ch_number=$2
-#echo $nic_name
-#echo $ch_number
+# nic_name=$1
+# ch_number=$2
+# echo "nic_name: $nic_name"
+# echo "ch_number: $ch_number"
 
 nic_name=sdr0
 
-
-killall hostapd
-killall webfsd
+echo "Checking for hostapd, killing if present"
+pidof hostapd && killall hostapd
+echo "Checking for webfsd, killing if present"
+pidof webfsd && killall webfsd
 
 cd ~/openwifi
 
+echo "Stopping network-manager"
 service network-manager stop
+
+echo "Running wgd"
 ./wgd.sh
+
 #ifconfig sdr0 192.168.13.1
 route add default gw 192.168.10.1
 service isc-dhcp-server restart
@@ -31,9 +36,11 @@ sleep 5
 sudo ip link set $nic_name down
 sudo iwconfig $nic_name mode monitor
 sudo ip link set $nic_name up
-#sudo iwconfig $nic_name channel $ch_number
+
+# sudo iwconfig $nic_name channel $ch_number
 # sudo iwconfig $nic_name modulation 11g
 # sudo iwconfig $nic_name rate 6M
+
 ifconfig
 iwconfig $nic_name
 

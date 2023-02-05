@@ -14,15 +14,15 @@
 
 void find_mesh_node_by_beacon(struct packet *pkt)
 {
-    struct ieee_hdr *hdr;
+    struct ieee_hdr *hdr = NULL;
     struct buf abuf = {0};
-    uint8_t *tlvs;
-    int tlvs_len;
+    uint8_t *tlvs = NULL;
+    int tlvs_len = 0;
     uint8_t tlv_type = 0;
     uint8_t tlv_len = 0;
-    uint8_t *tlv_value;
-    int offset;
-    int nread;
+    uint8_t *tlv_value = NULL;
+    int offset = 0;
+    int nread = 0;
     uint8_t xssid[32] = {0};
 
     hdr = (struct ieee_hdr *)pkt->data;
@@ -31,11 +31,12 @@ void find_mesh_node_by_beacon(struct packet *pkt)
     abuf.data = tlvs;
     abuf.len = tlvs_len;
 
-    if (hdr->type != IEEE80211_TYPE_BEACON)
+    if (hdr->type != IEEE80211_TYPE_BEACON) {
         return;
+    }
 
     offset = 0;
-    while (tlvs_len)
+    while (tlvs_len > 0)
     {
         nread = read_tlv8(&abuf, offset, &tlv_type, &tlv_len, (const uint8_t **)&tlv_value);
         if (tlv_type == 0)

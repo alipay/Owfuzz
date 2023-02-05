@@ -267,13 +267,16 @@ unsigned short calc_chksum(unsigned short *buff, int len)
 	return (unsigned short)(~sum);
 }
 
+/*
+	Prepare the ICMP packet to be sent via the socket
+*/
 int pack_icmp(uint8_t *buff, int seq)
 {
 	int packsize = 0;
 	struct icmphdr *icmp_h = NULL;
 	struct timeval *tval = NULL;
 
-	icmp_h = (struct icmp *)buff;
+	icmp_h = (struct icmphdr *)buff;
 	icmp_h->type = ICMP_ECHO;
 	icmp_h->code = 0;
 	icmp_h->checksum = 0;
@@ -302,6 +305,9 @@ void tv_sub(struct timeval *out, struct timeval *in)
 	out->tv_sec -= in->tv_sec;
 }
 
+/*
+	Breakdown the ICMP response
+*/
 int unpack_icmp(uint8_t *buff, int len, struct timeval tvrecv)
 {
 	int iphdrlen = 0;
@@ -333,6 +339,11 @@ int unpack_icmp(uint8_t *buff, int len, struct timeval tvrecv)
 	return 0;
 }
 
+/*
+	Create a 'ping' socket
+	This function tries to create the socket that will be later used, returns -1 if fails
+	Set the value of 'ping_sockfd' to the created socket
+*/
 int init_ping_sock()
 {
 	int sockfd;
@@ -340,9 +351,16 @@ int init_ping_sock()
 	int size = 1024;
 	struct timeval tv_timeout = {0};
 
+	if (0 != fuzzing_opt.ping_sockfd)
+	{
+		// If socket was previously openned, close it
+		close(fuzzing_opt.ping_sockfd);
+		fuzzing_opt.ping_sockfd = 0;
+	}
+
 	if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0)
 	{
-		fuzz_logger_log(FUZZ_LOG_INFO, "init socket error");
+		fuzz_logger_log(FUZZ_LOG_INFO, "socket initialization error, errno = %d", errno);
 		return -1;
 	}
 
@@ -355,24 +373,34 @@ int init_ping_sock()
 	inaddr = inet_addr(fuzzing_opt.target_ip);
 	if (inaddr == INADDR_NONE)
 	{
-		fuzz_logger_log(FUZZ_LOG_INFO, "Target's IP is error");
+		fuzz_logger_log(FUZZ_LOG_INFO, "Unable to resolve Target's IP address");
+
+		// Don't leave behind values
+		fuzzing_opt.ping_dst_addr.sin_family = 0;
+		fuzzing_opt.ping_dst_addr.sin_addr.s_addr = 0;
+		fuzzing_opt.ping_sockfd = 0;
+
 		return -1;
 	}
-	else
-	{
-		fuzzing_opt.ping_dst_addr.sin_family = AF_INET;
-		fuzzing_opt.ping_dst_addr.sin_addr.s_addr = inaddr;
 
-		fuzzing_opt.ping_sockfd = sockfd;
-	}
+	fuzzing_opt.ping_dst_addr.sin_family = AF_INET;
+	fuzzing_opt.ping_dst_addr.sin_addr.s_addr = inaddr;
+
+	fuzzing_opt.ping_sockfd = sockfd;
 
 	return 0;
 }
 
+/*
+	Perform an ICMP ping to the target IP address
+	Returns 0 - target is unreachable (no ICMP reply)
+			1 - target is reachable (got ICMP reply)
+	Tries every 5s to send an ICMP echo packet
+*/
 int check_alive_by_ping()
 {
-	uint8_t sendpacket[PING_PACKET_SIZE];
-	uint8_t recvpacket[PING_PACKET_SIZE];
+	uint8_t sendpacket[PING_PACKET_SIZE] = {0};
+	uint8_t recvpacket[PING_PACKET_SIZE] = {0};
 	int nsend = 0, nreceived = 0;
 	struct sockaddr_in from = {0};
 	struct timeval tvrecv = {0};
@@ -384,6 +412,7 @@ int check_alive_by_ping()
 
 	if (fuzzing_opt.ping_sockfd <= 0)
 	{
+		// Socket is not open or invalid
 		return 0;
 	}
 
@@ -393,7 +422,7 @@ int check_alive_by_ping()
 		packetsize = pack_icmp(sendpacket, seq++);
 		if (sendto(fuzzing_opt.ping_sockfd, sendpacket, packetsize, 0, (struct sockaddr *)&fuzzing_opt.ping_dst_addr, sizeof(fuzzing_opt.ping_dst_addr)) <= 0)
 		{
-			fuzz_logger_log(FUZZ_LOG_INFO, "sendto error");
+			fuzz_logger_log(FUZZ_LOG_INFO, "sendto error, errno = %d", errno);
 			continue;
 		}
 
@@ -406,7 +435,7 @@ int check_alive_by_ping()
 		fromlen = sizeof(from);
 		if ((n = recvfrom(fuzzing_opt.ping_sockfd, recvpacket, sizeof(recvpacket), 0, (struct sockaddr *)&from, &fromlen)) <= 0)
 		{
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom error, n = %d", n);
+			fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom error, n = %d, errno = %d", n, errno);
 			// exit(-1);
 		}
 		else
@@ -420,7 +449,7 @@ int check_alive_by_ping()
 			}
 			else
 			{
-				fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom , not ereply"); // not ECHO_REPLY
+				fuzz_logger_log(FUZZ_LOG_DEBUG, "recvfrom didn't return ICMP reply"); // not ECHO_REPLY
 			}
 		}
 
@@ -438,6 +467,9 @@ int check_alive_by_ping()
 	return 0;
 }
 
+/*
+	Determine if a remote device is alive looking for DEAUTH packets
+*/
 int check_alive_by_deauth(struct packet *pkt)
 {
 	struct ieee_hdr *hdr;
@@ -452,6 +484,9 @@ int check_alive_by_deauth(struct packet *pkt)
 	return 1;
 }
 
+/*
+	Determine if a remote device is alive looking for DISASSOC packets
+*/
 int check_alive_by_disassoc(struct packet *pkt)
 {
 	struct ieee_hdr *hdr;
@@ -466,17 +501,24 @@ int check_alive_by_disassoc(struct packet *pkt)
 	return 1;
 }
 
+/*
+	Determine if a remote device is alive by examine the time elapsed since last packet
+*/
 int check_alive_by_pkts(struct ether_addr smac)
 {
 	time_t current_time = 0;
 
 	if (fuzzing_opt.last_recv_pkt_time == 0)
+	{
 		return 1;
+	}
 
 	// if(MAC_MATCHES(smac, SE_NULLMAC)) return 1;
 
 	if (MAC_MATCHES(smac, fuzzing_opt.target_addr))
+	{
 		return 1;
+	}
 
 	current_time = time(NULL);
 	if (current_time - fuzzing_opt.last_recv_pkt_time > CHECK_ALIVE_TIME)
@@ -490,6 +532,9 @@ int check_alive_by_pkts(struct ether_addr smac)
 	return 1;
 }
 
+/*
+	Wrapper function to store the fuzzing state (TODO)
+*/
 void save_fuzzing_state()
 {
 	save_action_state();
@@ -508,6 +553,9 @@ void save_fuzzing_state()
 	save_timing_advertisement_state();
 }
 
+/*
+	Wrapper function to load the fuzzing state (TODO)
+*/
 void load_fuzzing_state()
 {
 	load_action_state();
@@ -526,10 +574,15 @@ void load_fuzzing_state()
 	load_timing_advertisement_state();
 }
 
+/*
+	Convert a provided phex array of length 'len' store it in pascii
+	pascii should be of length / 2
+*/
 void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len)
 {
-	unsigned char nibble[2];
-	unsigned int i, j;
+	unsigned char nibble[2] = {0};
+	unsigned int i = 0, j = 0;
+
 	for (i = 0; i < len; i++)
 	{
 		nibble[0] = (phex[i] & 0xF0) >> 4;
@@ -550,6 +603,10 @@ void hex_to_ascii(unsigned char *phex, unsigned char *pascii, unsigned int len)
 	}
 }
 
+/*
+	Convert a provided phex of length 'len' to a hex and stores it inside 'pascii'
+	in the form of [\xXX], pascii should be length of 2 times phex (len * 2)
+*/
 void hex_to_ascii_hex(unsigned char *phex, char *pascii, unsigned int len)
 {
 	unsigned char nibble[2];
@@ -579,9 +636,9 @@ void hex_to_ascii_hex(unsigned char *phex, char *pascii, unsigned int len)
 int str_to_hex(char *pascii, unsigned char *phex, unsigned int len)
 {
 	int i = 0;
-	int str_len;
-	char h1, h2;
-	unsigned char s1, s2;
+	int str_len = 0;
+	char h1 = 0, h2 = 0;
+	unsigned char s1 = 0, s2 = 0;
 
 	if (pascii == NULL || phex == NULL || len == 0)
 		return 0;
@@ -610,18 +667,23 @@ int str_to_hex(char *pascii, unsigned char *phex, unsigned int len)
 	return i;
 }
 
+/*
+	Log a provided packet
+*/
 void log_pkt(int log_level, struct packet *pkt)
 {
-	struct ieee_hdr *hdr;
+	struct ieee_hdr *hdr = NULL;
 	char log_txt[256] = {0};
 	int log_txt_len = 0, len = 0;
 	char buf[MAX_PRINT_BUF_LEN * 5] = {0};
 
-	if (log_level > fuzzing_opt.log_level)
+	if (log_level > fuzzing_opt.log_level) {
 		return;
+	}
 
-	if (pkt->data[0] == 0 || pkt->len <= 0)
+	if (pkt->data[0] == 0 || pkt->len <= 0) {
 		return;
+	}
 
 	hdr = (struct ieee_hdr *)pkt->data;
 	switch (hdr->type)

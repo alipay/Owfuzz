@@ -23,6 +23,7 @@
 #include "common/eapol_common.h"
 #include "eap_common/eap_defs.h"
 
+extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt)
@@ -117,15 +118,24 @@ struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, s
 
                     // ieee8021x_hdr->version = 0x00;
                     ieee8021x_hdr->type = 0x00;
-                    srandom(time(NULL));
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL));
+                    }
                     ieee8021x_hdr->length = htons(random() % 512);
                     memcpy(data.data + data.len, ieee8021x_hdr, sizeof(struct ieee802_1x_hdr));
                     data.len += sizeof(struct ieee802_1x_hdr);
 
-                    srandom(time(NULL) + ieee8021x_hdr->length);
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL) + ieee8021x_hdr->length);
+                    }
                     eaphdr->code = random() % 6 + 1;
                     // eaphdr->identifier = 0x00;
-                    srandom(time(NULL) + eaphdr->code);
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL) + eaphdr->code);
+                    }
                     eaphdr->length = htons(random() % 512);
                     memcpy(data.data + data.len, eaphdr, sizeof(struct eap_hdr));
                     data.len += sizeof(struct eap_hdr);
@@ -134,7 +144,10 @@ struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, s
                     data.data[data.len] = eap_type;
                     data.len += 1;
                     // type data
-                    srandom(time(NULL) + eap_type);
+                    if (0 == seed)
+                    {
+                        srandom(time(NULL) + eap_type);
+                    }
                     dlen = random() % 1024;
                     generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
                     data.len += dlen;
@@ -223,21 +236,30 @@ struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, s
             data.len += sizeof(wp);
 
             hdr_new->flags |= 0x40;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;
         }
         else if (fuzzing_opt.auth_type == OPEN_WEP)
         {
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;
         }
         else
         {
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;
@@ -270,14 +292,20 @@ struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, s
 
             ieee8021xdhr.version = 0x02;
             ieee8021xdhr.type = 0x00;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             ieee8021xdhr.length = htons(5);
             memcpy(data.data + data.len, &ieee8021xdhr, sizeof(struct ieee802_1x_hdr));
             data.len += sizeof(struct ieee802_1x_hdr);
 
             eap.code = EAP_CODE_REQUEST;
             eap.identifier = random() % 0xFF;
-            srandom(time(NULL) + eap.identifier);
+            if (0 == seed)
+            {
+                srandom(time(NULL) + eap.identifier);
+            }
             eap.length = htons(5);
             memcpy(data.data + data.len, &eap, sizeof(struct eap_hdr));
             data.len += sizeof(struct eap_hdr);
@@ -296,7 +324,10 @@ struct packet create_qos_data(struct ether_addr bssid, struct ether_addr smac, s
 
                 hdr_new->flags |= 0x40;
             }
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             dlen = random() % 1024;
             generate_random_data(data.data + data.len, dlen, VALUE_RANDOM);
             data.len += dlen;
@@ -334,7 +365,10 @@ void create_eapol_m1(struct packet *pkt)
         case WPA_PSK_TKIP:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x0089);
@@ -350,7 +384,10 @@ void create_eapol_m1(struct packet *pkt)
         case WPA_PSK_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x008a);
@@ -366,7 +403,10 @@ void create_eapol_m1(struct packet *pkt)
         case WPA_PSK_TKIP_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x008a);
@@ -382,7 +422,10 @@ void create_eapol_m1(struct packet *pkt)
         case WPA2_PSK_TKIP:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x0089);
@@ -398,7 +441,10 @@ void create_eapol_m1(struct packet *pkt)
         case WPA2_PSK_AES:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x008a);
@@ -414,7 +460,10 @@ void create_eapol_m1(struct packet *pkt)
         case WPA2_PSK_TKIP_AES:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x008a);
@@ -430,7 +479,10 @@ void create_eapol_m1(struct packet *pkt)
         case WPA3:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x0088);
@@ -484,7 +536,10 @@ void create_eapol_m2(struct packet *pkt)
         case WPA_PSK_TKIP:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x0109);
@@ -500,7 +555,10 @@ void create_eapol_m2(struct packet *pkt)
         case WPA_PSK_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x010a);
@@ -516,7 +574,10 @@ void create_eapol_m2(struct packet *pkt)
         case WPA_PSK_TKIP_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x010a);
@@ -532,7 +593,10 @@ void create_eapol_m2(struct packet *pkt)
         case WPA2_PSK_TKIP:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x0109);
@@ -548,7 +612,10 @@ void create_eapol_m2(struct packet *pkt)
         case WPA2_PSK_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x010a);
@@ -564,7 +631,10 @@ void create_eapol_m2(struct packet *pkt)
         case WPA2_PSK_TKIP_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x010a);
@@ -580,7 +650,10 @@ void create_eapol_m2(struct packet *pkt)
         case WPA3:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x0108);
@@ -610,7 +683,10 @@ void create_eapol_m3(struct packet *pkt)
     struct llc_hdr llc_h = {0};
     struct ieee8021x_auth wpa_auth = {0};
 
-    srandom(time(NULL));
+    if (0 == seed)
+    {
+        srandom(time(NULL));
+    }
 
     if (fuzzing_opt.auth_type >= WPA_PSK_TKIP)
     {
@@ -636,7 +712,10 @@ void create_eapol_m3(struct packet *pkt)
         case WPA_PSK_TKIP:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x01c9);
@@ -652,7 +731,10 @@ void create_eapol_m3(struct packet *pkt)
         case WPA_PSK_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x01ca);
@@ -667,7 +749,10 @@ void create_eapol_m3(struct packet *pkt)
         case WPA_PSK_TKIP_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x01ca);
@@ -683,7 +768,10 @@ void create_eapol_m3(struct packet *pkt)
         case WPA2_PSK_TKIP:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x13c9);
@@ -699,7 +787,10 @@ void create_eapol_m3(struct packet *pkt)
         case WPA2_PSK_AES:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x13ca);
@@ -715,7 +806,10 @@ void create_eapol_m3(struct packet *pkt)
         case WPA2_PSK_TKIP_AES:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x13ca);
@@ -731,7 +825,10 @@ void create_eapol_m3(struct packet *pkt)
         case WPA3:
             wpa_auth.version = 0x02; // 802.1X-2004
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL RSN Key
             wpa_auth.key_info = htons(0x13c8);
@@ -786,7 +883,10 @@ void create_eapol_m4(struct packet *pkt)
         case WPA_PSK_TKIP:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x0109);
@@ -802,7 +902,10 @@ void create_eapol_m4(struct packet *pkt)
         case WPA_PSK_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x010a);
@@ -818,7 +921,10 @@ void create_eapol_m4(struct packet *pkt)
         case WPA_PSK_TKIP_AES:
             wpa_auth.version = 0x01; // 802.a_length = htons(0); 1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0xfe; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x010a);
@@ -834,7 +940,10 @@ void create_eapol_m4(struct packet *pkt)
         case WPA2_PSK_TKIP:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x0309);
@@ -850,7 +959,10 @@ void create_eapol_m4(struct packet *pkt)
         case WPA2_PSK_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x030a);
@@ -866,7 +978,10 @@ void create_eapol_m4(struct packet *pkt)
         case WPA2_PSK_TKIP_AES:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x030a);
@@ -882,7 +997,10 @@ void create_eapol_m4(struct packet *pkt)
         case WPA3:
             wpa_auth.version = 0x01; // 802.1X-2001
             wpa_auth.type = 0x03;
-            srandom(time(NULL));
+            if (0 == seed)
+            {
+                srandom(time(NULL));
+            }
             wpa_auth.length = htons(random() % 1024);
             wpa_auth.descriptor = 0x02; // EAPOL WPA Key
             wpa_auth.key_info = htons(0x0308);

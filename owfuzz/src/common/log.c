@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 #include "log.h"
 
 static int default_level = FUZZ_LOG_INFO;
@@ -31,8 +32,10 @@ void fuzz_logger_init(int log_level, char *file_log)
 	if (log_level != -1)
 		default_level = log_level;
 
-	if (file_log)
+	if (NULL != file_log && strlen(file_log) > 0) {
+		fuzz_logger_log(FUZZ_LOG_INFO, "Opening '%s' for logging.", file_log);
 		log_fd = open(file_log, O_RDWR | O_CREAT | O_APPEND | O_SYNC, 0);
+	}
 	/*else
 		log_fd = open(log_file, O_RDWR|O_CREAT|O_APPEND|O_SYNC, 0);	*/
 
