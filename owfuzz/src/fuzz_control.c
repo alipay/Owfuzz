@@ -531,44 +531,58 @@ void *oi_receive_thread_ex(void *param)
 	pthread_exit(NULL);
 }
 
+/*
+	Configure the provided interfaces, each on its own thread
+*/
 int init_ex()
 {
-	int i = 0;
+	int interface_number = 0;
+	int res = 0;
 
 	ow_queue_init(&owq);
 	pthread_mutex_init(&owq_mutex, NULL);
 
-	for (i = 0; i < fuzzing_opt.ois_cnt; i++)
+	for (interface_number = 0; interface_number < fuzzing_opt.ois_cnt; interface_number++)
 	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "interface: %s, channel: %d\n", fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.ois[i].channel);
+		fuzz_logger_log(FUZZ_LOG_DEBUG, "Unterface: %s, channel: %d\n", fuzzing_opt.ois[interface_number].osdep_iface_out, fuzzing_opt.ois[interface_number].channel);
 
-		if (i == 0 && fuzzing_opt.fuzz_work_mode != FUZZ_WORK_MODE_MITM)
+		if (interface_number == 0 && fuzzing_opt.fuzz_work_mode != FUZZ_WORK_MODE_MITM)
 		{
 			// owfuzz_change_interface_mac(fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.szsource_addr);
 		}
 
 		if (fuzzing_opt.fuzz_work_mode == FUZZ_WORK_MODE_MITM)
 		{
-			if (i == 0)
+			if (0 == interface_number)
 			{
-				owfuzz_change_interface_mac(fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.szsource_addr);
+				owfuzz_change_interface_mac(fuzzing_opt.ois[interface_number].osdep_iface_out, fuzzing_opt.szsource_addr);
 			}
-			else if (i == 1)
+			else if (1 == interface_number)
 			{
-				owfuzz_change_interface_mac(fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.sztarget_addr);
+				owfuzz_change_interface_mac(fuzzing_opt.ois[interface_number].osdep_iface_out, fuzzing_opt.sztarget_addr);
 			}
 		}
-		oi_init(&fuzzing_opt.ois[i]);
-		if ((fuzzing_opt.ois[i].thread_id = pthread_create(&fuzzing_opt.ois[i].fthread, NULL, oi_receive_thread, &fuzzing_opt.ois[i])) != 0)
+
+		res = oi_init(&fuzzing_opt.ois[interface_number]);
+		if (-1 == res)
 		{
-			fuzz_logger_log(FUZZ_LOG_ERR, "create oi_receive_thread-[%d] failed.", i);
+			// Failed to oi_init
+			exit(-1);
+		}
+
+		if ((fuzzing_opt.ois[interface_number].thread_id = pthread_create(&fuzzing_opt.ois[interface_number].fthread, NULL, oi_receive_thread, &fuzzing_opt.ois[interface_number])) != 0)
+		{
+			fuzz_logger_log(FUZZ_LOG_ERR, "create oi_receive_thread-[%d] failed.", interface_number);
 			exit(-1);
 		}
 	}
 
-	return 0;
+	return interface_number; // We return the number of interfaces inited (0 = error, 0 > more than one interface configured)
 }
 
+/*
+	Return a single packet from the queue
+*/
 struct packet read_packet_ex()
 {
 	struct packet pkt = {0};
@@ -590,7 +604,7 @@ int send_packet_ex(struct packet *pkt)
 {
 	int i = 0;
 
-	if (pkt)
+	if (NULL != pkt)
 	{
 		// fuzzing_opt.fuzz_pkt = *pkt;
 		fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d --> send packet: %d", pkt->channel, pkt->len);
@@ -624,21 +638,51 @@ int oi_init(struct osdep_instance *oi)
 	char szerr[512] = {0};
 	int mode = 0;
 	int channel = 0;
+	int res = 0;
 
 	strncpy(oi->osdep_iface_in, oi->osdep_iface_out, sizeof(oi->osdep_iface_in) - 1);
 
-	kismet_interface_down(oi->osdep_iface_out, szerr);
+	res = kismet_interface_down(oi->osdep_iface_out, szerr);
+	if (-1 == res)
+	{
+		fuzz_logger_log(FUZZ_LOG_ERR, "Could not down the interface: '%s', error: %s", oi->osdep_iface_out, szerr);
+		return -1;
+	}
 	sleep(0.5);
-	kismet_set_mode(oi->osdep_iface_out, szerr, 6);
-	kismet_interface_up(oi->osdep_iface_out, szerr);
+
+	res = kismet_set_mode(oi->osdep_iface_out, szerr, 6);
+	if (-1 == res)
+	{
+		fuzz_logger_log(FUZZ_LOG_ERR, "Could not set mode the interface: '%s', error: %s", oi->osdep_iface_out, szerr);
+		return -1;
+	}
+
+	res = kismet_interface_up(oi->osdep_iface_out, szerr);
+	if (-1 == res)
+	{
+		fuzz_logger_log(FUZZ_LOG_ERR, "Could not up the interface: '%s', error: %s", oi->osdep_iface_out, szerr);
+		return -1;
+	}
 	sleep(0.5);
-	kismet_set_channel(oi->osdep_iface_out, oi->channel, szerr);
-	kismet_get_mode(oi->osdep_iface_out, szerr, &mode);
+
+	res = kismet_set_channel(oi->osdep_iface_out, oi->channel, szerr);
+	if (-1 == res)
+	{
+		fuzz_logger_log(FUZZ_LOG_ERR, "Could not set channel on the interface: '%s', error: %s", oi->osdep_iface_out, szerr);
+		return -1;
+	}
+	
+	res = kismet_get_mode(oi->osdep_iface_out, szerr, &mode);
+	if (-1 == res)
+	{
+		fuzz_logger_log(FUZZ_LOG_ERR, "Could not get channel from the interface: '%s', error: %s", oi->osdep_iface_out, szerr);
+		return -1;
+	}
 	channel = kismet_get_channel(oi->osdep_iface_out, szerr);
 
-	if (mode != 6 || channel != oi->channel)
+	if (6 != mode || channel != oi->channel)
 	{
-		fuzz_logger_log(FUZZ_LOG_ERR, "init_oi failed, interface: %s, mode: %d, channel: %d\n", oi->osdep_iface_out, mode, channel);
+		fuzz_logger_log(FUZZ_LOG_ERR, "init_oi failed, interface: %s, mode: %d, channel: %d (expected: %d)\n", oi->osdep_iface_out, mode, channel, oi->channel);
 		exit(-1);
 	}
 
