@@ -172,6 +172,9 @@ void usage_help(char *name)
 		   TEST_FRAME, TEST_INTERACTIVE, TEST_POC, TEST_INTERACTIVE, TEST_FRAME, TEST_INTERACTIVE_FRAME);
 }
 
+/*
+	Test the remote device with Bad Frames
+*/
 void *test_bad_frame(void *param)
 {
 	int i = 0;
@@ -189,7 +192,7 @@ void *test_bad_frame(void *param)
 
 	sleep(2);
 
-	/*for(t=0;t<100;t++)*/ while (1)
+	while (true)
 	{
 		for (i = 0; i < MAX_BAD_FRAME_COUNT; i++)
 		{
@@ -476,28 +479,31 @@ void sniff_ies(struct packet *pkt)
 			}
 		}
 
-		fuzz_logger_log(FUZZ_LOG_INFO, "recv %d frame: 0x%02X, contains ies: %d\n", idx, hdr->type, fuzzing_opt.sfs[idx].ie_cnt);
+		fuzz_logger_log(FUZZ_LOG_INFO, "recv %d frame: 0x%02X, contains ies: %d", idx, hdr->type, fuzzing_opt.sfs[idx].ie_cnt);
 		for (i = 0; i < fuzzing_opt.sfs[idx].ie_cnt; i++)
 		{
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "ie: %d, len: %d\n", fuzzing_opt.sfs[idx].sies[i].id, fuzzing_opt.sfs[idx].sies[i].len);
+			fuzz_logger_log(FUZZ_LOG_DEBUG, "ie: %d, len: %d", fuzzing_opt.sfs[idx].sies[i].id, fuzzing_opt.sfs[idx].sies[i].len);
 		}
 	}
 }
 
+/*
+	A threaded function that captures incoming packets
+*/
 void *oi_receive_thread(void *param)
 {
 	struct osdep_instance *oi = (struct osdep_instance *)param;
 	struct packet pkt = {0};
 
-	while (1)
+	while (true)
 	{
 		memset(&pkt, 0, sizeof(struct packet));
 		pkt = osdep_read_packet_ex(oi);
-		if (pkt.len)
+		// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] osdep_read_packet_ex from channel: %d, pkt.len: %d", __FILE__, __LINE__, pkt.channel, pkt.len);
+		if (pkt.len > 0)
 		{
 			pthread_mutex_lock(&owq_mutex);
 			ow_queue_push(&owq, &pkt);
-			// printf("recv from channel: %d, pkt.len: %d\n", pkt.channel, pkt.len);
 			pthread_mutex_unlock(&owq_mutex);
 		}
 		usleep(10);
@@ -506,18 +512,22 @@ void *oi_receive_thread(void *param)
 	pthread_exit(NULL);
 }
 
+/*
+	A threaded function that captures incoming packets (extended version)
+*/
 void *oi_receive_thread_ex(void *param)
 {
 	fuzzing_option *fo = (fuzzing_option *)param;
 	struct packet pkt;
 	int i;
 
-	while (1)
+	while (true)
 	{
 		for (i = 0; i < fo->ois_cnt; i++)
 		{
 			memset(&pkt, 0, sizeof(struct packet));
 			pkt = osdep_read_packet_ex(&fo->ois[i]);
+			// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] osdep_read_packet_ex from channel: %d, pkt.len: %d", __FILE__, __LINE__, pkt.channel, pkt.len);
 			if (pkt.len)
 			{
 				pthread_mutex_lock(&owq_mutex);
@@ -543,9 +553,10 @@ int init_ex()
 
 	for (interface_number = 0; interface_number < fuzzing_opt.ois_cnt; interface_number++)
 	{
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "Unterface: %s, channel: %d\n", fuzzing_opt.ois[interface_number].osdep_iface_out, fuzzing_opt.ois[interface_number].channel);
+		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] Configuring interface: %s, channel: %d", 
+			__FILE__, __LINE__, fuzzing_opt.ois[interface_number].osdep_iface_out, fuzzing_opt.ois[interface_number].channel);
 
-		if (interface_number == 0 && fuzzing_opt.fuzz_work_mode != FUZZ_WORK_MODE_MITM)
+		if (0 == interface_number && fuzzing_opt.fuzz_work_mode != FUZZ_WORK_MODE_MITM)
 		{
 			// owfuzz_change_interface_mac(fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.szsource_addr);
 		}
@@ -566,12 +577,15 @@ int init_ex()
 		if (-1 == res)
 		{
 			// Failed to oi_init
+			fuzz_logger_log(FUZZ_LOG_ERR, "Failed to oi_init");
 			exit(-1);
 		}
 
-		if ((fuzzing_opt.ois[interface_number].thread_id = pthread_create(&fuzzing_opt.ois[interface_number].fthread, NULL, oi_receive_thread, &fuzzing_opt.ois[interface_number])) != 0)
+		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] Creating oi_receive_thread for interface: %s", __FILE__, __LINE__, fuzzing_opt.ois[interface_number].osdep_iface_out);
+		fuzzing_opt.ois[interface_number].thread_id = pthread_create(&fuzzing_opt.ois[interface_number].fthread, NULL, oi_receive_thread, &fuzzing_opt.ois[interface_number]);
+		if (0 != fuzzing_opt.ois[interface_number].thread_id)
 		{
-			fuzz_logger_log(FUZZ_LOG_ERR, "create oi_receive_thread-[%d] failed.", interface_number);
+			fuzz_logger_log(FUZZ_LOG_ERR, "[%s:%d] Create oi_receive_thread-[%d] failed.", __FILE__, __LINE__, interface_number);
 			exit(-1);
 		}
 	}
@@ -593,7 +607,7 @@ struct packet read_packet_ex()
 	}
 	else
 	{
-		// printf("queue is empty!\n");
+		// fuzz_logger_log(FUZZ_LOG_INFO, "ow_queue is empty");
 	}
 
 	return pkt;
@@ -1718,7 +1732,7 @@ void *start_fuzzing(void *param)
 			// fuzz sta
 			// frame_array_size = sizeof(ap_frames)/sizeof(ap_frames[0]);
 			// fuzz_frames = ap_frames;
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "Getting AP frames");
+			fuzz_logger_log(FUZZ_LOG_INFO, "Getting AP frames");
 			owfuzz_config_get_ap_frames(NULL, owfuzz_frames, &frame_array_size);
 			fuzz_frames = owfuzz_frames;
 		}
@@ -1727,7 +1741,7 @@ void *start_fuzzing(void *param)
 			// fuzz ap
 			// frame_array_size = sizeof(sta_frames)/sizeof(sta_frames[0]);
 			// fuzz_frames = sta_frames;
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "Getting STA frames");
+			fuzz_logger_log(FUZZ_LOG_INFO, "Getting STA frames");
 			owfuzz_config_get_sta_frames(NULL, owfuzz_frames, &frame_array_size);
 			fuzz_frames = owfuzz_frames;
 		}
@@ -1739,13 +1753,13 @@ void *start_fuzzing(void *param)
 		fuzzing_opt->owfuzz_frames = owfuzz_frames;
 		fuzzing_opt->owfuzz_frames_cnt = frame_array_size;
 
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "Fuzzing frames count: %d", frame_array_size);
+		fuzz_logger_log(FUZZ_LOG_INFO, "Fuzzing frames count: %d", frame_array_size);
 	}
 
 	owfuzz_config_get_ies_status(NULL, fuzzing_opt);
 	owfuzz_config_get_ext_ies_status(NULL, fuzzing_opt);
 
-	if (fuzzing_opt->test_type == TEST_FRAME)
+	if (TEST_FRAME == fuzzing_opt->test_type)
 	{
 		fuzzing_opt->sniff_frames = 1;
 
@@ -1755,7 +1769,7 @@ void *start_fuzzing(void *param)
 
 		sleep(2);
 
-		fuzz_logger_log(FUZZ_LOG_INFO, "\nPlease try to connect clinet device to AP ...");
+		fuzz_logger_log(FUZZ_LOG_INFO, "\nPlease try to connect client device to AP ...");
 	}
 
 	while (true)
@@ -1791,9 +1805,14 @@ void *start_fuzzing(void *param)
 		{
 			if (FUZZ_WORK_MODE_MITM != fuzzing_opt->fuzz_work_mode)
 			{
+				// fuzz_logger_log(FUZZ_LOG_INFO, "fuzzing_opt->sniff_frames: %d", fuzzing_opt->sniff_frames);
 				if (0 == fuzzing_opt->sniff_frames)
 				{
-					if (1 == fuzzing_opt->target_alive && (!check_alive_by_pkts(smac)))
+					// fuzz_logger_log(FUZZ_LOG_INFO, "fuzzing_opt->target_alive: %d", fuzzing_opt->target_alive);
+					int target_alive_by_pkts = check_alive_by_pkts(smac);
+
+					// fuzz_logger_log(FUZZ_LOG_INFO, "target_alive_by_pkts: %d", target_alive_by_pkts);
+					if (1 == fuzzing_opt->target_alive && !target_alive_by_pkts)
 					{
 						save_exp_payload(&fuzzing_opt->fuzz_pkt);
 						log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
@@ -2502,20 +2521,26 @@ void *start_fuzzing(void *param)
 	pthread_exit(NULL);
 }
 
-void load_payloads()
+/*
+	Load from 'poc.txt' the bad frames
+	Returns the number of frames loaded
+*/
+int load_payloads()
 {
 	FILE *fp = NULL;
-	int i = 0;
+	int frame_count = 0;
 	char str_line[8192] = {0};
 	char owfuzz_path[256] = {0};
 	char *ptr;
 
-	if (readlink("/proc/self/exe", owfuzz_path, sizeof(owfuzz_path)) <= 0)
-		return;
+	if (readlink("/proc/self/exe", owfuzz_path, sizeof(owfuzz_path)) <= 0) {
+		return 0;
+	}
 
 	ptr = strrchr(owfuzz_path, '/');
-	if (!ptr)
-		return;
+	if (!ptr) {
+		return 0;
+	}
 
 	ptr[1] = '\0';
 	strcat(owfuzz_path, "poc.txt");
@@ -2523,25 +2548,27 @@ void load_payloads()
 	fp = fopen(owfuzz_path, "r");
 	if (!fp)
 	{
-		fuzz_logger_log(FUZZ_LOG_ERR, "fopen poc.txt failed.\n", i);
-		return;
+		fuzz_logger_log(FUZZ_LOG_ERR, "fopen 'poc.txt' failed.");
+		return 0;
 	}
 
-	while (!feof(fp) && (i < MAX_BAD_FRAME_COUNT))
+	while (!feof(fp) && (frame_count < MAX_BAD_FRAME_COUNT))
 	{
 		memset(str_line, 0, sizeof(str_line));
 		if (fgets(str_line, sizeof(str_line), fp))
 		{
 			if (str_line[0] != '#')
 			{
-				bad_frame[i].len = str_to_hex(str_line, bad_frame[i].data, sizeof(bad_frame[i].data));
-				i++;
+				bad_frame[frame_count].len = str_to_hex(str_line, bad_frame[frame_count].data, sizeof(bad_frame[frame_count].data));
+				frame_count++;
 			}
 		}
 	}
 
 	fclose(fp);
-	fuzz_logger_log(FUZZ_LOG_INFO, "load %d pocs.\n", i);
+	fuzz_logger_log(FUZZ_LOG_INFO, "Loaded %d poc(s).", frame_count);
+
+	return frame_count;
 }
 
 void save_exp_payload(struct packet *pkt)
@@ -2924,9 +2951,9 @@ int fuzzing(int argc, char *argv[])
 	}
 
 	int i;
-	for (i = 0; i < fuzzing_opt.ois_cnt; i++)
-	{
-		fuzz_logger_log(FUZZ_LOG_INFO, "Interface: %s, channel: %d", fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.ois[i].channel);
+	for (i = 0; i < fuzzing_opt.ois_cnt; i++) {
+		// Print out all the interfaces and their channels
+		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] Interface: %s, channel: %d", __FILE__, __LINE__, fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.ois[i].channel);
 	}
 
 	fuzz_logger_log(FUZZ_LOG_INFO, "Fuzzing mode: %s", fuzzing_opt.mode);
@@ -2980,9 +3007,11 @@ int fuzzing(int argc, char *argv[])
 	fuzz_logger_log(FUZZ_LOG_INFO, "Log file: %s", strlen(fuzzing_opt.log_file) > 0 ? fuzzing_opt.log_file : "unset");
 	fuzz_logger_init(fuzzing_opt.log_level, fuzzing_opt.log_file);
 
-	if (strlen(fuzzing_opt.target_ip))
+	fuzz_logger_log(FUZZ_LOG_INFO, "Target IP: %s", strlen(fuzzing_opt.target_ip) > 0 ? fuzzing_opt.target_ip : "unset");
+	if (strlen(fuzzing_opt.target_ip) > 0)
 	{
 		fuzzing_opt.enable_check_alive = 1;
+		// fuzz_logger_log(FUZZ_LOG_INFO, "IP Address has been provided: '%s', init_ping_sock called", fuzzing_opt.target_ip);
 		init_ping_sock(&fuzzing_opt);
 	}
 
@@ -3000,6 +3029,7 @@ int fuzzing(int argc, char *argv[])
 
 	if (TEST_POC == fuzzing_opt.test_type)
 	{
+		fuzz_logger_log(FUZZ_LOG_INFO, "Running 'test_bad_frame'");
 		if ((tid = pthread_create(&fthread, NULL, test_bad_frame, &fuzzing_opt)) != 0)
 		{
 			fuzz_logger_log(FUZZ_LOG_ERR, "Create test_bad_frame thread failed.");
