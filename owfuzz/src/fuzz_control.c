@@ -64,78 +64,78 @@ uint8_t ap_frames[] = {};
 uint8_t sta_frames[] = {};
 
 uint8_t all_frames[] =
-{
-	// management
-	IEEE80211_TYPE_ASSOCREQ,
-	IEEE80211_TYPE_ASSOCRES,
-	IEEE80211_TYPE_REASSOCREQ,
-	IEEE80211_TYPE_REASSOCRES,
-	IEEE80211_TYPE_PROBEREQ,
-	IEEE80211_TYPE_PROBERES,
-	IEEE80211_TYPE_TIMADVERT,
-	// IEEE80211_TYPE_000111,
-	IEEE80211_TYPE_BEACON,
-	IEEE80211_TYPE_ATIM,
-	// IEEE80211_TYPE_DISASSOC,
-	IEEE80211_TYPE_AUTH,
-	// IEEE80211_TYPE_DEAUTH,
-	IEEE80211_TYPE_ACTION,
-	IEEE80211_TYPE_ACTIONNOACK,
-	// IEEE80211_TYPE_001111,
+	{
+		// management
+		IEEE80211_TYPE_ASSOCREQ,
+		IEEE80211_TYPE_ASSOCRES,
+		IEEE80211_TYPE_REASSOCREQ,
+		IEEE80211_TYPE_REASSOCRES,
+		IEEE80211_TYPE_PROBEREQ,
+		IEEE80211_TYPE_PROBERES,
+		IEEE80211_TYPE_TIMADVERT,
+		// IEEE80211_TYPE_000111,
+		IEEE80211_TYPE_BEACON,
+		IEEE80211_TYPE_ATIM,
+		// IEEE80211_TYPE_DISASSOC,
+		IEEE80211_TYPE_AUTH,
+		// IEEE80211_TYPE_DEAUTH,
+		IEEE80211_TYPE_ACTION,
+		IEEE80211_TYPE_ACTIONNOACK,
+		// IEEE80211_TYPE_001111,
 
-	// control
-	// IEEE80211_TYPE_010000,
-	// IEEE80211_TYPE_010001,
-	// IEEE80211_TYPE_010010,
-	// IEEE80211_TYPE_010011,
-	IEEE80211_TYPE_BEAMFORMING,
-	IEEE80211_TYPE_VHT,
-	IEEE80211_TYPE_CTRLFRMEXT,
-	IEEE80211_TYPE_CTRLWRAP,
-	IEEE80211_TYPE_BLOCKACKREQ,
-	IEEE80211_TYPE_BLOCKACK,
-	IEEE80211_TYPE_PSPOLL,
-	IEEE80211_TYPE_RTS,
-	IEEE80211_TYPE_CTS,
-	IEEE80211_TYPE_ACK,
-	IEEE80211_TYPE_CFEND,
-	IEEE80211_TYPE_CFENDACK,
+		// control
+		// IEEE80211_TYPE_010000,
+		// IEEE80211_TYPE_010001,
+		// IEEE80211_TYPE_010010,
+		// IEEE80211_TYPE_010011,
+		IEEE80211_TYPE_BEAMFORMING,
+		IEEE80211_TYPE_VHT,
+		IEEE80211_TYPE_CTRLFRMEXT,
+		IEEE80211_TYPE_CTRLWRAP,
+		IEEE80211_TYPE_BLOCKACKREQ,
+		IEEE80211_TYPE_BLOCKACK,
+		IEEE80211_TYPE_PSPOLL,
+		IEEE80211_TYPE_RTS,
+		IEEE80211_TYPE_CTS,
+		IEEE80211_TYPE_ACK,
+		IEEE80211_TYPE_CFEND,
+		IEEE80211_TYPE_CFENDACK,
 
-	// data
-	IEEE80211_TYPE_DATA,
-	IEEE80211_TYPE_DATACFACK,
-	IEEE80211_TYPE_DATACFPOLL,
-	IEEE80211_TYPE_DATACFACKPOLL,
-	IEEE80211_TYPE_NULL,
-	IEEE80211_TYPE_CFACK,
-	IEEE80211_TYPE_CFPOLL,
-	IEEE80211_TYPE_CFACKPOLL,
-	IEEE80211_TYPE_QOSDATA,
-	IEEE80211_TYPE_QOSDATACFACK,
-	IEEE80211_TYPE_QOSDATACFPOLL,
-	IEEE80211_TYPE_QOSDATACFACKPOLL,
-	IEEE80211_TYPE_QOSNULL,
-	IEEE80211_TYPE_QOSCFACK,
-	IEEE80211_TYPE_QOSCFPOLL,
-	IEEE80211_TYPE_QOSCFACKPOLL,
+		// data
+		IEEE80211_TYPE_DATA,
+		IEEE80211_TYPE_DATACFACK,
+		IEEE80211_TYPE_DATACFPOLL,
+		IEEE80211_TYPE_DATACFACKPOLL,
+		IEEE80211_TYPE_NULL,
+		IEEE80211_TYPE_CFACK,
+		IEEE80211_TYPE_CFPOLL,
+		IEEE80211_TYPE_CFACKPOLL,
+		IEEE80211_TYPE_QOSDATA,
+		IEEE80211_TYPE_QOSDATACFACK,
+		IEEE80211_TYPE_QOSDATACFPOLL,
+		IEEE80211_TYPE_QOSDATACFACKPOLL,
+		IEEE80211_TYPE_QOSNULL,
+		IEEE80211_TYPE_QOSCFACK,
+		IEEE80211_TYPE_QOSCFPOLL,
+		IEEE80211_TYPE_QOSCFACKPOLL,
 
-	// extension
-	// IEEE80211_TYPE_DMGBEACON,
-	/*IEEE80211_TYPE_110001,
-	IEEE80211_TYPE_110010,
-	IEEE80211_TYPE_110011,
-	IEEE80211_TYPE_110100,
-	IEEE80211_TYPE_110101,
-	IEEE80211_TYPE_110110,
-	IEEE80211_TYPE_110111,
-	IEEE80211_TYPE_111000,
-	IEEE80211_TYPE_111001,
-	IEEE80211_TYPE_111010,
-	IEEE80211_TYPE_111011,
-	IEEE80211_TYPE_111100,
-	IEEE80211_TYPE_111101,
-	IEEE80211_TYPE_111110,
-	IEEE80211_TYPE_111111*/
+		// extension
+		// IEEE80211_TYPE_DMGBEACON,
+		/*IEEE80211_TYPE_110001,
+		IEEE80211_TYPE_110010,
+		IEEE80211_TYPE_110011,
+		IEEE80211_TYPE_110100,
+		IEEE80211_TYPE_110101,
+		IEEE80211_TYPE_110110,
+		IEEE80211_TYPE_110111,
+		IEEE80211_TYPE_111000,
+		IEEE80211_TYPE_111001,
+		IEEE80211_TYPE_111010,
+		IEEE80211_TYPE_111011,
+		IEEE80211_TYPE_111100,
+		IEEE80211_TYPE_111101,
+		IEEE80211_TYPE_111110,
+		IEEE80211_TYPE_111111*/
 };
 
 void usage_help(char *name)
@@ -373,9 +373,12 @@ void *test_bad_frame(void *param)
 	exit(1);
 }
 
+/*
+	Sniff captured IES so that we can fuzz them
+*/
 void sniff_ies(struct packet *pkt)
 {
-	struct ieee_hdr *hdr;
+	struct ieee_hdr *hdr = NULL;
 	struct buf abuf = {0};
 	uint8_t *tlvs = NULL;
 	int tlvs_len = 0;
@@ -385,7 +388,7 @@ void sniff_ies(struct packet *pkt)
 	int offset = 0;
 	int nread = 0;
 	int idx = 0, ie_idx = 0;
-	int i;
+	int i = 0;
 
 	hdr = (struct ieee_hdr *)pkt->data;
 	if ((hdr->type & 0x0F) != MANAGMENT_FRAME)
@@ -453,19 +456,19 @@ void sniff_ies(struct packet *pkt)
 			abuf.data = tlvs;
 			abuf.len = tlvs_len;
 
-			while (tlvs_len)
+			while (tlvs_len > 0)
 			{
 				tlv_len = 0;
 				tlv_type = 0;
 				tlv_value = NULL;
 				nread = read_tlv8(&abuf, offset, &tlv_type, &tlv_len, (const unsigned char **)&tlv_value);
-				// printf("type: %d, len: %d\n", tlv_type, tlv_len);
+				fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] type: %d, len: %d", __FILE__, __LINE__, tlv_type, tlv_len);
 				if (nread)
 				{
 					fuzzing_opt.sfs[idx].sies[ie_idx].id = tlv_type;
 					fuzzing_opt.sfs[idx].sies[ie_idx].len = tlv_len;
 					memcpy(fuzzing_opt.sfs[idx].sies[ie_idx].value, tlv_value, tlv_len);
-					if (tlv_type == 225)
+					if (255 == tlv_type)
 					{
 						fuzzing_opt.sfs[idx].sies[ie_idx].ext_id = tlv_value[0];
 					}
@@ -479,7 +482,7 @@ void sniff_ies(struct packet *pkt)
 			}
 		}
 
-		fuzz_logger_log(FUZZ_LOG_INFO, "recv %d frame: 0x%02X, contains ies: %d", idx, hdr->type, fuzzing_opt.sfs[idx].ie_cnt);
+		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] recv %d frame: 0x%02X, contains ies: %d", __FILE__, __LINE__, idx, hdr->type, fuzzing_opt.sfs[idx].ie_cnt);
 		for (i = 0; i < fuzzing_opt.sfs[idx].ie_cnt; i++)
 		{
 			fuzz_logger_log(FUZZ_LOG_DEBUG, "ie: %d, len: %d", fuzzing_opt.sfs[idx].sies[i].id, fuzzing_opt.sfs[idx].sies[i].len);
@@ -553,8 +556,8 @@ int init_ex()
 
 	for (interface_number = 0; interface_number < fuzzing_opt.ois_cnt; interface_number++)
 	{
-		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] Configuring interface: %s, channel: %d", 
-			__FILE__, __LINE__, fuzzing_opt.ois[interface_number].osdep_iface_out, fuzzing_opt.ois[interface_number].channel);
+		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] Configuring interface: %s, channel: %d",
+						__FILE__, __LINE__, fuzzing_opt.ois[interface_number].osdep_iface_out, fuzzing_opt.ois[interface_number].channel);
 
 		if (0 == interface_number && fuzzing_opt.fuzz_work_mode != FUZZ_WORK_MODE_MITM)
 		{
@@ -684,7 +687,7 @@ int oi_init(struct osdep_instance *oi)
 		fuzz_logger_log(FUZZ_LOG_ERR, "Could not set channel on the interface: '%s', error: %s", oi->osdep_iface_out, szerr);
 		return -1;
 	}
-	
+
 	res = kismet_get_mode(oi->osdep_iface_out, szerr, &mode);
 	if (-1 == res)
 	{
@@ -2233,287 +2236,320 @@ void *start_fuzzing(void *param)
 			pass_time2 = current_time2;
 		}
 
-		if ((memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 || memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0) ||
-			(memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 || memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0))
+		// fuzz_logger_log(FUZZ_LOG_INFO,
+		// 				"SMAC %02X:%02X:%02X:%02X:%02X:%02X, DMAC %02X:%02X:%02X:%02X:%02X:%02X",
+		// 				smac.ether_addr_octet[0],
+		// 				smac.ether_addr_octet[1],
+		// 				smac.ether_addr_octet[2],
+		// 				smac.ether_addr_octet[3],
+		// 				smac.ether_addr_octet[4],
+		// 				smac.ether_addr_octet[5],
+		// 				dmac.ether_addr_octet[0],
+		// 				dmac.ether_addr_octet[1],
+		// 				dmac.ether_addr_octet[2],
+		// 				dmac.ether_addr_octet[3],
+		// 				dmac.ether_addr_octet[4],
+		// 				dmac.ether_addr_octet[5]);
+
+		// Skip the irrelevant to make the code more readable (smaller 'if')
+		if (!(
+				FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode ||
+				0 == memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) ||
+				0 == memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) ||
+				0 == memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) ||
+				0 == memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6)))
 		{
-			if (pkt.channel == fuzzing_opt->mitm_ap_channel)
-				fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d ==> pkt.len = %d, owq size: %d frame type: %02X-%s, smac %02X:%02X:%02X:%02X:%02X:%02X, dmac %02X:%02X:%02X:%02X:%02X:%02X, bssid %02X:%02X:%02X:%02X:%02X:%02X, sent pkt num -> %d",
-								pkt.channel, pkt.len, owq.size, hdr->type, frame_name,
-								smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5],
-								dmac.ether_addr_octet[0], dmac.ether_addr_octet[1], dmac.ether_addr_octet[2], dmac.ether_addr_octet[3], dmac.ether_addr_octet[4], dmac.ether_addr_octet[5],
-								bssid.ether_addr_octet[0], bssid.ether_addr_octet[1], bssid.ether_addr_octet[2], bssid.ether_addr_octet[3], bssid.ether_addr_octet[4], bssid.ether_addr_octet[5], fuzzing_opt->fuzz_pkt_num);
+			// If we are not working in AWDL mode and the packet doesn't match filter
+			continue;
+		}
 
-			if (memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0)
+		if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
+		{
+			if (is_awdl_frame(&pkt))
 			{
-				fuzzing_opt->last_recv_pkt_time = time(NULL);
-				fuzzing_opt->target_alive = 1;
+				handle_awdl(&pkt, bssid, smac, dmac, fuzzing_opt);
 			}
+		}
 
-			if (fuzzing_opt->sniff_frames == 1 /*FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode || FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode*/)
+		if (pkt.channel == fuzzing_opt->mitm_ap_channel)
+			fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d ==> pkt.len = %d, owq size: %d frame type: %02X-%s, smac %02X:%02X:%02X:%02X:%02X:%02X, dmac %02X:%02X:%02X:%02X:%02X:%02X, bssid %02X:%02X:%02X:%02X:%02X:%02X, sent pkt num -> %d",
+							pkt.channel, pkt.len, owq.size, hdr->type, frame_name,
+							smac.ether_addr_octet[0], smac.ether_addr_octet[1], smac.ether_addr_octet[2], smac.ether_addr_octet[3], smac.ether_addr_octet[4], smac.ether_addr_octet[5],
+							dmac.ether_addr_octet[0], dmac.ether_addr_octet[1], dmac.ether_addr_octet[2], dmac.ether_addr_octet[3], dmac.ether_addr_octet[4], dmac.ether_addr_octet[5],
+							bssid.ether_addr_octet[0], bssid.ether_addr_octet[1], bssid.ether_addr_octet[2], bssid.ether_addr_octet[3], bssid.ether_addr_octet[4], bssid.ether_addr_octet[5], fuzzing_opt->fuzz_pkt_num);
+
+		if (memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0)
+		{
+			fuzzing_opt->last_recv_pkt_time = time(NULL);
+			fuzzing_opt->target_alive = 1;
+		}
+
+		if (fuzzing_opt->sniff_frames == 1 /*FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode || FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode*/)
+		{
+			if (TEST_FRAME == fuzzing_opt->test_type)
 			{
-				if (TEST_FRAME == fuzzing_opt->test_type)
+				sniff_ies(&pkt);
+
+				// fuzz_logger_log(FUZZ_LOG_INFO, "fuzzing_opt->cur_sfs_cnt: %d", fuzzing_opt->cur_sfs_cnt);
+
+				if (fuzzing_opt->cur_sfs_cnt >= 3) // beacon, probe_request, probe_response, assoc_req, assoc_res, action, ...
 				{
-					sniff_ies(&pkt);
+					fuzzing_opt->sniff_frames = 0;
 
-					if (fuzzing_opt->cur_sfs_cnt >= 3) // beacon, probe_request, probe_response, assoc_req, assoc_res, action, ...
-					{
-						fuzzing_opt->sniff_frames = 0;
-
-						fuzz_logger_log(FUZZ_LOG_INFO, "\nStart fuzzing ...");
-						sleep(10);
-					}
-				}
-			}
-
-			if (FUZZ_WORK_MODE_MESH == fuzzing_opt->fuzz_work_mode)
-			{
-				handle_mesh(&pkt, bssid, smac, dmac, tmac, fuzzing_opt);
-			}
-
-			if ((memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0 &&
-				 memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0) ||
-				(memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 &&
-				 memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0))
-			{
-				if (0 == fuzzing_opt->sniff_frames)
-				{
-					if (!check_alive_by_deauth(&pkt))
-					{
-						fuzz_logger_log(FUZZ_LOG_INFO, "\t\033[22;31mTarget WiFi is disconnected(Deauth from %02X:%02X:%02X:%02X:%02X:%02X)\033[22;39m",
-										smac.ether_addr_octet[0],
-										smac.ether_addr_octet[1],
-										smac.ether_addr_octet[2],
-										smac.ether_addr_octet[3],
-										smac.ether_addr_octet[4],
-										smac.ether_addr_octet[5]);
-
-						if (TEST_FRAME == fuzzing_opt->test_type)
-						{
-							save_exp_payload(&fuzzing_opt->fuzz_pkt);
-							log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
-							while (fuzzing_opt->enable_check_alive && !check_alive_by_ping())
-							{
-								sleep(1);
-							}
-						}
-						else
-						{
-							save_exp_payload(&fuzzing_opt->fuzz_pkt);
-						}
-
-						if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
-						{
-							fuzzing_opt->mitm_state = 0;
-						}
-					}
-
-					if (!check_alive_by_disassoc(&pkt))
-					{
-						fuzz_logger_log(FUZZ_LOG_INFO, "\t\033[22;31mTarget WiFi is disconnected(Disassoc from %02X:%02X:%02X:%02X:%02X:%02X)\033[22;39m",
-										smac.ether_addr_octet[0],
-										smac.ether_addr_octet[1],
-										smac.ether_addr_octet[2],
-										smac.ether_addr_octet[3],
-										smac.ether_addr_octet[4],
-										smac.ether_addr_octet[5]);
-
-						if (TEST_FRAME == fuzzing_opt->test_type)
-						{
-							save_exp_payload(&fuzzing_opt->fuzz_pkt);
-							log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
-							while (fuzzing_opt->enable_check_alive && !check_alive_by_ping())
-							{
-								sleep(1);
-							}
-						}
-
-						if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
-						{
-							fuzzing_opt->mitm_state = 0;
-						}
-					}
+					fuzz_logger_log(FUZZ_LOG_INFO, "\nStart fuzzing ...");
+					sleep(10);
+				} else {
+					// We don't use fuzz_logger_log because we want it to stay on the same line
+					printf("Need more packets...\r");
 				}
 			}
-			else
+		}
+
+		if (FUZZ_WORK_MODE_MESH == fuzzing_opt->fuzz_work_mode)
+		{
+			handle_mesh(&pkt, bssid, smac, dmac, tmac, fuzzing_opt);
+		}
+
+		if ((memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0 &&
+			 memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0) ||
+			(memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 &&
+			 memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0))
+		{
+			if (0 == fuzzing_opt->sniff_frames)
 			{
-				if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
+				if (!check_alive_by_deauth(&pkt))
 				{
-					if (is_awdl_frame(&pkt))
-						handle_awdl(&pkt, bssid, smac, dmac, fuzzing_opt);
-				}
-			}
+					fuzz_logger_log(FUZZ_LOG_INFO, "\t\033[22;31mTarget WiFi is disconnected(Deauth from %02X:%02X:%02X:%02X:%02X:%02X)\033[22;39m",
+									smac.ether_addr_octet[0],
+									smac.ether_addr_octet[1],
+									smac.ether_addr_octet[2],
+									smac.ether_addr_octet[3],
+									smac.ether_addr_octet[4],
+									smac.ether_addr_octet[5]);
 
-			if (0 == memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) && 
-			    0 == memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) // source(fuzzer) packet seq number
-				)
-			{
-				seq_ctrl = get_seqno(&pkt);
-				if (MANAGMENT_FRAME == (hdr->type & 0x0F))
-				{
-					if (seq_ctrl != fuzzing_opt->seq_ctrl)
+					if (TEST_FRAME == fuzzing_opt->test_type)
 					{
-						fuzzing_opt->seq_ctrl = seq_ctrl;
-						set_seqno(NULL, seq_ctrl);
-
-						fuzz_logger_log(FUZZ_LOG_DEBUG, "source management frame seq = %d", fuzzing_opt->seq_ctrl);
-					}
-				}
-				else if (DATA_FRAME == (hdr->type & 0x0F))
-				{
-					if (seq_ctrl != fuzzing_opt->data_seq_ctrl)
-					{
-						fuzzing_opt->data_seq_ctrl = seq_ctrl;
-						// set_data_seqno(NULL, data_seq_ctrl);
-
-						fuzz_logger_log(FUZZ_LOG_DEBUG, "source data frame seq = %d", fuzzing_opt->data_seq_ctrl);
-					}
-				}
-
-				if (TEST_INTERACTIVE == fuzzing_opt->test_type)
-				{
-					if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
-					{
-						handle_sta_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
-					}
-					else if (FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode)
-					{
-						handle_ap_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
-					}
-					else if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
-					{
-						handle_mitm(&pkt, bssid, smac, dmac, fuzzing_opt);
-					}
-					else if (FUZZ_WORK_MODE_P2P == fuzzing_opt->fuzz_work_mode)
-					{
-						if (is_p2p_frame(&pkt))
+						save_exp_payload(&fuzzing_opt->fuzz_pkt);
+						log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
+						while (fuzzing_opt->enable_check_alive && !check_alive_by_ping())
 						{
+							sleep(1);
 						}
 					}
-					else if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
+					else
 					{
-						if (is_awdl_frame(&pkt))
+						save_exp_payload(&fuzzing_opt->fuzz_pkt);
+					}
+
+					if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
+					{
+						fuzzing_opt->mitm_state = 0;
+					}
+				}
+
+				if (!check_alive_by_disassoc(&pkt))
+				{
+					fuzz_logger_log(FUZZ_LOG_INFO, "\t\033[22;31mTarget WiFi is disconnected(Disassoc from %02X:%02X:%02X:%02X:%02X:%02X)\033[22;39m",
+									smac.ether_addr_octet[0],
+									smac.ether_addr_octet[1],
+									smac.ether_addr_octet[2],
+									smac.ether_addr_octet[3],
+									smac.ether_addr_octet[4],
+									smac.ether_addr_octet[5]);
+
+					if (TEST_FRAME == fuzzing_opt->test_type)
+					{
+						save_exp_payload(&fuzzing_opt->fuzz_pkt);
+						log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
+						while (fuzzing_opt->enable_check_alive && !check_alive_by_ping())
 						{
+							sleep(1);
 						}
 					}
-				}
-			}
 
-			if (memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0 && (memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 || (dmac.ether_addr_octet[0] == 0xff && dmac.ether_addr_octet[1] == 0xff && dmac.ether_addr_octet[2] == 0xff &&
-																																															  dmac.ether_addr_octet[3] == 0xff && dmac.ether_addr_octet[4] == 0xff && dmac.ether_addr_octet[5] == 0xff)))
-			{
-				recv_seq_ctrl = get_seqno(&pkt);
-				if (MANAGMENT_FRAME == (hdr->type & 0x0F))
-				{
-					// target's packet managment seq number
-					if (recv_seq_ctrl != fuzzing_opt->recv_seq_ctrl)
+					if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
 					{
-						fuzzing_opt->recv_seq_ctrl = recv_seq_ctrl;
+						fuzzing_opt->mitm_state = 0;
 					}
-				}
-				else if ((hdr->type & 0x0F) == DATA_FRAME)
-				{
-					// target's packet data seq number
-					if (recv_seq_ctrl != fuzzing_opt->recv_data_seq_ctrl)
-					{
-						fuzzing_opt->recv_data_seq_ctrl = recv_seq_ctrl;
-					}
-				}
-
-				fuzzing_opt->target_alive = 1;
-
-				if (fuzzing_opt->test_type == TEST_INTERACTIVE)
-				{
-					if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
-					{
-						handle_sta_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
-					}
-					else if (FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode)
-					{
-						handle_ap_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
-					}
-					else if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
-					{
-						handle_mitm(&pkt, bssid, smac, dmac, fuzzing_opt);
-					}
-					else if (FUZZ_WORK_MODE_P2P == fuzzing_opt->fuzz_work_mode)
-					{
-					}
-					else if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
-					{
-					}
-					else if (FUZZ_WORK_MODE_MESH == fuzzing_opt->fuzz_work_mode)
-					{
-					}
-				}
-			}
-
-			if (fuzzing_opt->test_type == TEST_FRAME)
-			{
-				if (/*fuzzing_opt->cur_sfs_cnt >= 1*/ fuzzing_opt->sniff_frames == 0)
-				{
-					if (fuzz_current_time2 - fuzz_pass_time2 >= 20)
-					{
-						if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_AP || fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_STA)
-						{
-							if (frame_idx >= frame_array_size)
-								frame_idx = 0;
-
-							fuzz_logger_log(FUZZ_LOG_DEBUG, "fuzzing frame idx: %d", frame_idx);
-
-							memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
-
-							fuzz_pkt = get_frame(fuzz_frames[frame_idx], fuzzing_opt->bssid, fuzzing_opt->source_addr, fuzzing_opt->target_addr, NULL);
-							fuzz_pkt.channel = fuzzing_opt->ois[0].channel;
-							fuzzing_opt->fuzz_pkt = fuzz_pkt;
-
-							// save_packet(&fuzz_pkt);
-							send_packet_ex(&fuzz_pkt);
-
-							print_status(NULL);
-
-							frame_idx++;
-						}
-						else if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P)
-						{
-							if (fuzzing_opt->p2p_frame_test == 1)
-							{
-								if (frame_idx >= (sizeof(p2p_frames) / sizeof(p2p_frames[0])))
-									frame_idx = 0;
-
-								fuzz_logger_log(FUZZ_LOG_DEBUG, "fuzzing p2p frame idx: %d", frame_idx);
-								memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
-
-								fuzz_pkt = get_p2p_frame(p2p_frames[frame_idx], fuzzing_opt->p2p_bssid, fuzzing_opt->p2p_source_addr, fuzzing_opt->p2p_target_addr, NULL);
-								fuzz_pkt.channel = fuzzing_opt->ois[fuzzing_opt->p2p_operating_interface_id].channel;
-								fuzzing_opt->fuzz_pkt = fuzz_pkt;
-
-								send_packet_ex(&fuzz_pkt);
-
-								frame_idx++;
-							}
-						}
-
-						fuzz_pass_time2 = fuzz_current_time2;
-					}
-				}
-				else
-				{
-					fuzz_pkt = get_frame(IEEE80211_TYPE_DEAUTH, fuzzing_opt->bssid, fuzzing_opt->source_addr, fuzzing_opt->target_addr, NULL);
-					send_packet_ex(&fuzz_pkt);
-
-					fuzz_pkt = get_frame(IEEE80211_TYPE_DISASSOC, fuzzing_opt->bssid, fuzzing_opt->source_addr, fuzzing_opt->target_addr, NULL);
-					send_packet_ex(&fuzz_pkt);
 				}
 			}
 		}
 		else
 		{
-			if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_AWDL)
+			if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
 			{
 				if (is_awdl_frame(&pkt))
-				{
 					handle_awdl(&pkt, bssid, smac, dmac, fuzzing_opt);
+			}
+		}
+
+		if (0 == memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) &&
+			0 == memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) // source(fuzzer) packet seq number
+		)
+		{
+			seq_ctrl = get_seqno(&pkt);
+			if (MANAGMENT_FRAME == (hdr->type & 0x0F))
+			{
+				if (seq_ctrl != fuzzing_opt->seq_ctrl)
+				{
+					fuzzing_opt->seq_ctrl = seq_ctrl;
+					set_seqno(NULL, seq_ctrl);
+
+					fuzz_logger_log(FUZZ_LOG_DEBUG, "source management frame seq = %d", fuzzing_opt->seq_ctrl);
 				}
+			}
+			else if (DATA_FRAME == (hdr->type & 0x0F))
+			{
+				if (seq_ctrl != fuzzing_opt->data_seq_ctrl)
+				{
+					fuzzing_opt->data_seq_ctrl = seq_ctrl;
+					// set_data_seqno(NULL, data_seq_ctrl);
+
+					fuzz_logger_log(FUZZ_LOG_DEBUG, "source data frame seq = %d", fuzzing_opt->data_seq_ctrl);
+				}
+			}
+
+			if (TEST_INTERACTIVE == fuzzing_opt->test_type)
+			{
+				if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
+				{
+					handle_sta_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
+				}
+				else if (FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode)
+				{
+					handle_ap_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
+				}
+				else if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
+				{
+					handle_mitm(&pkt, bssid, smac, dmac, fuzzing_opt);
+				}
+				else if (FUZZ_WORK_MODE_P2P == fuzzing_opt->fuzz_work_mode)
+				{
+					if (is_p2p_frame(&pkt))
+					{
+					}
+				}
+				else if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
+				{
+					if (is_awdl_frame(&pkt))
+					{
+					}
+				}
+			}
+		}
+
+		if (
+			0 == memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) &&
+			(memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 ||
+			 (dmac.ether_addr_octet[0] == 0xff &&
+			  dmac.ether_addr_octet[1] == 0xff &&
+			  dmac.ether_addr_octet[2] == 0xff &&
+			  dmac.ether_addr_octet[3] == 0xff &&
+			  dmac.ether_addr_octet[4] == 0xff &&
+			  dmac.ether_addr_octet[5] == 0xff)))
+		{
+			recv_seq_ctrl = get_seqno(&pkt);
+			if (MANAGMENT_FRAME == (hdr->type & 0x0F))
+			{
+				// target's packet managment seq number
+				if (recv_seq_ctrl != fuzzing_opt->recv_seq_ctrl)
+				{
+					fuzzing_opt->recv_seq_ctrl = recv_seq_ctrl;
+				}
+			}
+			else if ((hdr->type & 0x0F) == DATA_FRAME)
+			{
+				// target's packet data seq number
+				if (recv_seq_ctrl != fuzzing_opt->recv_data_seq_ctrl)
+				{
+					fuzzing_opt->recv_data_seq_ctrl = recv_seq_ctrl;
+				}
+			}
+
+			fuzzing_opt->target_alive = 1;
+
+			if (fuzzing_opt->test_type == TEST_INTERACTIVE)
+			{
+				if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
+				{
+					handle_sta_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
+				}
+				else if (FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode)
+				{
+					handle_ap_auth(&pkt, bssid, smac, dmac, fuzzing_opt);
+				}
+				else if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
+				{
+					handle_mitm(&pkt, bssid, smac, dmac, fuzzing_opt);
+				}
+				else if (FUZZ_WORK_MODE_P2P == fuzzing_opt->fuzz_work_mode)
+				{
+				}
+				else if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
+				{
+				}
+				else if (FUZZ_WORK_MODE_MESH == fuzzing_opt->fuzz_work_mode)
+				{
+				}
+			}
+		}
+
+		if (TEST_FRAME == fuzzing_opt->test_type)
+		{
+			if (/*fuzzing_opt->cur_sfs_cnt >= 1*/ fuzzing_opt->sniff_frames == 0)
+			{
+				if (fuzz_current_time2 - fuzz_pass_time2 >= 20)
+				{
+					if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_AP || fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_STA)
+					{
+						if (frame_idx >= frame_array_size)
+							frame_idx = 0;
+
+						fuzz_logger_log(FUZZ_LOG_DEBUG, "fuzzing frame idx: %d", frame_idx);
+
+						memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
+
+						fuzz_pkt = get_frame(fuzz_frames[frame_idx], fuzzing_opt->bssid, fuzzing_opt->source_addr, fuzzing_opt->target_addr, NULL);
+						fuzz_pkt.channel = fuzzing_opt->ois[0].channel;
+						fuzzing_opt->fuzz_pkt = fuzz_pkt;
+
+						// save_packet(&fuzz_pkt);
+						send_packet_ex(&fuzz_pkt);
+
+						print_status(NULL);
+
+						frame_idx++;
+					}
+					else if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P)
+					{
+						if (fuzzing_opt->p2p_frame_test == 1)
+						{
+							if (frame_idx >= (sizeof(p2p_frames) / sizeof(p2p_frames[0])))
+								frame_idx = 0;
+
+							fuzz_logger_log(FUZZ_LOG_DEBUG, "fuzzing p2p frame idx: %d", frame_idx);
+							memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
+
+							fuzz_pkt = get_p2p_frame(p2p_frames[frame_idx], fuzzing_opt->p2p_bssid, fuzzing_opt->p2p_source_addr, fuzzing_opt->p2p_target_addr, NULL);
+							fuzz_pkt.channel = fuzzing_opt->ois[fuzzing_opt->p2p_operating_interface_id].channel;
+							fuzzing_opt->fuzz_pkt = fuzz_pkt;
+
+							send_packet_ex(&fuzz_pkt);
+
+							frame_idx++;
+						}
+					}
+
+					fuzz_pass_time2 = fuzz_current_time2;
+				}
+			}
+			else
+			{
+				fuzz_pkt = get_frame(IEEE80211_TYPE_DEAUTH, fuzzing_opt->bssid, fuzzing_opt->source_addr, fuzzing_opt->target_addr, NULL);
+				send_packet_ex(&fuzz_pkt);
+
+				fuzz_pkt = get_frame(IEEE80211_TYPE_DISASSOC, fuzzing_opt->bssid, fuzzing_opt->source_addr, fuzzing_opt->target_addr, NULL);
+				send_packet_ex(&fuzz_pkt);
 			}
 		}
 	}
@@ -2533,12 +2569,14 @@ int load_payloads()
 	char owfuzz_path[256] = {0};
 	char *ptr;
 
-	if (readlink("/proc/self/exe", owfuzz_path, sizeof(owfuzz_path)) <= 0) {
+	if (readlink("/proc/self/exe", owfuzz_path, sizeof(owfuzz_path)) <= 0)
+	{
 		return 0;
 	}
 
 	ptr = strrchr(owfuzz_path, '/');
-	if (!ptr) {
+	if (!ptr)
+	{
 		return 0;
 	}
 
@@ -2951,7 +2989,8 @@ int fuzzing(int argc, char *argv[])
 	}
 
 	int i;
-	for (i = 0; i < fuzzing_opt.ois_cnt; i++) {
+	for (i = 0; i < fuzzing_opt.ois_cnt; i++)
+	{
 		// Print out all the interfaces and their channels
 		fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] Interface: %s, channel: %d", __FILE__, __LINE__, fuzzing_opt.ois[i].osdep_iface_out, fuzzing_opt.ois[i].channel);
 	}
