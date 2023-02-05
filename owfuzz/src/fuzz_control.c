@@ -64,79 +64,78 @@ uint8_t ap_frames[] = {};
 uint8_t sta_frames[] = {};
 
 uint8_t all_frames[] =
-	{
-		// management
-		IEEE80211_TYPE_ASSOCREQ,
-		IEEE80211_TYPE_ASSOCRES,
-		IEEE80211_TYPE_REASSOCREQ,
-		IEEE80211_TYPE_REASSOCRES,
-		IEEE80211_TYPE_PROBEREQ,
-		IEEE80211_TYPE_PROBERES,
-		IEEE80211_TYPE_TIMADVERT,
-		// IEEE80211_TYPE_000111,
-		IEEE80211_TYPE_BEACON,
-		IEEE80211_TYPE_ATIM,
-		// IEEE80211_TYPE_DISASSOC,
-		IEEE80211_TYPE_AUTH,
-		// IEEE80211_TYPE_DEAUTH,
-		IEEE80211_TYPE_ACTION,
-		IEEE80211_TYPE_ACTIONNOACK,
-		// IEEE80211_TYPE_001111,
+{
+	// management
+	IEEE80211_TYPE_ASSOCREQ,
+	IEEE80211_TYPE_ASSOCRES,
+	IEEE80211_TYPE_REASSOCREQ,
+	IEEE80211_TYPE_REASSOCRES,
+	IEEE80211_TYPE_PROBEREQ,
+	IEEE80211_TYPE_PROBERES,
+	IEEE80211_TYPE_TIMADVERT,
+	// IEEE80211_TYPE_000111,
+	IEEE80211_TYPE_BEACON,
+	IEEE80211_TYPE_ATIM,
+	// IEEE80211_TYPE_DISASSOC,
+	IEEE80211_TYPE_AUTH,
+	// IEEE80211_TYPE_DEAUTH,
+	IEEE80211_TYPE_ACTION,
+	IEEE80211_TYPE_ACTIONNOACK,
+	// IEEE80211_TYPE_001111,
 
-		// control
-		// IEEE80211_TYPE_010000,
-		// IEEE80211_TYPE_010001,
-		// IEEE80211_TYPE_010010,
-		// IEEE80211_TYPE_010011,
-		IEEE80211_TYPE_BEAMFORMING,
-		IEEE80211_TYPE_VHT,
-		IEEE80211_TYPE_CTRLFRMEXT,
-		IEEE80211_TYPE_CTRLWRAP,
-		IEEE80211_TYPE_BLOCKACKREQ,
-		IEEE80211_TYPE_BLOCKACK,
-		IEEE80211_TYPE_PSPOLL,
-		IEEE80211_TYPE_RTS,
-		IEEE80211_TYPE_CTS,
-		IEEE80211_TYPE_ACK,
-		IEEE80211_TYPE_CFEND,
-		IEEE80211_TYPE_CFENDACK,
+	// control
+	// IEEE80211_TYPE_010000,
+	// IEEE80211_TYPE_010001,
+	// IEEE80211_TYPE_010010,
+	// IEEE80211_TYPE_010011,
+	IEEE80211_TYPE_BEAMFORMING,
+	IEEE80211_TYPE_VHT,
+	IEEE80211_TYPE_CTRLFRMEXT,
+	IEEE80211_TYPE_CTRLWRAP,
+	IEEE80211_TYPE_BLOCKACKREQ,
+	IEEE80211_TYPE_BLOCKACK,
+	IEEE80211_TYPE_PSPOLL,
+	IEEE80211_TYPE_RTS,
+	IEEE80211_TYPE_CTS,
+	IEEE80211_TYPE_ACK,
+	IEEE80211_TYPE_CFEND,
+	IEEE80211_TYPE_CFENDACK,
 
-		// data
-		IEEE80211_TYPE_DATA,
-		IEEE80211_TYPE_DATACFACK,
-		IEEE80211_TYPE_DATACFPOLL,
-		IEEE80211_TYPE_DATACFACKPOLL,
-		IEEE80211_TYPE_NULL,
-		IEEE80211_TYPE_CFACK,
-		IEEE80211_TYPE_CFPOLL,
-		IEEE80211_TYPE_CFACKPOLL,
-		IEEE80211_TYPE_QOSDATA,
-		IEEE80211_TYPE_QOSDATACFACK,
-		IEEE80211_TYPE_QOSDATACFPOLL,
-		IEEE80211_TYPE_QOSDATACFACKPOLL,
-		IEEE80211_TYPE_QOSNULL,
-		IEEE80211_TYPE_QOSCFACK,
-		IEEE80211_TYPE_QOSCFPOLL,
-		IEEE80211_TYPE_QOSCFACKPOLL,
+	// data
+	IEEE80211_TYPE_DATA,
+	IEEE80211_TYPE_DATACFACK,
+	IEEE80211_TYPE_DATACFPOLL,
+	IEEE80211_TYPE_DATACFACKPOLL,
+	IEEE80211_TYPE_NULL,
+	IEEE80211_TYPE_CFACK,
+	IEEE80211_TYPE_CFPOLL,
+	IEEE80211_TYPE_CFACKPOLL,
+	IEEE80211_TYPE_QOSDATA,
+	IEEE80211_TYPE_QOSDATACFACK,
+	IEEE80211_TYPE_QOSDATACFPOLL,
+	IEEE80211_TYPE_QOSDATACFACKPOLL,
+	IEEE80211_TYPE_QOSNULL,
+	IEEE80211_TYPE_QOSCFACK,
+	IEEE80211_TYPE_QOSCFPOLL,
+	IEEE80211_TYPE_QOSCFACKPOLL,
 
-		// extension
-		// IEEE80211_TYPE_DMGBEACON,
-		/*IEEE80211_TYPE_110001,
-		IEEE80211_TYPE_110010,
-		IEEE80211_TYPE_110011,
-		IEEE80211_TYPE_110100,
-		IEEE80211_TYPE_110101,
-		IEEE80211_TYPE_110110,
-		IEEE80211_TYPE_110111,
-		IEEE80211_TYPE_111000,
-		IEEE80211_TYPE_111001,
-		IEEE80211_TYPE_111010,
-		IEEE80211_TYPE_111011,
-		IEEE80211_TYPE_111100,
-		IEEE80211_TYPE_111101,
-		IEEE80211_TYPE_111110,
-		IEEE80211_TYPE_111111*/
-
+	// extension
+	// IEEE80211_TYPE_DMGBEACON,
+	/*IEEE80211_TYPE_110001,
+	IEEE80211_TYPE_110010,
+	IEEE80211_TYPE_110011,
+	IEEE80211_TYPE_110100,
+	IEEE80211_TYPE_110101,
+	IEEE80211_TYPE_110110,
+	IEEE80211_TYPE_110111,
+	IEEE80211_TYPE_111000,
+	IEEE80211_TYPE_111001,
+	IEEE80211_TYPE_111010,
+	IEEE80211_TYPE_111011,
+	IEEE80211_TYPE_111100,
+	IEEE80211_TYPE_111101,
+	IEEE80211_TYPE_111110,
+	IEEE80211_TYPE_111111*/
 };
 
 void usage_help(char *name)
@@ -1665,11 +1664,14 @@ void handle_mitm(struct packet *pkt, struct ether_addr bssid, struct ether_addr 
 	}
 }
 
+/*
+	Main funzzing fuction
+*/
 void *start_fuzzing(void *param)
 {
 	struct packet pkt = {0};
-	struct ieee_hdr *hdr;
-	uint8_t dsflags;
+	struct ieee_hdr *hdr = NULL;
+	uint8_t dsflags = 0;
 	char frame_name[64];
 
 	struct ether_addr smac = {0};
@@ -1690,13 +1692,13 @@ void *start_fuzzing(void *param)
 
 	struct packet fuzz_pkt = {0};
 
-	uint64_t current_time2;
-	uint64_t pass_time2;
-	uint64_t fuzz_current_time2;
-	uint64_t fuzz_pass_time2;
+	uint64_t current_time2 = 0;
+	uint64_t pass_time2 = 0;
+	uint64_t fuzz_current_time2 = 0;
+	uint64_t fuzz_pass_time2 = 0;
 	uint32_t frame_idx = 0;
 	uint32_t frame_array_size = 0;
-	uint8_t *fuzz_frames;
+	uint8_t *fuzz_frames = NULL;
 
 	fuzzing_option *fuzzing_opt = (fuzzing_option *)param;
 	fuzzing_opt->wpa_s = WPA_DISCONNECTED;
@@ -1709,7 +1711,7 @@ void *start_fuzzing(void *param)
 	// ping_pass_time = tv.tv_sec;
 	fuzzing_opt->last_recv_pkt_time = 0;
 
-	if (fuzzing_opt->test_type == TEST_FRAME)
+	if (TEST_FRAME == fuzzing_opt->test_type)
 	{
 		if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
 		{
@@ -1737,7 +1739,7 @@ void *start_fuzzing(void *param)
 		fuzzing_opt->owfuzz_frames = owfuzz_frames;
 		fuzzing_opt->owfuzz_frames_cnt = frame_array_size;
 
-		fuzz_logger_log(FUZZ_LOG_DEBUG, "fuzzing frames count: %d", frame_array_size);
+		fuzz_logger_log(FUZZ_LOG_DEBUG, "Fuzzing frames count: %d", frame_array_size);
 	}
 
 	owfuzz_config_get_ies_status(NULL, fuzzing_opt);
@@ -1756,7 +1758,7 @@ void *start_fuzzing(void *param)
 		fuzz_logger_log(FUZZ_LOG_INFO, "\nPlease try to connect clinet device to AP ...");
 	}
 
-	while (1)
+	while (true)
 	{
 		frame_type = 0;
 		memset(&smac, 0, 6);
@@ -1785,13 +1787,13 @@ void *start_fuzzing(void *param)
 		}*/
 
 		pkt = read_packet_ex();
-		if (pkt.len == 0)
+		if (0 == pkt.len)
 		{
-			if (fuzzing_opt->fuzz_work_mode != FUZZ_WORK_MODE_MITM)
+			if (FUZZ_WORK_MODE_MITM != fuzzing_opt->fuzz_work_mode)
 			{
-				if (fuzzing_opt->sniff_frames == 0)
+				if (0 == fuzzing_opt->sniff_frames)
 				{
-					if (fuzzing_opt->target_alive == 1 && (!check_alive_by_pkts(smac)))
+					if (1 == fuzzing_opt->target_alive && (!check_alive_by_pkts(smac)))
 					{
 						save_exp_payload(&fuzzing_opt->fuzz_pkt);
 						log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
@@ -1806,7 +1808,7 @@ void *start_fuzzing(void *param)
 										fuzzing_opt->target_addr.ether_addr_octet[4],
 										fuzzing_opt->target_addr.ether_addr_octet[5]);
 
-						if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P)
+						if (FUZZ_WORK_MODE_P2P == fuzzing_opt->fuzz_work_mode)
 						{
 							fuzzing_opt->p2p_frame_test = 0;
 							owfuzz_config_get_channels(NULL, fuzzing_opt);
@@ -1832,7 +1834,7 @@ void *start_fuzzing(void *param)
 		frame_type = frame_type & 0x0F;
 		dsflags = hdr->flags & 0x03;
 
-		if ((hdr->type & 0x0F) != CONTROL_FRAME)
+		if (CONTROL_FRAME != (hdr->type & 0x0F))
 		{
 			switch (dsflags)
 			{
@@ -2144,11 +2146,11 @@ void *start_fuzzing(void *param)
 			break;
 		}
 
-		if (fuzzing_opt->fuzz_work_mode != FUZZ_WORK_MODE_MITM)
+		if (FUZZ_WORK_MODE_MITM != fuzzing_opt->fuzz_work_mode)
 		{
-			if (fuzzing_opt->sniff_frames == 0)
+			if (0 == fuzzing_opt->sniff_frames)
 			{
-				if (!check_alive_by_pkts(smac) && fuzzing_opt->target_alive == 1)
+				if (!check_alive_by_pkts(smac) && 1 == fuzzing_opt->target_alive)
 				{
 					log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
 					save_exp_payload(&fuzzing_opt->fuzz_pkt);
@@ -2163,7 +2165,7 @@ void *start_fuzzing(void *param)
 									fuzzing_opt->target_addr.ether_addr_octet[4],
 									fuzzing_opt->target_addr.ether_addr_octet[5]);
 
-					if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P)
+					if (FUZZ_WORK_MODE_P2P == fuzzing_opt->fuzz_work_mode)
 					{
 						fuzzing_opt->p2p_frame_test = 0;
 						owfuzz_config_get_channels(NULL, fuzzing_opt);
@@ -2183,25 +2185,25 @@ void *start_fuzzing(void *param)
 
 		if (current_time2 - pass_time2 >= 100)
 		{
-			if (fuzzing_opt->test_type == TEST_INTERACTIVE)
+			if (TEST_INTERACTIVE == fuzzing_opt->test_type)
 			{
-				if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_AP)
+				if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
 				{
 					// ap
 					fuzz_pkt = get_default_frame(IEEE80211_TYPE_BEACON, fuzzing_opt->source_addr, fuzzing_opt->source_addr, SE_BROADCASTMAC, NULL);
 					send_packet_ex(&fuzz_pkt);
 				}
-				else if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_STA)
+				else if (FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode)
 				{
 				}
-				else if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_P2P)
+				else if (FUZZ_WORK_MODE_P2P == fuzzing_opt->fuzz_work_mode)
 				{
 					// fuzz_pkt = create_p2p_probe_request(SE_BROADCASTMAC, fuzzing_opt->source_addr, SE_BROADCASTMAC, 0, NULL);
 					// send_packet_ex(&fuzz_pkt);
 				}
 			}
 
-			if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_MITM)
+			if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
 			{
 				if (fuzzing_opt->mitm_state >= 1)
 				{
@@ -2230,7 +2232,7 @@ void *start_fuzzing(void *param)
 
 			if (fuzzing_opt->sniff_frames == 1 /*FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode || FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode*/)
 			{
-				if (fuzzing_opt->test_type == TEST_FRAME)
+				if (TEST_FRAME == fuzzing_opt->test_type)
 				{
 					sniff_ies(&pkt);
 
@@ -2266,7 +2268,7 @@ void *start_fuzzing(void *param)
 										smac.ether_addr_octet[4],
 										smac.ether_addr_octet[5]);
 
-						if (fuzzing_opt->test_type == TEST_FRAME)
+						if (TEST_FRAME == fuzzing_opt->test_type)
 						{
 							save_exp_payload(&fuzzing_opt->fuzz_pkt);
 							log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
@@ -2280,7 +2282,7 @@ void *start_fuzzing(void *param)
 							save_exp_payload(&fuzzing_opt->fuzz_pkt);
 						}
 
-						if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_MITM)
+						if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
 						{
 							fuzzing_opt->mitm_state = 0;
 						}
@@ -2296,7 +2298,7 @@ void *start_fuzzing(void *param)
 										smac.ether_addr_octet[4],
 										smac.ether_addr_octet[5]);
 
-						if (fuzzing_opt->test_type == TEST_FRAME)
+						if (TEST_FRAME == fuzzing_opt->test_type)
 						{
 							save_exp_payload(&fuzzing_opt->fuzz_pkt);
 							log_pkt(FUZZ_LOG_ERR, &fuzzing_opt->fuzz_pkt);
@@ -2306,7 +2308,7 @@ void *start_fuzzing(void *param)
 							}
 						}
 
-						if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_MITM)
+						if (FUZZ_WORK_MODE_MITM == fuzzing_opt->fuzz_work_mode)
 						{
 							fuzzing_opt->mitm_state = 0;
 						}
@@ -2315,20 +2317,19 @@ void *start_fuzzing(void *param)
 			}
 			else
 			{
-				if (fuzzing_opt->fuzz_work_mode == FUZZ_WORK_MODE_AWDL)
+				if (FUZZ_WORK_MODE_AWDL == fuzzing_opt->fuzz_work_mode)
 				{
 					if (is_awdl_frame(&pkt))
 						handle_awdl(&pkt, bssid, smac, dmac, fuzzing_opt);
 				}
 			}
 
-			if (memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 && (memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) == 0 // source(fuzzer) packet seq number
-																																														  /*|| (dmac.ether_addr_octet[0] == 0xff && dmac.ether_addr_octet[1] == 0xff &&dmac.ether_addr_octet[2] == 0xff &&
-																																														  dmac.ether_addr_octet[3] == 0xff && dmac.ether_addr_octet[4] == 0xff &&dmac.ether_addr_octet[5] == 0xff)*/
-																									   ))
+			if (0 == memcmp(&smac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) && 
+			    0 == memcmp(&dmac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) // source(fuzzer) packet seq number
+				)
 			{
 				seq_ctrl = get_seqno(&pkt);
-				if ((hdr->type & 0x0F) == MANAGMENT_FRAME)
+				if (MANAGMENT_FRAME == (hdr->type & 0x0F))
 				{
 					if (seq_ctrl != fuzzing_opt->seq_ctrl)
 					{
@@ -2338,7 +2339,7 @@ void *start_fuzzing(void *param)
 						fuzz_logger_log(FUZZ_LOG_DEBUG, "source management frame seq = %d", fuzzing_opt->seq_ctrl);
 					}
 				}
-				else if ((hdr->type & 0x0F) == DATA_FRAME)
+				else if (DATA_FRAME == (hdr->type & 0x0F))
 				{
 					if (seq_ctrl != fuzzing_opt->data_seq_ctrl)
 					{
@@ -2349,7 +2350,7 @@ void *start_fuzzing(void *param)
 					}
 				}
 
-				if (fuzzing_opt->test_type == TEST_INTERACTIVE)
+				if (TEST_INTERACTIVE == fuzzing_opt->test_type)
 				{
 					if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
 					{
@@ -2382,7 +2383,7 @@ void *start_fuzzing(void *param)
 																																															  dmac.ether_addr_octet[3] == 0xff && dmac.ether_addr_octet[4] == 0xff && dmac.ether_addr_octet[5] == 0xff)))
 			{
 				recv_seq_ctrl = get_seqno(&pkt);
-				if ((hdr->type & 0x0F) == MANAGMENT_FRAME)
+				if (MANAGMENT_FRAME == (hdr->type & 0x0F))
 				{
 					// target's packet managment seq number
 					if (recv_seq_ctrl != fuzzing_opt->recv_seq_ctrl)
@@ -2954,8 +2955,8 @@ int fuzzing(int argc, char *argv[])
 					fuzzing_opt.bssid.ether_addr_octet[5]);
 
 	fuzz_logger_log(FUZZ_LOG_INFO, "Fuzzing target's SSID: %s", fuzzing_opt.target_ssid);
-	fuzz_logger_log(FUZZ_LOG_INFO, "auth_type: %d", fuzzing_opt.auth_type);
-	fuzz_logger_log(FUZZ_LOG_INFO, "test_type: %d", fuzzing_opt.test_type);
+	fuzz_logger_log(FUZZ_LOG_INFO, "auth_type: %d (%s)", fuzzing_opt.auth_type, AP_AUTH_TYPE_NAME[fuzzing_opt.auth_type]);
+	fuzz_logger_log(FUZZ_LOG_INFO, "test_type: %d (%s)", fuzzing_opt.test_type, TEST_TYPE_NAME[fuzzing_opt.test_type]);
 
 	if (0 == seed)
 	{
@@ -2975,6 +2976,8 @@ int fuzzing(int argc, char *argv[])
 
 	init_ex();
 
+	fuzz_logger_log(FUZZ_LOG_INFO, "Log level: %d", fuzzing_opt.log_level);
+	fuzz_logger_log(FUZZ_LOG_INFO, "Log file: %s", strlen(fuzzing_opt.log_file) > 0 ? fuzzing_opt.log_file : "unset");
 	fuzz_logger_init(fuzzing_opt.log_level, fuzzing_opt.log_file);
 
 	if (strlen(fuzzing_opt.target_ip))
@@ -2983,7 +2986,7 @@ int fuzzing(int argc, char *argv[])
 		init_ping_sock(&fuzzing_opt);
 	}
 
-	if (fuzzing_opt.test_type == TEST_INTERACTIVE)
+	if (TEST_INTERACTIVE == fuzzing_opt.test_type)
 	{
 		fuzzing_opt.wpa_s = WPA_DISCONNECTED;
 	}
@@ -2995,7 +2998,7 @@ int fuzzing(int argc, char *argv[])
 	fuzzing_opt.target_alive = 1;
 	fuzzing_opt.p2p_frame_test = 0;
 
-	if (fuzzing_opt.test_type == TEST_POC)
+	if (TEST_POC == fuzzing_opt.test_type)
 	{
 		if ((tid = pthread_create(&fthread, NULL, test_bad_frame, &fuzzing_opt)) != 0)
 		{
@@ -3071,7 +3074,7 @@ void print_status(struct packet *pkt)
 		}
 		else if (fuzzing_opt.fuzz_work_mode == FUZZ_WORK_MODE_P2P)
 		{
-			printf("\tFuzzing Type: %d (p2p frame testing)\t\tFrame types: %lu\n", fuzzing_opt.test_type, sizeof(p2p_frames) / sizeof(p2p_frames[0]));
+			printf("\tFuzzing Type: %d (p2p frame testing)\t\tFrame types: %d\n", fuzzing_opt.test_type, sizeof(p2p_frames) / sizeof(p2p_frames[0]));
 		}
 	}
 
