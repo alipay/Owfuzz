@@ -141,7 +141,7 @@ uint8_t all_frames[] =
 void usage_help(char *name)
 {
 	printf("owfuzz usage:\n"
-		   "\texample: sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [target-mac] -b [ap-mac] -s [ap-mac] -T 2 -A WPA2_PSK_TKIP_AES -I [targe-ip]\n"
+		   "\texample: sudo ./owfuzz -i wlan0 -m ap -c [channel] -t [target-mac] -b [ap-mac] -s [ap-mac] -T %d -A WPA2_PSK_TKIP_AES -I [targe-ip]\n"
 		   "\t-i [interface]\n"
 		   "\t   Interface to use.\n"
 		   "\t-m [ap/sta]\n"
@@ -162,12 +162,13 @@ void usage_help(char *name)
 		   "\t   Fuzzer's (source) Mac address.\n"
 		   "\t-T [test type]\n"
 		   "\t   Test type, default %d, %d: Poc test, %d: interactive test, %d: frames test, %d: interactive & frames test\n"
-		   //		"\t-l [log level]\n"
-		   //		"\t   Log level, 8:DEBUG, 7:INFO, 6:NOTICE, 5:WARN, 4:ERR, 3:CRIT, 2:ALERT, 1:EMERG, 0:STDERR\n"
+		   "\t-l [log level]\n"
+		   "\t   Log level, 8:DEBUG, 7:INFO, 6:NOTICE, 5:WARN, 4:ERR, 3:CRIT, 2:ALERT, 1:EMERG, 0:STDERR\n"
 		   "\t-f [log file]\n"
 		   "\t   Log file path\n"
 		   "\t-h\n"
-		   "\t   Help.\n", TEST_INTERACTIVE, TEST_POC, TEST_INTERACTIVE, TEST_FRAME, TEST_INTERACTIVE_FRAME);
+		   "\t   Help.\n",
+		   TEST_FRAME, TEST_INTERACTIVE, TEST_POC, TEST_INTERACTIVE, TEST_FRAME, TEST_INTERACTIVE_FRAME);
 }
 
 void *test_bad_frame(void *param)
@@ -2756,7 +2757,7 @@ int fuzzing(int argc, char *argv[])
 			return -1;
 		}
 
-		if (target_ip)
+		if (NULL != target_ip)
 		{
 			if (inet_addr(target_ip) == INADDR_NONE)
 			{
@@ -2766,7 +2767,7 @@ int fuzzing(int argc, char *argv[])
 			}
 		}
 
-		if (fuzz_mode == NULL)
+		if (NULL == fuzz_mode)
 		{
 			fuzz_mode = AP_MODE;
 			strncpy(fuzzing_opt.mode, fuzz_mode, sizeof(fuzzing_opt.mode) - 1);
