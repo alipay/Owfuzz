@@ -1560,7 +1560,7 @@ void handle_mitm(struct packet *pkt, struct ether_addr bssid, struct ether_addr 
 			else
 			{
 				if (MAC_MATCHES(smac, fuzzing_opt->source_addr))
-					fuzzing_opt->mitm_state == 0;
+					fuzzing_opt->mitm_state = 0;
 
 				else if (MAC_MATCHES(dmac, fuzzing_opt->source_addr))
 				{
