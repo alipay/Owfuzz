@@ -23,7 +23,6 @@
 #include "ies_creator.h"
 #include "../../procedures/awdl/wire.h"
 
-extern unsigned long seed;
 extern fuzzing_option fuzzing_opt;
 
 uint8_t beacon_ie_ieee1999[10] = {0, 1, 2, 3, 4, 6, 5, 0};
@@ -281,10 +280,9 @@ struct packet create_beacon(struct ether_addr bssid, char adhoc, char *ssid)
 	internal_timestamp += 0x400 * DEFAULT_BEACON_INTERVAL;
 	bf->timestamp = htole64(internal_timestamp);
 	bf->interval = htole16(DEFAULT_BEACON_INTERVAL);
-	if (0 == seed)
-	{
+	if (0 == fuzzing_opt.seed)
 		srandom(time(NULL));
-	}
+
 	bf->capabilities = random() % 0xffff;
 	/*bf->capabilities = 0x0000;
 	if (adhoc) {

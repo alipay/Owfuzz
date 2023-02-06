@@ -822,10 +822,9 @@ void frame_fuzzing()
 	struct packet fuzz_pkt = {0};
 	uint32_t frame_idx = 0;
 
-	if (0 == seed)
-	{
+	if (0 == fuzzing_opt.seed)
 		srandom(time(NULL));
-	}
+
 	frame_idx = random() % fuzzing_opt.owfuzz_frames_cnt;
 
 	memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
@@ -838,10 +837,9 @@ void p2p_frame_fuzzing()
 	struct packet fuzz_pkt = {0};
 	uint32_t frame_idx = 0;
 
-	if (0 == seed)
-	{
+	if (0 == fuzzing_opt.seed)
 		srandom(time(NULL));
-	}
+
 	frame_idx = random() % (sizeof(p2p_frames) / sizeof(p2p_frames[0]));
 
 	memset(&fuzz_pkt, 0, sizeof(fuzz_pkt));
@@ -1937,7 +1935,7 @@ void *start_fuzzing(void *param)
 		memset(&bssid, 0, 6);
 
 		frame_name = NULL;
-		//memset(frame_name, 0, sizeof(frame_name));
+		// memset(frame_name, 0, sizeof(frame_name));
 
 		gettimeofday(&tv, NULL);
 		// current_time = tv.tv_sec;
@@ -3003,7 +3001,7 @@ int fuzzing(int argc, char *argv[])
 	fuzz_logger_log(FUZZ_LOG_INFO, "auth_type: %d (%s)", fuzzing_opt.auth_type, AP_AUTH_TYPE_NAME[fuzzing_opt.auth_type]);
 	fuzz_logger_log(FUZZ_LOG_INFO, "test_type: %d (%s)", fuzzing_opt.test_type, TEST_TYPE_NAME[fuzzing_opt.test_type]);
 
-	if (0 == seed)
+	if (0 == fuzzing_opt.seed)
 	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "Seed: srandom(NULL)...");
 	}

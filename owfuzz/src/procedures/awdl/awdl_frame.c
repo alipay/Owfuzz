@@ -21,7 +21,7 @@
 #include "wire.h"
 #include "../../frames/management/ies_creator.h"
 
-extern unsigned long seed;
+extern fuzzing_option fuzzing_opt;
 
 uint8_t awdl_ies[30] = {0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
 
@@ -132,10 +132,9 @@ struct packet create_action_awdl(struct ether_addr bssid, struct ether_addr smac
 	i = 0;
 	do
 	{
-		if (0 == seed)
-		{
+		if (0 == fuzzing_opt.seed)
 			srandom(time(NULL) + i);
-		}
+
 		i = random() % (sizeof(awdl_ies) / sizeof(awdl_ies[0]));
 		add_attribute_tlv_fuzzing_data(&pkt, NULL, awdl_ies[i]);
 
