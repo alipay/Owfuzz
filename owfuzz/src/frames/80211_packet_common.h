@@ -229,6 +229,7 @@ typedef struct _fuzzing_option
   struct ie_status ies_status[255];
   struct ie_status ext_ies_status[255];
 
+  unsigned long seed;
 } fuzzing_option;
 
 #pragma pack(1)
