@@ -2262,18 +2262,10 @@ void *start_fuzzing(void *param)
 					ht_insert(ht_notification_hash, smac_address, "notified");
 					ht_insert(ht_notification_hash, dmac_address, "notified");
 					fuzz_logger_log(FUZZ_LOG_INFO,
-									"[%s:%d] Packet is not for us.. smac %s, dmac %s"
-									"\n[%s:%d] Make packets for us.. target %02X:%02X:%02X:%02X:%02X:%02X, source %02X:%02X:%02X:%02X:%02X:%02X",
+									"[%s:%d] Packet is not for us.. smac %s, dmac %s",
 									__FILE__, __LINE__,
 									smac_address,
-									dmac_address,
-									__FILE__, __LINE__,
-									fuzzing_opt->target_addr.ether_addr_octet[0], fuzzing_opt->target_addr.ether_addr_octet[1],
-									fuzzing_opt->target_addr.ether_addr_octet[2], fuzzing_opt->target_addr.ether_addr_octet[3],
-									fuzzing_opt->target_addr.ether_addr_octet[4], fuzzing_opt->target_addr.ether_addr_octet[5],
-									fuzzing_opt->source_addr.ether_addr_octet[0], fuzzing_opt->source_addr.ether_addr_octet[1],
-									fuzzing_opt->source_addr.ether_addr_octet[2], fuzzing_opt->source_addr.ether_addr_octet[3],
-									fuzzing_opt->source_addr.ether_addr_octet[4], fuzzing_opt->source_addr.ether_addr_octet[5]);
+									dmac_address);
 				}
 			}
 			continue;
@@ -2423,19 +2415,11 @@ void *start_fuzzing(void *param)
 						ht_insert(ht_notification_hash, smac_address, "notified");
 						ht_insert(ht_notification_hash, dmac_address, "notified");
 						fuzz_logger_log(FUZZ_LOG_INFO,
-										"[%s:%d] Packet is not for us.. smac %s, dmac %s, frame_name: '%s'"
-										"\n[%s:%d] Make packets for us.. target %02X:%02X:%02X:%02X:%02X:%02X, source %02X:%02X:%02X:%02X:%02X:%02X",
+										"[%s:%d] Packet is not for us.. smac %s, dmac %s, frame_name: '%s'",
 										__FILE__, __LINE__,
-										frame_name,
 										smac_address,
 										dmac_address,
-										__FILE__, __LINE__,
-										fuzzing_opt->target_addr.ether_addr_octet[0], fuzzing_opt->target_addr.ether_addr_octet[1],
-										fuzzing_opt->target_addr.ether_addr_octet[2], fuzzing_opt->target_addr.ether_addr_octet[3],
-										fuzzing_opt->target_addr.ether_addr_octet[4], fuzzing_opt->target_addr.ether_addr_octet[5],
-										fuzzing_opt->source_addr.ether_addr_octet[0], fuzzing_opt->source_addr.ether_addr_octet[1],
-										fuzzing_opt->source_addr.ether_addr_octet[2], fuzzing_opt->source_addr.ether_addr_octet[3],
-										fuzzing_opt->source_addr.ether_addr_octet[4], fuzzing_opt->source_addr.ether_addr_octet[5]);
+										frame_name);
 					}
 				}
 			}
