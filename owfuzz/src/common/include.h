@@ -116,6 +116,20 @@ static const char *AP_AUTH_TYPE_NAME[] =
 	"WPA3"
 };
 
+static const char *wpa_state_names[] = {
+	"WPA_DISCONNECTED",
+	"WPA_INTERFACE_DISABLED",
+	"WPA_INACTIVE",
+	"WPA_SCANNING",
+	"WPA_AUTHENTICATING",
+	"WPA_ASSOCIATING",
+	"WPA_ASSOCIATED",
+	"WPA_EAP_HANDSHAKE",
+	"WPA_4WAY_HANDSHAKE",
+	"WPA_GROUP_HANDSHAKE",
+	"WPA_COMPLETED"
+};
+
 /**
  * enum wpa_states - wpa_supplicant state
  *
