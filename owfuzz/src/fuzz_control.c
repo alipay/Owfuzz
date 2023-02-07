@@ -2165,6 +2165,7 @@ void *start_fuzzing(void *param)
 		}
 
 		frame_name = return_frame_name(hdr->type);
+		// printf("[%s:%d] fuzz_pkt_num: %d                 \r", __FILE__, __LINE__, fuzzing_opt->fuzz_pkt_num);
 		// fuzz_logger_log(FUZZ_LOG_INFO, "recv-->%s", frame_name);
 
 		if (FUZZ_WORK_MODE_MITM != fuzzing_opt->fuzz_work_mode)
@@ -2446,7 +2447,7 @@ void *start_fuzzing(void *param)
 		)
 		{
 			seq_ctrl = get_seqno(&pkt);
-			fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] seq_ctrl: %d", __FILE__, __LINE__, seq_ctrl);
+			// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] seq_ctrl: %d", __FILE__, __LINE__, seq_ctrl);
 			if (MANAGMENT_FRAME == (hdr->type & 0x0F))
 			{
 				if (seq_ctrl != fuzzing_opt->seq_ctrl)
@@ -2499,13 +2500,15 @@ void *start_fuzzing(void *param)
 
 		if (
 			0 == memcmp(&smac.ether_addr_octet, &fuzzing_opt->target_addr.ether_addr_octet, 6) &&
-			(memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) == 0 ||
-			 (dmac.ether_addr_octet[0] == 0xff &&
-			  dmac.ether_addr_octet[1] == 0xff &&
-			  dmac.ether_addr_octet[2] == 0xff &&
-			  dmac.ether_addr_octet[3] == 0xff &&
-			  dmac.ether_addr_octet[4] == 0xff &&
-			  dmac.ether_addr_octet[5] == 0xff)))
+			(0 == memcmp(&dmac.ether_addr_octet, &fuzzing_opt->source_addr.ether_addr_octet, 6) ||
+			 0 == memcmp(dmac.ether_addr_octet, BROADCAST, 6)
+			 //  (dmac.ether_addr_octet[0] == 0xff &&
+			 //   dmac.ether_addr_octet[1] == 0xff &&
+			 //   dmac.ether_addr_octet[2] == 0xff &&
+			 //   dmac.ether_addr_octet[3] == 0xff &&
+			 //   dmac.ether_addr_octet[4] == 0xff &&
+			 //   dmac.ether_addr_octet[5] == 0xff)
+			 ))
 		{
 			recv_seq_ctrl = get_seqno(&pkt);
 			if (MANAGMENT_FRAME == (hdr->type & 0x0F))
@@ -2516,7 +2519,7 @@ void *start_fuzzing(void *param)
 					fuzzing_opt->recv_seq_ctrl = recv_seq_ctrl;
 				}
 			}
-			else if ((hdr->type & 0x0F) == DATA_FRAME)
+			else if (DATA_FRAME == (hdr->type & 0x0F))
 			{
 				// target's packet data seq number
 				if (recv_seq_ctrl != fuzzing_opt->recv_data_seq_ctrl)
@@ -2527,7 +2530,7 @@ void *start_fuzzing(void *param)
 
 			fuzzing_opt->target_alive = 1;
 
-			if (fuzzing_opt->test_type == TEST_INTERACTIVE)
+			if (TEST_INTERACTIVE == fuzzing_opt->test_type)
 			{
 				if (FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode)
 				{
