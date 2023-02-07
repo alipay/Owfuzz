@@ -190,11 +190,23 @@ void *test_bad_frame(void *param)
 	uint8_t dsflags;
 	struct beacon_fixed *bf;
 	static uint64_t internal_timestamp = 0;
+	int bad_frame_packets = 0;
 
 	bad_frame = (struct packet *)malloc(sizeof(struct packet) * MAX_BAD_FRAME_COUNT);
 	memset(bad_frame, 0, sizeof(struct packet) * MAX_BAD_FRAME_COUNT);
 
 	load_payloads();
+
+	for (i = 0; i < MAX_BAD_FRAME_COUNT; i++)
+	{
+		if (bad_frame[i].len != 0)
+			bad_frame_packets++;
+	}
+
+	if (0 == bad_frame_packets) {
+		fuzz_logger_log(FUZZ_LOG_ERR, "No bad frame packets defined, exiting");
+		exit(-1);
+	}
 
 	sleep(2);
 
