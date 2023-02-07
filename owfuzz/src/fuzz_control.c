@@ -643,7 +643,7 @@ int send_packet_ex(struct packet *pkt)
 				if (fuzzing_opt.ois[ois_number].channel == pkt->channel)
 				{
 					fuzzing_opt.fuzz_pkt_num++;
-					fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] fuzzing_opt.fuzz_pkt_num: %d, channel: %d --> send packet: %d", __FILE__, __LINE__, fuzzing_opt.fuzz_pkt_num, pkt->channel, pkt->len);
+					fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] fuzzing_opt.fuzz_pkt_num: %d, channel: %d --> send packet len: %d", __FILE__, __LINE__, fuzzing_opt.fuzz_pkt_num, pkt->channel, pkt->len);
 					return osdep_send_packet_ex(&fuzzing_opt.ois[ois_number], pkt);
 				}
 			}
@@ -651,7 +651,7 @@ int send_packet_ex(struct packet *pkt)
 		else
 		{
 			fuzzing_opt.fuzz_pkt_num++;
-			fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] fuzzing_opt.fuzz_pkt_num: %d, channel: %d --> send packet: %d", __FILE__, __LINE__, fuzzing_opt.fuzz_pkt_num, pkt->channel, pkt->len);
+			fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] fuzzing_opt.fuzz_pkt_num: %d, channel: %d --> send packet len: %d", __FILE__, __LINE__, fuzzing_opt.fuzz_pkt_num, pkt->channel, pkt->len);
 
 			// dumphex(pkt->data, pkt->len);
 
