@@ -433,7 +433,7 @@ void sniff_ies(struct packet *pkt)
 		return;
 	}
 
-	if (tlvs && tlvs_len != 0)
+	if (NULL != tlvs && tlvs_len != 0)
 	{
 		idx = 0;
 		for (i = 0; i < MAX_SFS_COUNT; i++)
@@ -643,7 +643,7 @@ int send_packet_ex(struct packet *pkt)
 				if (fuzzing_opt.ois[ois_number].channel == pkt->channel)
 				{
 					fuzzing_opt.fuzz_pkt_num++;
-					// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] channel: %d --> send packet: %d", __FILE__, __LINE__, pkt->channel, pkt->len);
+					fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] fuzzing_opt.fuzz_pkt_num: %d, channel: %d --> send packet: %d", __FILE__, __LINE__, fuzzing_opt.fuzz_pkt_num, pkt->channel, pkt->len);
 					return osdep_send_packet_ex(&fuzzing_opt.ois[ois_number], pkt);
 				}
 			}
@@ -651,7 +651,10 @@ int send_packet_ex(struct packet *pkt)
 		else
 		{
 			fuzzing_opt.fuzz_pkt_num++;
-			fuzz_logger_log(FUZZ_LOG_DEBUG, "[%s:%d] channel: %d --> send packet: %d", __FILE__, __LINE__, pkt->channel, pkt->len);
+			fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] fuzzing_opt.fuzz_pkt_num: %d, channel: %d --> send packet: %d", __FILE__, __LINE__, fuzzing_opt.fuzz_pkt_num, pkt->channel, pkt->len);
+
+			// dumphex(pkt->data, pkt->len);
+
 			return osdep_send_packet_ex(&fuzzing_opt.ois[0], pkt);
 		}
 	}
@@ -2279,10 +2282,11 @@ void *start_fuzzing(void *param)
 					ht_insert(ht_notification_hash, smac_address, "notified");
 					ht_insert(ht_notification_hash, dmac_address, "notified");
 					fuzz_logger_log(FUZZ_LOG_INFO,
-									"[%s:%d] Packet is not for us.. smac %s, dmac %s",
+									"[%s:%d] Packet is not for us.. smac %s, dmac %s, frame_name: %s",
 									__FILE__, __LINE__,
 									smac_address,
-									dmac_address);
+									dmac_address,
+									frame_name);
 				}
 			}
 			continue;
@@ -2309,10 +2313,12 @@ void *start_fuzzing(void *param)
 			fuzzing_opt->target_alive = 1;
 		}
 
+		// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] fuzzing_opt->sniff_frames: %d", __FILE__, __LINE__, fuzzing_opt->sniff_frames);
 		if (1 == fuzzing_opt->sniff_frames /*FUZZ_WORK_MODE_AP == fuzzing_opt->fuzz_work_mode || FUZZ_WORK_MODE_STA == fuzzing_opt->fuzz_work_mode*/)
 		{
 			if (TEST_FRAME == fuzzing_opt->test_type)
 			{
+				// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] sniff_ies", __FILE__, __LINE__);
 				sniff_ies(&pkt);
 
 				// fuzz_logger_log(FUZZ_LOG_INFO, "fuzzing_opt->cur_sfs_cnt: %d", fuzzing_opt->cur_sfs_cnt);
@@ -2327,7 +2333,7 @@ void *start_fuzzing(void *param)
 				else
 				{
 					// We don't use fuzz_logger_log because we want it to stay on the same line
-					printf("Need more packets... have: %d, need: %d\r", fuzzing_opt->cur_sfs_cnt, CAPTURED_PKT_BEFORE_FUZZING);
+					printf("Need more packets... have: %d, need: %d               \r", fuzzing_opt->cur_sfs_cnt, CAPTURED_PKT_BEFORE_FUZZING);
 				}
 			}
 		}
