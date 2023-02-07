@@ -267,13 +267,16 @@ void set_fragno(struct packet *pkt, uint8_t frag, int last_frag)
 	hdr->frag_seq = htole16(seq);
 }
 
+/*
+	Returns the adddress of the packet
+*/
 struct ether_addr *get_addr(struct packet *pkt, char type)
 {
-	uint8_t dsflags;
-	struct ieee_hdr *hdr;
+	uint8_t dsflags = 0;
+	struct ieee_hdr *hdr = NULL;
 	struct ether_addr *src = NULL, *dst = NULL, *bss = NULL, *trn = NULL;
 
-	if (!pkt)
+	if (NULL == pkt)
 	{
 		printf("BUG: Got NULL packet!\n");
 		return NULL;
@@ -349,11 +352,11 @@ struct ether_addr *get_receiver(struct packet *pkt)
 
 uint8_t *get_elemet(struct packet *pkt, uint8_t id)
 {
-	struct ieee_hdr *hdr;
+	struct ieee_hdr *hdr = NULL;
 	unsigned char *ie = NULL;
-	int left;
+	int left = 0;
 
-	if (!pkt)
+	if (NULL == pkt)
 	{
 		fuzz_logger_log(FUZZ_LOG_INFO, "get_elemet: pkt is NULL");
 		return NULL;
@@ -410,7 +413,7 @@ uint8_t *get_elemet(struct packet *pkt, uint8_t id)
 		break;
 	}
 
-	if (ie)
+	if (NULL != ie)
 	{
 		left = pkt->len - (ie - pkt->data);
 		while (left > 2)
