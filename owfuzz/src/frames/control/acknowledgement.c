@@ -22,7 +22,7 @@
 struct packet create_ack(struct ether_addr dmac)
 {
     struct packet pkt = {0};
-    struct ieee_hdr *hdr;
+    struct ieee_hdr *hdr = NULL;
 
     hdr = (struct ieee_hdr *)pkt.data;
     hdr->type = IEEE80211_TYPE_ACK;
@@ -38,7 +38,8 @@ struct packet create_ack(struct ether_addr dmac)
 
     // dumphex(pkt.data, pkt.len);
 
-    fuzz_logger_log(FUZZ_LOG_DEBUG, "Response Ack to  ==> %02X:%02X:%02X:%02X:%02X:%02X",
+    fuzz_logger_log(FUZZ_LOG_DEBUG, "[%s:%d] (Unmodified) Response Ack to  ==> %02X:%02X:%02X:%02X:%02X:%02X",
+                    __FILE__, __LINE__,
                     dmac.ether_addr_octet[0],
                     dmac.ether_addr_octet[1],
                     dmac.ether_addr_octet[2],
