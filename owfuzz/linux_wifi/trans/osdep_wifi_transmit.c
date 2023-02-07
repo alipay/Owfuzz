@@ -177,7 +177,7 @@ int osdep_start_ex(struct osdep_instance *oi)
 int osdep_send_packet_ex(struct osdep_instance *oi, struct packet *pkt)
 {
 	struct wif *wi = oi->_wi_out; /* XXX globals suck */
-	if (wi_write(wi, pkt->data, pkt->len, NULL) == -1)
+	if (-1 == wi_write(wi, pkt->data, pkt->len, NULL))
 	{
 		switch (errno)
 		{
