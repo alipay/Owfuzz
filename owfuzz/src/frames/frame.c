@@ -145,7 +145,7 @@ struct packet get_frame(uint8_t frame_type, struct ether_addr bssid, struct ethe
 
 	fuzzing_opt.current_frame = frame_type;
 
-	fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] frame_type: %x (%s)", __FILE__, __LINE__, frame_type, return_frame_type(frame_type));
+	// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] frame_type: %x (%s)", __FILE__, __LINE__, frame_type, return_frame_type(frame_type));
 	switch (frame_type)
 	{
 	// management
