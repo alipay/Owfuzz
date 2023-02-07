@@ -2245,7 +2245,23 @@ void *start_fuzzing(void *param)
 		{
 			// If we are not working in AWDL mode and the packet doesn't match filter
 			// printf("Packet is not for us... check configured Target MAC and Source MAC\r");
-			if (0 != memcmp(dmac.ether_addr_octet, BROADCAST, 6))
+			if (0 != memcmp(bssid.ether_addr_octet, fuzzing_opt->bssid.ether_addr_octet, 6))
+			{
+				char bssid_address[128] = {0};
+				sprintf(bssid_address, "%02X:%02X:%02X:%02X:%02X:%02X", bssid.ether_addr_octet[0], bssid.ether_addr_octet[1],
+						bssid.ether_addr_octet[2], bssid.ether_addr_octet[3],
+						bssid.ether_addr_octet[4], bssid.ether_addr_octet[5]);
+
+				if (NULL == ht_search(ht_notification_hash, bssid_address))
+				{
+					ht_insert(ht_notification_hash, bssid_address, "notified");
+					fuzz_logger_log(FUZZ_LOG_INFO,
+									"[%s:%d] BSSID mismatch: %s",
+									__FILE__, __LINE__,
+									bssid_address);
+				}
+			}
+			if (0 != memcmp(dmac.ether_addr_octet, BROADCAST, 6) && 0 == memcmp(bssid.ether_addr_octet, fuzzing_opt->bssid.ether_addr_octet, 6))
 			{
 				char smac_address[128] = {0};
 				char dmac_address[128] = {0};
@@ -2395,7 +2411,7 @@ void *start_fuzzing(void *param)
 			}
 			else
 			{
-				if (0 != memcmp(dmac.ether_addr_octet, BROADCAST, 6))
+				if (0 != memcmp(dmac.ether_addr_octet, BROADCAST, 6) && 0 == memcmp(bssid.ether_addr_octet, fuzzing_opt->bssid.ether_addr_octet, 6))
 				{
 					// Skip those that are broadcast, they are not relevant for us
 					// Notify user if the settings don't match..
