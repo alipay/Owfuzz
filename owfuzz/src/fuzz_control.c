@@ -2165,7 +2165,7 @@ void *start_fuzzing(void *param)
 		}
 
 		frame_name = return_frame_name(hdr->type);
-		// printf("[%s:%d] fuzz_pkt_num: %d                 \r", __FILE__, __LINE__, fuzzing_opt->fuzz_pkt_num);
+		printf("[%s:%d] fuzz_pkt_num: %d                 \r", __FILE__, __LINE__, fuzzing_opt->fuzz_pkt_num);
 		// fuzz_logger_log(FUZZ_LOG_INFO, "recv-->%s", frame_name);
 
 		if (FUZZ_WORK_MODE_MITM != fuzzing_opt->fuzz_work_mode)
