@@ -25,9 +25,23 @@ void test_single_wi_read(char *iface)
     dev.fd_out = wi_fd(wi);
     printf("wi_fd successful: %d\n", dev.fd_out);
 
-    int res = wi_read(wi, pkt.data, MAX_IEEE_PACKET_SIZE, &pkt.ri);
-    assert(res != -1 && "Failed to wi_read");
-    printf("wi_read successful: %d\n", res);
+    int rc = 0;
+    do
+	{
+		rc = wi_read(wi, pkt.data, MAX_IEEE_PACKET_SIZE, &pkt.ri);
+        printf("rc: %d      \r", rc);
+		if (-1 == rc)
+		{
+			assert(0 && "wi_read()");
+			pkt.len = 0;
+            break;
+		}
+        sleep(0.1);
+	} while (rc < 1);
+
+	pkt.len = rc;
+	pkt.channel = 7;
+    printf("wi_read successful: %d\n", rc);
 
     wi_close(wi);
     printf("wi_close successful\n");
