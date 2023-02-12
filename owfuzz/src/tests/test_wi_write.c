@@ -71,11 +71,17 @@ void test_multi_wi_write(char *iface) {
 }
 
 
-void main() {
+int main(int argc, char *argv[]) {
+    char interface_name[128] = {"wlp59s0"};
+    if (argc == 2) {
+        strcpy(interface_name, argv[1]);
+    }
     printf("\nStarting test_single_wi_write\n");
-    test_single_wi_write("wlp59s0");
+    test_single_wi_write(interface_name);
 
     printf("\nStarting test_multi_wi_write\n");
-    test_multi_wi_write("wlp59s0");
+    test_multi_wi_write(interface_name);
+
+    return 0;
 }
 
