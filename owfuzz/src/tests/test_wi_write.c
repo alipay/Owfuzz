@@ -1,4 +1,4 @@
-#include <stddef.h>
+#include <utypes.h>
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
@@ -14,10 +14,8 @@ void test_single_wi_write(char *iface) {
     pkt.channel = 7;
 
     struct wif * wi = wi_open(iface);
-    if (wi == NULL) {
-        assert("Failed to open interface");
-    }
-    printf("wi_open successfulL %08X\n", wi);
+    assert (wi != NULL && "Failed to open interface");
+    printf("wi_open successfull %08X\n", wi);
 
     struct devices dev;
     memset(&dev, 0, sizeof(struct devices));
@@ -25,11 +23,8 @@ void test_single_wi_write(char *iface) {
     dev.fd_out = wi_fd(wi);
     printf("wi_fd successful: %d\n", dev.fd_out);
 
-    int res = 0;
-    if (-1 == (res = wi_write(wi, pkt.data, pkt.len, NULL)))
-    {
-        assert("Failed to wi_write");
-    }
+    int res = wi_write(wi, pkt.data, pkt.len, NULL);
+    assert(res != -1 && "Failed to wi_write");
     printf("wi_write successful: %d\n", res);
 
     wi_close(wi);
@@ -45,9 +40,8 @@ void test_multi_wi_write(char *iface) {
     pkt.channel = 7;
 
     struct wif * wi = wi_open(iface);
-    if (wi == NULL) {
-        assert("Failed to open interface");
-    }
+    assert (wi != NULL && "Failed to open interface");
+
     printf("wi_open successfulL %08X\n", wi);
 
     struct devices dev;
@@ -57,11 +51,8 @@ void test_multi_wi_write(char *iface) {
     printf("wi_fd successful: %d\n", dev.fd_out);
 
     for (int i = 0; i < 1000; i++) {
-        int res = 0;
-        if (-1 == (res = wi_write(wi, pkt.data, pkt.len, NULL)))
-        {
-            assert("Failed to wi_write");
-        }
+        int res = wi_write(wi, pkt.data, pkt.len, NULL);
+        assert(res != -1 && "Failed to wi_write");
         printf("wi_write successful: %d (%d out of 1000)\r", res, i);
     }
     printf("\n");
@@ -72,10 +63,13 @@ void test_multi_wi_write(char *iface) {
 
 
 int main(int argc, char *argv[]) {
-    char interface_name[128] = {"wlp59s0"};
+    char interface_name[128] = {0};
     if (argc == 2) {
         strcpy(interface_name, argv[1]);
+    } else {
+        strcpy(interface_name, "wlp59s0");
     }
+    printf("Using interface_name: %s\n", interface_name);
     printf("\nStarting test_single_wi_write\n");
     test_single_wi_write(interface_name);
 
