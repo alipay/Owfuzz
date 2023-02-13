@@ -15,7 +15,7 @@ void test_single_wi_write(char *iface) {
 
     struct wif * wi = wi_open(iface);
     assert (wi != NULL && "Failed to open interface");
-    printf("wi_open successfull %08X\n", wi);
+    printf("wi_open successful %08X\n", wi);
 
     struct devices dev;
     memset(&dev, 0, sizeof(struct devices));
@@ -42,7 +42,7 @@ void test_multi_wi_write(char *iface) {
     struct wif * wi = wi_open(iface);
     assert (wi != NULL && "Failed to open interface");
 
-    printf("wi_open successfulL %08X\n", wi);
+    printf("wi_open successful %08X\n", wi);
 
     struct devices dev;
     memset(&dev, 0, sizeof(struct devices));

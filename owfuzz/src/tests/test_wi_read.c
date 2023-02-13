@@ -5,10 +5,6 @@
 
 #include "osdep_wifi_transmit.h"
 
-#ifdef DEBUG
-Stop
-#endif
-
 void test_single_wi_read(char *iface)
 {
     struct packet pkt;
@@ -17,7 +13,7 @@ void test_single_wi_read(char *iface)
     struct wif *wi = wi_open(iface);
     assert (wi != NULL && "Failed to open interface");
 
-    printf("wi_open successfull %08X\n", wi);
+    printf("wi_open successful %08X\n", wi);
 
     struct devices dev;
     memset(&dev, 0, sizeof(struct devices));
