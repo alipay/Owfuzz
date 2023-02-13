@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with owfuzz.  If not, see <https://www.gnu.org/licenses/>.
  ****************************************************************************/
-
+#include <stdint.h>
 #ifndef FUZZ_CONTROL_H
 #define FUZZ_CONTROL_H
 
