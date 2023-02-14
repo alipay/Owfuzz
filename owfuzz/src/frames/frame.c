@@ -28,6 +28,111 @@
 
 extern fuzzing_option fuzzing_opt;
 
+const char *return_frame_type(uint8_t frame_type)
+{
+	switch (frame_type)
+	{
+	// management
+	case IEEE80211_TYPE_ASSOCRES: // AP
+		return "IEEE80211_TYPE_ASSOCRES";
+	case IEEE80211_TYPE_REASSOCRES:
+		return "IEEE80211_TYPE_REASSOCRES";
+	case IEEE80211_TYPE_PROBERES:
+		return "IEEE80211_TYPE_PROBERES";
+	case IEEE80211_TYPE_TIMADVERT:
+		return "IEEE80211_TYPE_TIMADVERT";
+	case IEEE80211_TYPE_BEACON:
+		return "IEEE80211_TYPE_BEACON";
+	case IEEE80211_TYPE_ATIM: // xx
+		return "IEEE80211_TYPE_ATIM";
+	case IEEE80211_TYPE_DISASSOC:
+		return "IEEE80211_TYPE_DISASSOC";
+	case IEEE80211_TYPE_DEAUTH:
+		return "IEEE80211_TYPE_DEAUTH";
+	case IEEE80211_TYPE_ACTION:
+		return "IEEE80211_TYPE_ACTION";
+	case IEEE80211_TYPE_ACTIONNOACK:
+		return "IEEE80211_TYPE_ACTIONNOACK";
+	case IEEE80211_TYPE_ASSOCREQ: // STA
+		return "IEEE80211_TYPE_ASSOCREQ";
+	case IEEE80211_TYPE_REASSOCREQ:
+		return "IEEE80211_TYPE_REASSOCREQ";
+	case IEEE80211_TYPE_PROBEREQ:
+		return "IEEE80211_TYPE_PROBEREQ";
+	case IEEE80211_TYPE_AUTH:
+		return "IEEE80211_TYPE_AUTH";
+
+	// control
+	case IEEE80211_TYPE_ACK:
+		return "IEEE80211_TYPE_ACK";
+	case IEEE80211_TYPE_BEAMFORMING:
+		return "IEEE80211_TYPE_BEAMFORMING";
+	case IEEE80211_TYPE_VHT:
+		return "IEEE80211_TYPE_VHT";
+	case IEEE80211_TYPE_CTRLFRMEXT:
+		return "IEEE80211_TYPE_CTRLFRMEXT";
+	case IEEE80211_TYPE_CTRLWRAP:
+		return "IEEE80211_TYPE_CTRLWRAP";
+	case IEEE80211_TYPE_BLOCKACKREQ:
+		return "IEEE80211_TYPE_BLOCKACKREQ";
+	case IEEE80211_TYPE_BLOCKACK:
+		return "IEEE80211_TYPE_BLOCKACK";
+	case IEEE80211_TYPE_PSPOLL:
+		return "IEEE80211_TYPE_PSPOLL";
+	case IEEE80211_TYPE_RTS:
+		return "IEEE80211_TYPE_RTS";
+	case IEEE80211_TYPE_CTS:
+		return "IEEE80211_TYPE_CTS";
+	case IEEE80211_TYPE_CFEND:
+		return "IEEE80211_TYPE_CFEND";
+	case IEEE80211_TYPE_CFENDACK:
+		return "IEEE80211_TYPE_CFENDACK";
+
+	// data
+	case IEEE80211_TYPE_QOSDATA:
+		return "IEEE80211_TYPE_QOSDATA";
+	case IEEE80211_TYPE_DATA:
+		return "IEEE80211_TYPE_DATA";
+	case IEEE80211_TYPE_DATACFACK:
+		return "IEEE80211_TYPE_DATACFACK";
+	case IEEE80211_TYPE_DATACFPOLL:
+		return "IEEE80211_TYPE_DATACFPOLL";
+	case IEEE80211_TYPE_DATACFACKPOLL:
+		return "IEEE80211_TYPE_DATACFACKPOLL";
+	case IEEE80211_TYPE_NULL:
+		return "IEEE80211_TYPE_NULL";
+	case IEEE80211_TYPE_CFACK:
+		return "IEEE80211_TYPE_CFACK";
+	case IEEE80211_TYPE_CFPOLL:
+		return "IEEE80211_TYPE_CFPOLL";
+	case IEEE80211_TYPE_CFACKPOLL:
+		return "IEEE80211_TYPE_CFACKPOLL";
+	case IEEE80211_TYPE_QOSDATACFACK:
+		return "IEEE80211_TYPE_QOSDATACFACK";
+	case IEEE80211_TYPE_QOSDATACFPOLL:
+		return "IEEE80211_TYPE_QOSDATACFPOLL";
+	case IEEE80211_TYPE_QOSDATACFACKPOLL:
+		return "IEEE80211_TYPE_QOSDATACFACKPOLL";
+	case IEEE80211_TYPE_QOSNULL:
+		return "IEEE80211_TYPE_QOSNULL";
+	case IEEE80211_TYPE_QOSCFACK:
+		return "IEEE80211_TYPE_QOSCFACK";
+	case IEEE80211_TYPE_QOSCFPOLL:
+		return "IEEE80211_TYPE_QOSCFPOLL";
+	case IEEE80211_TYPE_QOSCFACKPOLL:
+		return "IEEE80211_TYPE_QOSCFACKPOLL";
+
+	// extension
+	case IEEE80211_TYPE_DMGBEACON:
+		return "IEEE80211_TYPE_DMGBEACON";
+	}
+
+	return "UNKNOWN";
+}
+
+/*
+	Return a pkt frame - fuzzed
+*/
 struct packet get_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
 	struct packet pkt = {0};
@@ -40,6 +145,7 @@ struct packet get_frame(uint8_t frame_type, struct ether_addr bssid, struct ethe
 
 	fuzzing_opt.current_frame = frame_type;
 
+	// fuzz_logger_log(FUZZ_LOG_INFO, "[%s:%d] frame_type: %x (%s)", __FILE__, __LINE__, frame_type, return_frame_type(frame_type));
 	switch (frame_type)
 	{
 	// management
@@ -677,11 +783,13 @@ void log_pkt(int log_level, struct packet *pkt)
 	int log_txt_len = 0, len = 0;
 	char buf[MAX_PRINT_BUF_LEN * 5] = {0};
 
-	if (log_level > fuzzing_opt.log_level) {
+	if (log_level > fuzzing_opt.log_level)
+	{
 		return;
 	}
 
-	if (pkt->data[0] == 0 || pkt->len <= 0) {
+	if (pkt->data[0] == 0 || pkt->len <= 0)
+	{
 		return;
 	}
 

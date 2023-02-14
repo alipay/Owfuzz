@@ -627,9 +627,12 @@ int owfuzz_config_get_interfaces(char *cfg_file, fuzzing_option *fo)
 	return 0;
 }
 
+/*
+	Retrieve from the cfg_file the 'interfaces' section
+*/
 int owfuzz_config_get_channels(char *cfg_file, fuzzing_option *fo)
 {
-	FILE *fp1;
+	FILE *fp1 = NULL;
 	char buf[256] = {0};
 	char iface[64] = {0};
 	int rc = 0;
@@ -687,7 +690,7 @@ int owfuzz_config_get_channels(char *cfg_file, fuzzing_option *fo)
 
 int owfuzz_config_get_macs(char *cfg_file, fuzzing_option *fo)
 {
-	FILE *fp1;
+	FILE *fp1 = NULL;
 	char buf[512] = {0};
 	char option_name[256] = {0};
 	char option_value[256] = {0};
@@ -736,15 +739,17 @@ int owfuzz_config_get_macs(char *cfg_file, fuzzing_option *fo)
 
 				fuzz_logger_log(FUZZ_LOG_DEBUG, "option_name: %s, option_value: %s", option_name, option_value);
 
-				if (!strcmp(option_name, "target_mac"))
+				if (0 == strcmp(option_name, "target_mac"))
 				{
 					fo->target_addr = parse_mac(option_value);
 				}
-				else if (!strcmp(option_name, "bssid"))
+
+				if (0 == strcmp(option_name, "bssid"))
 				{
 					fo->bssid = parse_mac(option_value);
 				}
-				else if (!strcmp(option_name, "source_mac"))
+
+				if (0 == strcmp(option_name, "source_mac"))
 				{
 					fo->source_addr = parse_mac(option_value);
 				}
@@ -803,7 +808,8 @@ int owfuzz_config_get_fuzzing_option(char *cfg_file, fuzzing_option *fo)
 				memset(option_name, 0, sizeof(option_name));
 				memset(option_value, 0, sizeof(option_value));
 
-				sscanf(buf, "%[^=]=%s", option_name, option_value);
+				// We want to cpature everything including spaces (i.e. a ssid might have a space), so we use [^\n] instead of %s
+				sscanf(buf, "%[^=]=%[^\n]", option_name, option_value);
 
 				fuzz_logger_log(FUZZ_LOG_DEBUG, "option_name: %s, option_value: %s", option_name, option_value);
 
@@ -863,7 +869,7 @@ int owfuzz_config_get_fuzzing_option(char *cfg_file, fuzzing_option *fo)
 						}
 					}
 				}
-				else if (!strcmp(option_name, "ssid"))
+				else if (0 == strcmp(option_name, "ssid"))
 				{
 					if (strlen(option_value) > 32)
 					{
@@ -873,7 +879,9 @@ int owfuzz_config_get_fuzzing_option(char *cfg_file, fuzzing_option *fo)
 					}
 
 					if (strlen(option_value) != 0)
+					{
 						strncpy(fo->target_ssid, option_value, sizeof(fo->target_ssid) - 1);
+					}
 				}
 				else if (!strcmp(option_name, "auth_type"))
 				{

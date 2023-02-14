@@ -937,13 +937,16 @@ struct packet create_p2p_action_go_negotiation_confirmation(struct ether_addr bs
     return pkt;
 }
 
+/*
+    Return whether a pkt is a P2P beacon
+*/
 int is_p2p_beacon(struct packet *pkt)
 {
-    struct ieee_hdr *hdr;
+    struct ieee_hdr *hdr = NULL;
     char *pie = NULL;
 
     hdr = (struct ieee_hdr *)pkt->data;
-    if (hdr->type == IEEE80211_TYPE_BEACON)
+    if (IEEE80211_TYPE_BEACON == hdr->type)
     {
         if (pkt->len < sizeof(struct ieee_hdr) + 12 + 2)
             return 0;
@@ -959,9 +962,12 @@ int is_p2p_beacon(struct packet *pkt)
     return 0;
 }
 
+/*
+    Return whether a pkt is a P2P probe
+*/
 int is_p2p_probe(struct packet *pkt)
 {
-    struct ieee_hdr *hdr;
+    struct ieee_hdr *hdr = NULL;
     char *pie = NULL;
 
     hdr = (struct ieee_hdr *)pkt->data;
@@ -993,9 +999,12 @@ int is_p2p_probe(struct packet *pkt)
     return 0;
 }
 
+/*
+    Return whether a pkt is a P2P action
+*/
 int is_p2p_action(struct packet *pkt)
 {
-    struct ieee_hdr *hdr;
+    struct ieee_hdr *hdr = NULL;
     unsigned char *action = NULL;
 
     hdr = (struct ieee_hdr *)pkt->data;
@@ -1012,23 +1021,29 @@ int is_p2p_action(struct packet *pkt)
     return 0;
 }
 
+/*
+    Return whether a pkt is a P2P
+*/
 int is_p2p_frame(struct packet *pkt)
 {
     return (is_p2p_action(pkt) || is_p2p_beacon(pkt) || is_p2p_probe(pkt));
 }
 
+/*
+    Check for P2P Attributes
+*/
 void check_p2p_attributes(struct packet *pkt, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac)
 {
-    struct ieee_hdr *hdr;
-    struct p2p_action *act;
-    struct p2p_ie *p2pie;
-    struct attribete_tlv_hdr *ath;
+    struct ieee_hdr *hdr = NULL;
+    struct p2p_action *act = NULL;
+    struct p2p_ie *p2pie = NULL;
+    struct attribete_tlv_hdr *ath = NULL;
     uint8_t *ies = NULL;
     int attlen = 0;
     int left = 0;
 
     hdr = (struct ieee_hdr *)pkt->data;
-    if (hdr->type == IEEE80211_TYPE_ACTION)
+    if (IEEE80211_TYPE_ACTION == hdr->type)
     {
         act = (struct p2p_action *)(pkt->data + sizeof(struct ieee_hdr));
         if (0 == memcmp(act, p2p_action_hdr, sizeof(p2p_action_hdr)))
@@ -1038,15 +1053,22 @@ void check_p2p_attributes(struct packet *pkt, struct ether_addr bssid, struct et
             left = pkt->len - sizeof(struct ieee_hdr) - sizeof(struct p2p_action);
         }
     }
-    else if (hdr->type == IEEE80211_TYPE_PROBEREQ)
+    
+    if (IEEE80211_TYPE_PROBEREQ == hdr->type)
     {
         ies = pkt->data + sizeof(struct ieee_hdr);
         left = pkt->len - sizeof(struct ieee_hdr);
     }
-    else if (hdr->type == IEEE80211_TYPE_PROBERES)
+    
+    if (IEEE80211_TYPE_PROBERES == hdr->type)
     {
         ies = pkt->data + sizeof(struct ieee_hdr) + 12;
         left = pkt->len - sizeof(struct ieee_hdr) - 12;
+    }
+
+    if (left == 0) {
+        // fuzz_logger_log(FUZZ_LOG_INFO, "***P2P ACTION not: IEEE80211_TYPE_ACTION, IEEE80211_TYPE_PROBEREQ, IEEE80211_TYPE_PROBERES");
+        return;
     }
 
     while (left > 0)
@@ -1230,6 +1252,9 @@ void check_p2p_attributes(struct packet *pkt, struct ether_addr bssid, struct et
     }
 }
 
+/*
+    Handle P2P WiFi Fuzzing
+*/
 void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, fuzzing_option *fuzzing_opt)
 {
     struct ieee_hdr *hdr = NULL;
@@ -1258,7 +1283,10 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
     check_p2p_attributes(pkt, bssid, smac, dmac);
 
     hdr = (struct ieee_hdr *)pkt->data;
-    if (hdr->type == IEEE80211_TYPE_ACTION && is_p2p_action(pkt))
+
+    int p2p_action = is_p2p_action(pkt);
+
+    if (IEEE80211_TYPE_ACTION == hdr->type && p2p_action)
     {
         action = pkt->data + sizeof(struct ieee_hdr);
         switch (action[6])
@@ -1460,7 +1488,8 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
             break;
         }
     }
-    else if (hdr->type == IEEE80211_TYPE_PROBERES)
+    
+    if (IEEE80211_TYPE_PROBERES == hdr->type)
     {
         fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_probe_response, p2p device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel,
                         smac.ether_addr_octet[0],
@@ -1478,7 +1507,8 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
             fuzz_pkt = create_p2p_action_provision_discovery_request(resp_bssid, resp_mac, smac, 0, pkt);
         }
     }
-    else if (hdr->type == IEEE80211_TYPE_PROBEREQ)
+    
+    if (IEEE80211_TYPE_PROBEREQ == hdr->type)
     {
         fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_probe_request, p2p device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel,
                         smac.ether_addr_octet[0],
@@ -1488,7 +1518,7 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
                         smac.ether_addr_octet[4],
                         smac.ether_addr_octet[5]);
 
-        if (fuzzing_opt->test_type == TEST_INTERACTIVE)
+        if (TEST_INTERACTIVE == fuzzing_opt->test_type)
         {
             fuzz_pkt = create_p2p_probe_request(SE_BROADCASTMAC, fuzzing_opt->source_addr, SE_BROADCASTMAC, 0, pkt);
             fuzz_pkt.channel = pkt->channel;
@@ -1497,8 +1527,10 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
             fuzz_pkt = create_p2p_probe_response(resp_bssid, resp_mac, smac, 0, pkt);
         }
     }
-    else if (hdr->type == IEEE80211_TYPE_BEACON)
+    
+    if (IEEE80211_TYPE_BEACON == hdr->type)
     {
+        // BEACON are not fuzzed here
         fuzz_logger_log(FUZZ_LOG_DEBUG, "channel: %d -> p2p_beacon, p2p device: %02X:%02X:%02X:%02X:%02X:%02X", pkt->channel,
                         smac.ether_addr_octet[0],
                         smac.ether_addr_octet[1],
@@ -1508,8 +1540,10 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
                         smac.ether_addr_octet[5]);
     }
 
-    if (fuzzing_opt->test_type == TEST_INTERACTIVE && fuzz_pkt.len)
+    if (TEST_INTERACTIVE == fuzzing_opt->test_type && fuzz_pkt.len > 0)
     {
+        // fuzz_logger_log(FUZZ_LOG_INFO, "[handle_p2p] hdr->type: %d (%s), p2p_action: %d", hdr->type, return_frame_name(hdr->type), p2p_action);
+
         fuzz_pkt.channel = pkt->channel;
         fuzzing_opt->fuzz_pkt_num++;
         fuzzing_opt->fuzz_pkt = fuzz_pkt;
@@ -1517,6 +1551,9 @@ void handle_p2p(struct packet *pkt, struct ether_addr bssid, struct ether_addr s
     }
 }
 
+/*
+    Create a P2P action
+*/
 struct packet create_p2p_action(struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, char adhoc, struct packet *recv_pkt)
 {
     struct packet pkt = {0};
@@ -1569,6 +1606,9 @@ struct packet create_p2p_action(struct ether_addr bssid, struct ether_addr smac,
     return pkt;
 }
 
+/*
+    Retrieve a P2P action
+*/
 struct packet get_p2p_frame(uint8_t frame_type, struct ether_addr bssid, struct ether_addr smac, struct ether_addr dmac, struct packet *recv_pkt)
 {
     struct packet pkt = {0};
