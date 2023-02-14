@@ -374,7 +374,7 @@ void *test_bad_frame(void *param)
 				//	continue;
 
 				fuzz_logger_log(FUZZ_LOG_INFO, "sending payload...");
-
+				bad_frame[i].channel = fuzzing_opt->channel;
 				send_packet_ex(&bad_frame[i]);
 
 				log_pkt(FUZZ_LOG_INFO, &bad_frame[i]);
