@@ -46,7 +46,7 @@ int open_pcap()
         return 0;
     }
 
-    pcap_fp = pcap_dump_open(p, owfuzz_path);
+    pcap_fp = pcap_dump_open_append(p, owfuzz_path);
     if (NULL == pcap_fp)
     {
         fuzz_logger_log(FUZZ_LOG_ERR, "pcap_dump_open failed");

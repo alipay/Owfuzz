@@ -2711,7 +2711,9 @@ void save_exp_payload(struct packet *pkt)
 
 	fuzzing_opt.fuzz_exp_pkt_cnt++;
 
+	open_pcap();
 	write_pcap(pkt->data, pkt->len);
+	close_pcap();
 
 	fd = open(owfuzz_path, O_RDWR | O_CREAT | O_APPEND | O_SYNC, 0);
 	if (pkt->len)
